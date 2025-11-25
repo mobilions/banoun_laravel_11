@@ -1,0 +1,71 @@
+# Laravel .gitignore
+
+# Dependencies
+/node_modules
+/vendor
+/composer.lock
+/package-lock.json
+/yarn.lock
+
+# Environment files
+.env
+.env.backup
+.env.production
+.env.local
+.env.testing
+
+# Storage files (except structure)
+/storage/*.key
+/storage/framework/cache/data/
+/storage/framework/sessions/
+/storage/framework/views/
+/storage/logs/
+/storage/debugbar/
+
+# Public storage (if using local disk)
+/public/storage
+
+# Cache files
+/bootstrap/cache/
+
+# Debugging
+.phpunit.result.cache
+/.phpunit.cache
+/.vscode
+/.idea
+/.vs
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Development tools
+Homestead.json
+Homestead.yaml
+.env.example
+/.nova
+/Valet
+
+# Testing
+/coverage
+
+# Built assets
+/public/hot
+/public/js/
+/public/css/
+/mix-manifest.json
+
+# Optional: Remove if you want to track built assets
+/public/js
+/public/css

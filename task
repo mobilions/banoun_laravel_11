@@ -1,0 +1,23 @@
+1.when select cat load respective subcat in product
+2.offer price calculation
+
+166988730
+
+
+Vendor
+Category
+brand
+Items (purchase & Selling Price )
+Level
+CUstomer Price Based on only level
+
+
+1.the filter parameters for size and color are not working. It gives the same result with any values.
+2.add few more products in diff categories
+3.add from admin panel but those product not showing in the APIs response.
+ 
+1.Dashboard
+	-Order Status wise pie chart
+	-order count & payment type wise count & payment status wise
+	-stock less than 20
+	- top selling 5 product

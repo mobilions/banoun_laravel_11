@@ -1,0 +1,46 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+class CreateProductsTable extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::create('products', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('category_id')->default(0);
+            $table->foreignId('subcategory_id')->default(0);
+            $table->foreignId('brand_id')->default(0);
+            $table->string('name', 100)->nullable();
+            $table->string('name_ar', 100)->nullable();
+            $table->mediumText('description')->nullable();
+            $table->mediumText('description_ar')->nullable();
+            $table->mediumText('imageurl')->nullable();
+            $table->decimal('price', 8, 2)->default(0);
+            $table->decimal('price_offer', 8, 2)->default(0);
+            $table->integer('percentage_discount')->default(0);
+            $table->integer('created_by')->default(0);
+            $table->integer('updated_by')->default(0);
+            $table->timestamps();
+            $table->integer('accept_status')->default(0);
+            $table->integer('delete_status')->default(0);
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::dropIfExists('products');
+    }
+}
