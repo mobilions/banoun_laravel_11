@@ -102,8 +102,8 @@ class DeliveryController extends Controller
             'name.max' => 'Info must not exceed 255 characters.',
             'name_ar.max' => 'Arabic info must not exceed 255 characters.',
             'imgfile.image' => 'The file must be an image.',
-            'imgfile.mimes' => 'The image must be a file of type: svg.',
-            'imgfile.max' => 'The image size must not exceed 2MB.',
+            // 'imgfile.mimes' => 'The image must be a file of type: svg.',
+            // 'imgfile.max' => 'The image size must not exceed 2MB.',
         ]);
 
         try {
@@ -203,7 +203,7 @@ class DeliveryController extends Controller
             'editid' => 'required|exists:deliveries,id',
             'name' => 'required|string|max:255',
             'name_ar' => 'nullable|string|max:255',
-            'imgfile' => 'nullable|image|mimes:svg|max:2048',
+            'imgfile' => 'nullable|image',
             'imgfile_val' => 'nullable|string',
         ], [
             'editid.required' => 'Record ID is required.',
@@ -212,8 +212,8 @@ class DeliveryController extends Controller
             'name.max' => 'Info must not exceed 255 characters.',
             'name_ar.max' => 'Arabic info must not exceed 255 characters.',
             'imgfile.image' => 'The file must be an image.',
-            'imgfile.mimes' => 'The image must be a file of type: svg.',
-            'imgfile.max' => 'The image size must not exceed 2MB.',
+            // 'imgfile.mimes' => 'The image must be a file of type: svg.',
+            // 'imgfile.max' => 'The image size must not exceed 2MB.',
         ]);
 
         $data = Delivery::find($request->editid);
