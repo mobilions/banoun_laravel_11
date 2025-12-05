@@ -606,7 +606,7 @@ class ProductController extends Controller
     // Validate
     try {
         $this->validate($request, [
-            'imgfile' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'imgfile' => 'required|image|mimes:jpeg,png,jpg,gif,svg',
             'product_id' => 'required|exists:products,id',
         ]);
         \Log::info('Validation passed');
