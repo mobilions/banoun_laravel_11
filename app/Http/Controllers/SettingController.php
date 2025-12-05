@@ -120,24 +120,29 @@ class SettingController extends Controller
 
         // Handle mail configuration update separately
         if ($request->has('update_mail_config')) {
-            $mailConfig = [
-                'MAIL_MAILER' => $request->input('MAIL_MAILER', env('MAIL_MAILER', 'smtp')),
-                'MAIL_HOST' => $request->input('MAIL_HOST', env('MAIL_HOST', '')),
-                'MAIL_PORT' => $request->input('MAIL_PORT', env('MAIL_PORT', '587')),
-                'MAIL_USERNAME' => $request->input('MAIL_USERNAME', env('MAIL_USERNAME', '')),
-                'MAIL_ENCRYPTION' => $request->input('MAIL_ENCRYPTION', env('MAIL_ENCRYPTION', 'tls')),
-                'MAIL_FROM_ADDRESS' => $request->input('MAIL_FROM_ADDRESS', env('MAIL_FROM_ADDRESS', '')),
-                'MAIL_FROM_NAME' => $request->input('MAIL_FROM_NAME', env('MAIL_FROM_NAME', '')),
-            ];
-            
-            // Only update password if provided (to avoid overwriting with empty)
-            if (!empty($request->input('MAIL_PASSWORD'))) {
-                $mailConfig['MAIL_PASSWORD'] = $request->input('MAIL_PASSWORD');
+            try {
+                $mailConfig = [
+                    'MAIL_MAILER' => $request->input('MAIL_MAILER', config('mail.default', 'smtp')),
+                    'MAIL_HOST' => $request->input('MAIL_HOST', config('mail.mailers.smtp.host', '')),
+                    'MAIL_PORT' => $request->input('MAIL_PORT', config('mail.mailers.smtp.port', '587')),
+                    'MAIL_USERNAME' => $request->input('MAIL_USERNAME', config('mail.mailers.smtp.username', '')),
+                    'MAIL_ENCRYPTION' => $request->input('MAIL_ENCRYPTION', env('MAIL_ENCRYPTION', 'tls')), // Not in config, use env directly
+                    'MAIL_FROM_ADDRESS' => $request->input('MAIL_FROM_ADDRESS', config('mail.from.address', '')),
+                    'MAIL_FROM_NAME' => $request->input('MAIL_FROM_NAME', config('mail.from.name', '')),
+                ];
+                
+                // Only update password if provided (to avoid overwriting with empty)
+                if (!empty($request->input('MAIL_PASSWORD'))) {
+                    $mailConfig['MAIL_PASSWORD'] = $request->input('MAIL_PASSWORD');
+                }
+                
+                EnvHelper::updateEnv($mailConfig);
+                
+                return redirect()->back()->with('success', 'Mail configuration updated successfully.');
+            } catch (\Exception $e) {
+                \Log::error('Mail configuration update failed: ' . $e->getMessage());
+                return redirect()->back()->withInput()->with('error', 'Failed to update mail configuration: ' . $e->getMessage());
             }
-            
-            EnvHelper::updateEnv($mailConfig);
-            
-            return redirect()->back()->with('success', 'Mail configuration updated successfully.');
         }
 
         Setting::where('delete_status','0')->update(['delete_status' => '1']);

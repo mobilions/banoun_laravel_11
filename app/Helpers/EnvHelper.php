@@ -12,42 +12,63 @@ class EnvHelper
      */
     public static function updateEnv(array $data)
     {
-        $envFile = base_path('.env');
-        
-        if (!file_exists($envFile)) {
-            return false;
-        }
-
-        // Read the .env file
-        $envContent = file_get_contents($envFile);
-        
-        // Update each key-value pair
-        foreach ($data as $key => $value) {
-            // Escape special characters in value
-            $escapedValue = self::escapeEnvValue($value);
+        try {
+            $envFile = app()->environmentFilePath();
             
-            // Pattern to match the key (with or without quotes)
-            $pattern = "/^{$key}=(.*)$/m";
-            
-            // Check if key exists
-            if (preg_match($pattern, $envContent)) {
-                // Replace existing value
-                $envContent = preg_replace($pattern, "{$key}={$escapedValue}", $envContent);
-            } else {
-                // Append new key-value pair
-                $envContent .= "\n{$key}={$escapedValue}\n";
+            if (!file_exists($envFile)) {
+                throw new \Exception('.env file not found at: ' . $envFile);
             }
+
+            // Check if file is writable
+            if (!is_writable($envFile)) {
+                throw new \Exception('.env file is not writable. Please check file permissions.');
+            }
+
+            // Read the .env file
+            $envContent = file_get_contents($envFile);
+            
+            if ($envContent === false) {
+                throw new \Exception('Unable to read .env file.');
+            }
+            
+            // Update each key-value pair
+            foreach ($data as $key => $value) {
+                // Escape special characters in value
+                $escapedValue = self::escapeEnvValue($value);
+                
+                // Pattern to match the key (with or without quotes)
+                $pattern = "/^{$key}=(.*)$/m";
+                
+                // Check if key exists
+                if (preg_match($pattern, $envContent)) {
+                    // Replace existing value
+                    $envContent = preg_replace($pattern, "{$key}={$escapedValue}", $envContent);
+                } else {
+                    // Append new key-value pair
+                    $envContent .= "\n{$key}={$escapedValue}\n";
+                }
+            }
+            
+            // Write back to .env file
+            $result = @file_put_contents($envFile, $envContent, LOCK_EX);
+            
+            if ($result === false) {
+                throw new \Exception('Failed to write to .env file. Please check file permissions.');
+            }
+            
+            // Clear config cache
+            try {
+                \Artisan::call('config:clear');
+            } catch (\Exception $e) {
+                // Log but don't fail if cache clear fails
+                \Log::warning('Failed to clear config cache: ' . $e->getMessage());
+            }
+            
+            return true;
+        } catch (\Exception $e) {
+            \Log::error('EnvHelper::updateEnv failed: ' . $e->getMessage());
+            throw $e;
         }
-        
-        // Write back to .env file
-        $result = file_put_contents($envFile, $envContent);
-        
-        // Clear config cache
-        if (function_exists('artisan')) {
-            \Artisan::call('config:clear');
-        }
-        
-        return $result !== false;
     }
     
     /**

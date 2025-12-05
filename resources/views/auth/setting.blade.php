@@ -330,17 +330,17 @@
                             <div class="mb-3">
                                 <label for="MAIL_MAILER" class="form-label">Mail Driver <span class="text-danger">*</span></label>
                                 <select class="form-control mail-config-field" name="MAIL_MAILER" id="MAIL_MAILER" readonly>
-                                    <option value="smtp" {{ env('MAIL_MAILER', 'smtp') == 'smtp' ? 'selected' : '' }}>SMTP</option>
-                                    <option value="sendmail" {{ env('MAIL_MAILER') == 'sendmail' ? 'selected' : '' }}>Sendmail</option>
-                                    <option value="mailgun" {{ env('MAIL_MAILER') == 'mailgun' ? 'selected' : '' }}>Mailgun</option>
-                                    <option value="ses" {{ env('MAIL_MAILER') == 'ses' ? 'selected' : '' }}>Amazon SES</option>
+                                    <option value="smtp" {{ config('mail.default', 'smtp') == 'smtp' ? 'selected' : '' }}>SMTP</option>
+                                    <option value="sendmail" {{ config('mail.default') == 'sendmail' ? 'selected' : '' }}>Sendmail</option>
+                                    <option value="mailgun" {{ config('mail.default') == 'mailgun' ? 'selected' : '' }}>Mailgun</option>
+                                    <option value="ses" {{ config('mail.default') == 'ses' ? 'selected' : '' }}>Amazon SES</option>
                                 </select>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="MAIL_HOST" class="form-label">Mail Host <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control mail-config-field" name="MAIL_HOST" id="MAIL_HOST" value="{{ env('MAIL_HOST', '') }}" placeholder="smtp.mailtrap.io" readonly>
+                                <input type="text" class="form-control mail-config-field" name="MAIL_HOST" id="MAIL_HOST" value="{{ config('mail.mailers.smtp.host', '') }}" placeholder="smtp.mailtrap.io" readonly>
                             </div>
                         </div>
                     </div>
@@ -349,16 +349,19 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="MAIL_PORT" class="form-label">Mail Port <span class="text-danger">*</span></label>
-                                <input type="number" class="form-control mail-config-field" name="MAIL_PORT" id="MAIL_PORT" value="{{ env('MAIL_PORT', '587') }}" placeholder="587" readonly>
+                                <input type="number" class="form-control mail-config-field" name="MAIL_PORT" id="MAIL_PORT" value="{{ config('mail.mailers.smtp.port', '587') }}" placeholder="587" readonly>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="MAIL_ENCRYPTION" class="form-label">Encryption <span class="text-danger">*</span></label>
                                 <select class="form-control mail-config-field" name="MAIL_ENCRYPTION" id="MAIL_ENCRYPTION" readonly>
-                                    <option value="tls" {{ env('MAIL_ENCRYPTION', 'tls') == 'tls' ? 'selected' : '' }}>TLS</option>
-                                    <option value="ssl" {{ env('MAIL_ENCRYPTION') == 'ssl' ? 'selected' : '' }}>SSL</option>
-                                    <option value="" {{ empty(env('MAIL_ENCRYPTION')) ? 'selected' : '' }}>None</option>
+                                    @php
+                                        $encryption = config('mail.mailers.smtp.encryption') ?? env('MAIL_ENCRYPTION', 'tls');
+                                    @endphp
+                                    <option value="tls" {{ $encryption == 'tls' ? 'selected' : '' }}>TLS</option>
+                                    <option value="ssl" {{ $encryption == 'ssl' ? 'selected' : '' }}>SSL</option>
+                                    <option value="" {{ empty($encryption) ? 'selected' : '' }}>None</option>
                                 </select>
                             </div>
                         </div>
@@ -368,7 +371,7 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="MAIL_USERNAME" class="form-label">Mail Username <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control mail-config-field" name="MAIL_USERNAME" id="MAIL_USERNAME" value="{{ env('MAIL_USERNAME', '') }}" placeholder="your-username" readonly>
+                                <input type="text" class="form-control mail-config-field" name="MAIL_USERNAME" id="MAIL_USERNAME" value="{{ config('mail.mailers.smtp.username', '') }}" placeholder="your-username" readonly>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -384,13 +387,13 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="MAIL_FROM_ADDRESS" class="form-label">From Address <span class="text-danger">*</span></label>
-                                <input type="email" class="form-control mail-config-field" name="MAIL_FROM_ADDRESS" id="MAIL_FROM_ADDRESS" value="{{ env('MAIL_FROM_ADDRESS', '') }}" placeholder="noreply@example.com" readonly>
+                                <input type="email" class="form-control mail-config-field" name="MAIL_FROM_ADDRESS" id="MAIL_FROM_ADDRESS" value="{{ config('mail.from.address', '') }}" placeholder="noreply@example.com" readonly>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="MAIL_FROM_NAME" class="form-label">From Name <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control mail-config-field" name="MAIL_FROM_NAME" id="MAIL_FROM_NAME" value="{{ env('MAIL_FROM_NAME', '') }}" placeholder="{{ $setting->company ?? 'Your App Name' }}" readonly>
+                                <input type="text" class="form-control mail-config-field" name="MAIL_FROM_NAME" id="MAIL_FROM_NAME" value="{{ config('mail.from.name', '') }}" placeholder="{{ $setting->company ?? 'Your App Name' }}" readonly>
                             </div>
                         </div>
                     </div>
