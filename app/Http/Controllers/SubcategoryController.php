@@ -51,8 +51,10 @@ class SubcategoryController extends Controller
         $title = "SubCategory";
 
         $indexes = Subcategory::join('categories', 'subcategories.category_id', '=', 'categories.id')
+            ->where('categories.delete_status', 0)
+            ->where('subcategories.delete_status', 0)
             ->addSelect('categories.name as category','categories.name_ar as category_ar','subcategories.*')
-            ->active()
+            ->orderByDesc('subcategories.created_at')
             ->get();
 
         return view('subcategory.index',compact('title','indexes'));  
@@ -107,7 +109,7 @@ class SubcategoryController extends Controller
             'name_ar' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'description_ar' => 'nullable|string',
-            'imgfile' => 'required|image|mimes:jpeg,png,jpg,gif,svg',
+            'imgfile' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
         $category_id=$request->category_id;
@@ -157,9 +159,7 @@ class SubcategoryController extends Controller
 
         }
 
-        
-
-        return redirect('/subcategory');
+        return redirect('/subcategory')->with('success', 'Subcategory created successfully.');
 
     }
 
@@ -239,7 +239,7 @@ class SubcategoryController extends Controller
             'name_ar' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'description_ar' => 'nullable|string',
-            'imgfile' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg',
+            'imgfile' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'imgfile_val' => 'nullable|string',
         ]);
 
@@ -278,7 +278,7 @@ class SubcategoryController extends Controller
 
         $data->save();
 
-        return redirect('/subcategory');
+        return redirect('/subcategory')->with('success', 'Subcategory updated successfully.');
 
     }
 
@@ -302,11 +302,15 @@ class SubcategoryController extends Controller
 
         $data = Subcategory::find($id);
 
+        if (empty($data)) {
+            return redirect('/subcategory')->with('error', 'Subcategory not found.');
+        }
+
         $data->delete_status = 1;
 
         $data->save();
 
-        return redirect('/subcategory');
+        return redirect('/subcategory')->with('success', 'Subcategory deleted successfully.');
 
     }
 

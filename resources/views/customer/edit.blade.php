@@ -54,22 +54,24 @@
                     <div class="col-lg-6 mb-3">
                         <div>
                             <label>Name <span class="text-danger">*</span></label>
-                            <input value="{{$log->name}}" class="form-control" type="text" name="name" id="name" required="">
-
+                            <input value="{{ old('name', $log->name) }}" class="form-control @error('name') is-invalid @enderror" type="text" name="name" id="name" required="">
+                            @error('name') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
                             <input type="hidden" name="editid" value="{{$log->id}}">
                         </div>
                     </div>
                     <div class="col-lg-6 mb-3">
                         <div>
-                            <label>Email (Username)</label>
-                            <input value="{{$log->email}}" class="form-control" type="text" name="email" id="email">
+                            <label>Email (Username) <span class="text-danger">*</span></label>
+                            <input value="{{ old('email', $log->email) }}" class="form-control @error('email') is-invalid @enderror" type="email" name="email" id="email" required="">
+                            @error('email') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
                         </div>
                     </div> 
 
                     <div class="col-lg-6 mb-3">
                         <div>
                             <label>Mobile</label>
-                            <input value="{{$log->phone}}" class="form-control" type="text" name="phone" id="phone">
+                            <input value="{{ old('phone', $log->phone) }}" class="form-control @error('phone') is-invalid @enderror" type="text" name="phone" id="phone">
+                            @error('phone') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
                         </div>
                     </div>     
                     <div class="col-lg-6 mt-3">

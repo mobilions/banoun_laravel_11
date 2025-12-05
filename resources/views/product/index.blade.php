@@ -57,38 +57,66 @@ tr.selected {background-color:#adf7a9  ! important;}
     <div class="card">
 
         <div class="card-body">
+            <!-- Filters -->
+            <form method="GET" action="{{ route('products') }}" class="mb-3">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <input type="text" name="search" class="form-control" placeholder="Search by name..." value="{{ request('search') }}">
+                    </div>
+                    <div class="col-md-2">
+                        <select name="category_id" class="form-select">
+                            <option value="">All Categories</option>
+                            @foreach($categories ?? [] as $cat)
+                                <option value="{{ $cat->id }}" {{ request('category_id') == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select name="brand_id" class="form-select">
+                            <option value="">All Brands</option>
+                            @foreach($brands ?? [] as $brand)
+                                <option value="{{ $brand->id }}" {{ request('brand_id') == $brand->id ? 'selected' : '' }}>{{ $brand->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <input type="number" name="min_price" class="form-control" placeholder="Min Price" value="{{ request('min_price') }}" step="0.01">
+                    </div>
+                    <div class="col-md-2">
+                        <input type="number" name="max_price" class="form-control" placeholder="Max Price" value="{{ request('max_price') }}" step="0.01">
+                    </div>
+                    <div class="col-md-1">
+                        <button type="submit" class="btn btn-primary w-100">Filter</button>
+                    </div>
+                </div>
+            </form>
 
-            <table id="datatable-buttons" class="table table-bordered dt-responsive nowrap w-100">
-
+            <table id="datatable-buttons" class="table table-bordered nowrap w-100 align-middle">
                 <thead>
-
                     <tr>
-
                         <th>#</th>
-
                         <th>Name</th>
-
+                        <th>Category</th>
+                        <th>Brand</th>
                         <th>Price</th>
-
-                        <th>Action</th>
-
+                        <th>Status</th>
+                        <th class="export-ignore">Action</th>
                     </tr>
-
                 </thead>           
-
                 <tbody>
-
-                    @foreach ($indexes as $index)
-
+                    @forelse ($indexes as $index)
                     <tr>
-
                         <td>{{$index->id}}</td>
-
-                        <td>{{$index->name}}</td>
-
-                        <td>{{$index->price}}</td>
-
+                        <td data-export="{{$index->name}}">{{$index->name}}@if($index->name_ar)<br>{{$index->name_ar}}@endif</td>
+                        <td>{{ $index->category->name ?? '—' }}</td>
+                        <td>{{ $index->brand->name ?? '—' }}</td>
+                        <td data-export="{{$index->price}}">{{number_format($index->price, 2)}}</td>
                         <td>
+                            <span class="badge {{ (int)$index->delete_status === 0 ? 'bg-success' : 'bg-secondary' }}">
+                                {{ (int)$index->delete_status === 0 ? 'Active' : 'Deleted' }}
+                            </span>
+                        </td>
+                        <td class="export-ignore">
                             <a href="{{url('/product')}}/{{$index->id}}/edit" class="btn btn-outline-secondary me-2 waves-effect waves-light btn-sm font-size-18"><i class="mdi mdi-pencil"></i></a>
                             <form action="{{url('/product')}}/{{$index->id}}/delete" method="POST" class="d-inline" onsubmit="return confirm('Delete this product?');">
                                 @csrf
@@ -97,14 +125,21 @@ tr.selected {background-color:#adf7a9  ! important;}
                                 </button>
                             </form>
                         </td>
-
                     </tr>
-
-                    @endforeach
-
+                    @empty
+                    <tr>
+                        <td colspan="7" class="text-center">No products found.</td>
+                    </tr>
+                    @endforelse
                 </tbody>
-
             </table>
+
+            <!-- Laravel Pagination -->
+            @if(method_exists($indexes, 'links'))
+                <div class="mt-3">
+                    {{ $indexes->links() }}
+                </div>
+            @endif
 
         </div>
 
@@ -143,31 +178,73 @@ tr.selected {background-color:#adf7a9  ! important;}
 <script src="{{asset('/assets')}}/libs/datatables.net-responsive-bs4/js/responsive.bootstrap4.min.js"></script>
 
 <script>
-
-$(document).ready(function(){$("#datatable").DataTable(),$("#datatable-buttons").DataTable({lengthChange:!1,"iDisplayLength": 500,buttons:["copy","excel","pdf"]}).buttons().container().appendTo("#datatable-buttons_wrapper .col-md-6:eq(0)"),$(".dataTables_length select").addClass("form-select form-select-sm")});
-
-
-
-$('.editbtn').click(function() {
-
-    var id = $(this).data("id"); $("#editid").val(id);
-
-    var name = $(this).data("name"); $("#name").val(name);
-
-    var day_limit = $(this).data("day_limit"); $("#day_limit").val(day_limit);
-
-});
-
-$('.resetbtn').click(function() {
-
-    $("#editid").val(0);
-
-    $("#name").val('');
-
-    $("#day_limit").val('');
-
-});
-
+(function ($) {
+    $(document).ready(function () {
+        var table = $("#datatable-buttons").DataTable({
+            pageLength: 10,
+            lengthMenu: [[10, 20, 50, 100, -1], [10, 20, 50, 100, "All"]],
+            buttons: [
+                { 
+                    extend: "copy", 
+                    exportOptions: { 
+                        columns: ":visible:not(.export-ignore)",
+                        format: {
+                            body: function (data, row, column, node) {
+                                var exportData = $(node).attr('data-export');
+                                return exportData !== undefined ? exportData : data.replace(/<[^>]*>/g, '').trim();
+                            }
+                        }
+                    } 
+                },
+                { 
+                    extend: "excel", 
+                    exportOptions: { 
+                        columns: ":visible:not(.export-ignore)",
+                        format: {
+                            body: function (data, row, column, node) {
+                                var exportData = $(node).attr('data-export');
+                                return exportData !== undefined ? exportData : data.replace(/<[^>]*>/g, '').trim();
+                            }
+                        }
+                    },
+                    customize: function(xlsx) {
+                        var sheet = xlsx.xl.worksheets['sheet1.xml'];
+                        $('row', sheet).each(function() {
+                            var cell = $(this).find('c[is="1"]');
+                            if (cell.length) {
+                                $(this).find('c').attr('s', '1');
+                            }
+                        });
+                    }
+                },
+                { 
+                    extend: "pdf", 
+                    exportOptions: { 
+                        columns: ":visible:not(.export-ignore)",
+                        format: {
+                            body: function (data, row, column, node) {
+                                var exportData = $(node).attr('data-export');
+                                var text = exportData !== undefined ? exportData : data.replace(/<[^>]*>/g, '').trim();
+                                return text.replace(/\n/g, ' ').substring(0, 200);
+                            }
+                        }
+                    },
+                    customize: function(doc) {
+                        doc.defaultStyle.fontSize = 8;
+                        doc.styles.tableHeader.fontSize = 9;
+                        doc.pageMargins = [10, 10, 10, 10];
+                    }
+                }
+            ],
+            responsive: false,
+            columnDefs: [
+                { targets: 'export-ignore', orderable: false, searchable: false, exportable: false }
+            ]
+        });
+        table.buttons().container().appendTo("#datatable-buttons_wrapper .col-md-6:eq(0)");
+        $(".dataTables_length select").addClass("form-select form-select-sm");
+    });
+})(jQuery);
 </script>
 
 @stop

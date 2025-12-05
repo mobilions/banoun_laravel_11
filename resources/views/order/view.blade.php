@@ -29,25 +29,39 @@ tr.selected {background-color:#adf7a9  ! important;}
         <div class="card">
             <div class="card-body">
                 @if($order->orderstatus=='1')
-                    <a href="{{url('orderstatus')}}/{{$order->id}}/2" class="btn btn-warning btn-sm waves-effect waves-light float-end me-3"> <i class="bx bx-check font-size-14 align-middle me-2"></i> Out of Delivery </a><br><br>
+                    <form action="{{route('order.status.update', [$order->id, 2])}}" method="post" class="d-inline float-end me-3">
+                        @csrf
+                        <button type="submit" class="btn btn-warning btn-sm waves-effect waves-light" onclick="return confirm('Mark order as Out for Delivery?');">
+                            <i class="bx bx-check font-size-14 align-middle me-2"></i> Out for Delivery
+                        </button>
+                    </form><br><br>
                 @endif
 
                 @if($order->orderstatus=='2')
-
-                    <a href="{{url('orderstatus')}}/{{$order->id}}/3" class="btn btn-success btn-sm waves-effect waves-light float-end me-3"> <i class="bx bx-check font-size-14 align-middle me-2"></i> Delivered </a><br><br>
-
+                    <form action="{{route('order.status.update', [$order->id, 3])}}" method="post" class="d-inline float-end me-3">
+                        @csrf
+                        <button type="submit" class="btn btn-success btn-sm waves-effect waves-light" onclick="return confirm('Mark order as Delivered?');">
+                            <i class="bx bx-check font-size-14 align-middle me-2"></i> Delivered
+                        </button>
+                    </form><br><br>
                 @endif
 
                 @if($order->orderstatus =='1' || $order->orderstatus =='2')
-
-                    <a href="{{url('orderstatus')}}/{{$order->id}}/4" class="btn btn-danger btn-sm waves-effect waves-light float-end me-3"> <i class="bx bx-block font-size-14 align-middle me-2"></i> Request for Return & Refund </a><br><br>
-
+                    <form action="{{route('order.status.update', [$order->id, 4])}}" method="post" class="d-inline float-end me-3">
+                        @csrf
+                        <button type="submit" class="btn btn-danger btn-sm waves-effect waves-light" onclick="return confirm('Request Return & Refund for this order?');">
+                            <i class="bx bx-block font-size-14 align-middle me-2"></i> Request for Return & Refund
+                        </button>
+                    </form><br><br>
                 @endif
 
                 @if($order->orderstatus=='4')
-
-                    <a href="{{url('orderstatus')}}/{{$order->id}}/5" class="btn btn-danger btn-sm waves-effect waves-light float-end me-3"> <i class="bx bx-block font-size-14 align-middle me-2"></i> Cancelled </a><br><br>
-
+                    <form action="{{route('order.status.update', [$order->id, 5])}}" method="post" class="d-inline float-end me-3">
+                        @csrf
+                        <button type="submit" class="btn btn-danger btn-sm waves-effect waves-light" onclick="return confirm('Cancel this order?');">
+                            <i class="bx bx-block font-size-14 align-middle me-2"></i> Cancel Order
+                        </button>
+                    </form><br><br>
                 @endif
 
 
@@ -61,21 +75,21 @@ tr.selected {background-color:#adf7a9  ! important;}
                         <div class="col-lg-3 mb-3">
                             <div>
                                 <label class="text-muted">Order Date</label>
-                                <h6>{{$order->order_number}}</h6>
+                                <h6>{{date('d M, Y', strtotime($order->created_at))}}</h6>
                             </div>
                         </div>
 
                         <div class="col-lg-3 mb-3">
                             <div>
                                 <label class="text-muted">Name</label>
-                                <h6><td>{{App\Models\User::findUserVal($order->id,'name')}}</td></h6>
+                                <h6>{{optional($order->user)->name ?? 'N/A'}}</h6>
                             </div>
                         </div>
 
                         <div class="col-lg-3 mb-3">
                             <div>
                                 <label class="text-muted">Mobile</label>
-                                <h6><td>{{App\Models\User::findUserVal($order->id,'phone')}}</td></h6>
+                                <h6>{{optional($order->user)->phone ?? 'N/A'}}</h6>
                             </div>
                         </div>
 
@@ -131,7 +145,7 @@ tr.selected {background-color:#adf7a9  ! important;}
                         <div class="col-lg-3 mb-3">
                             <div>
                                 <label class="text-muted">Order Status</label>
-                                <h6>{{App\Models\Orderstatus::findUserVal($order->orderstatus,'name')}}</h6>
+                                <h6>{{optional($order->orderStatus)->name ?? App\Models\Orderstatus::FindName($order->orderstatus)}}</h6>
                             </div>
                         </div>
                     </div>
@@ -197,9 +211,9 @@ tr.selected {background-color:#adf7a9  ! important;}
 
                             <td>{{$olog->id}}</td>
 
-                            <td>{{App\Models\Orderstatus::FindName($olog->status_id)}}</td>
+                            <td>{{optional($olog->status)->name ?? App\Models\Orderstatus::FindName($olog->status_id)}}</td>
 
-                            <td>{{date('d M,Y',strtotime($olog->created_at))}}</td>
+                            <td>{{date('d M, Y',strtotime($olog->created_at))}}</td>
 
                         </tr>
 
@@ -228,6 +242,23 @@ tr.selected {background-color:#adf7a9  ! important;}
 <script src="{{asset('/assets')}}/libs/datatables.net-responsive/js/dataTables.responsive.min.js"></script>
 <script src="{{asset('/assets')}}/libs/datatables.net-responsive-bs4/js/responsive.bootstrap4.min.js"></script>
 <script>
-    $(document).ready(function(){$("#datatable").DataTable(),$("#datatable-buttons").DataTable({lengthChange:!1,"iDisplayLength": 500,buttons:["copy","excel","pdf"]}).buttons().container().appendTo("#datatable-buttons_wrapper .col-md-6:eq(0)"),$(".dataTables_length select").addClass("form-select form-select-sm")});
+(function ($) {
+    var exportButtons = [
+        { extend: "copy", exportOptions: { columns: ":visible:not(.export-ignore)" } },
+        { extend: "excel", exportOptions: { columns: ":visible:not(.export-ignore)" } },
+        { extend: "pdf", exportOptions: { columns: ":visible:not(.export-ignore)" } }
+    ];
+    var defaultOptions = {
+        pageLength: 20,
+        lengthMenu: [[20, 50, 100, -1], [20, 50, 100, "All"]],
+        buttons: exportButtons,
+        responsive: true,
+        columnDefs: [{ targets: 'export-ignore', orderable: false, searchable: false }]
+    };
+    $(document).ready(function () {
+        $("#datatable-buttons").DataTable(defaultOptions).buttons().container().appendTo("#datatable-buttons_wrapper .col-md-6:eq(0)");
+        $(".dataTables_length select").addClass("form-select form-select-sm");
+    });
+})(jQuery);
 </script>
 @stop

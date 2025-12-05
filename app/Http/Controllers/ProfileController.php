@@ -45,16 +45,29 @@ class ProfileController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:users,email',
             'password' => 'required|string|min:6',
+        ], [
+            'name.required' => 'Name is required.',
+            'email.required' => 'Email is required.',
+            'email.email' => 'Please enter a valid email address.',
+            'email.unique' => 'This email is already registered.',
+            'password.required' => 'Password is required.',
+            'password.min' => 'Password must be at least 6 characters.',
         ]);
         
-        $password=Hash::make($request->password);
-        $data = new User; 
-        $data->name = $request->name;
-        $data->email = $request->email;
-        $data->password = $password;
-        $data->role = 'admin';
-        $data->save();
-        return redirect('/users');
+        try {
+            $password = Hash::make($request->password);
+            $data = new User; 
+            $data->name = $request->name;
+            $data->email = $request->email;
+            $data->password = $password;
+            $data->role = 'admin';
+            $data->delete_status = '0';
+            $data->save();
+            return redirect('/users')->with('success', 'User created successfully.');
+        } catch (\Exception $e) {
+            \Log::error('User creation failed: ' . $e->getMessage());
+            return redirect()->back()->withInput()->with('error', 'Failed to create user. Please try again.');
+        }
     }
 
     public function edit(User $user,$id)
@@ -75,6 +88,15 @@ class ProfileController extends Controller
             'editid' => 'required|exists:users,id',
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:users,email,'.$request->editid,
+            'password' => 'nullable|string|min:6',
+        ], [
+            'editid.required' => 'User ID is required.',
+            'editid.exists' => 'Selected user does not exist.',
+            'name.required' => 'Name is required.',
+            'email.required' => 'Email is required.',
+            'email.email' => 'Please enter a valid email address.',
+            'email.unique' => 'This email is already registered.',
+            'password.min' => 'Password must be at least 6 characters.',
         ]);
 
         $data = User::find($request->editid);
@@ -83,13 +105,22 @@ class ProfileController extends Controller
             return redirect('/users')->with('error', 'User not found.');
         }
 
-        $data->name = $request->name;
+        try {
+            $data->name = $request->name;
+            $data->email = $request->email;
+            
+            // Update password only if provided
+            if (!empty($request->password)) {
+                $data->password = Hash::make($request->password);
+            }
+            
+            $data->save();
 
-        $data->email = $request->email;
-
-        $data->save();
-
-        return redirect('/users');
+            return redirect('/users')->with('success', 'User updated successfully.');
+        } catch (\Exception $e) {
+            \Log::error('User update failed: ' . $e->getMessage());
+            return redirect()->back()->withInput()->with('error', 'Failed to update user. Please try again.');
+        }
 
     }
 

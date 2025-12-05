@@ -8,6 +8,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Setting;
 
+use App\Helpers\EnvHelper;
+
 use Illuminate\Http\Request;
 
 use Illuminate\Support\Facades\Storage;
@@ -79,50 +81,75 @@ class SettingController extends Controller
     public function store(Request $request)
 
     {
-        $this->validate($request, [
-            'company' => 'required|string|max:255',
-            'company_ar' => 'nullable|string|max:255',
-            'contact_person' => 'nullable|string|max:255',
-            'phone' => 'nullable|string|max:20',
-            'email' => 'nullable|email|max:255',
-            'support_phone' => 'nullable|string|max:20',
-            'support_email' => 'nullable|email|max:255',
-            'location' => 'nullable|string|max:500',
-            'header' => 'nullable|string|max:500',
-            'header_ar' => 'nullable|string|max:500',
-            'description' => 'nullable|string',
-            'description_ar' => 'nullable|string',
-            'facebook' => 'nullable|url|max:255',
-            'whatsapp' => 'nullable|string|max:255',
-            'twitter' => 'nullable|url|max:255',
-            'instagram' => 'nullable|url|max:255',
-            'google' => 'nullable|url|max:255',
-            'giftwrap_price' => 'nullable|numeric|min:0',
-            'imgfile' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg',
-            'imgfile_val' => 'nullable|string',
-        ]);
+        // Validate based on what's being updated
+        if ($request->has('update_mail_config')) {
+            $this->validate($request, [
+                'MAIL_MAILER' => 'required|string|in:smtp,sendmail,mailgun,ses',
+                'MAIL_HOST' => 'required|string|max:255',
+                'MAIL_PORT' => 'required|integer|min:1|max:65535',
+                'MAIL_USERNAME' => 'required|string|max:255',
+                'MAIL_PASSWORD' => 'nullable|string|max:255',
+                'MAIL_ENCRYPTION' => 'nullable|string|in:tls,ssl,',
+                'MAIL_FROM_ADDRESS' => 'required|email|max:255',
+                'MAIL_FROM_NAME' => 'required|string|max:255',
+            ]);
+        } else {
+            $this->validate($request, [
+                'company' => 'required|string|max:255',
+                'company_ar' => 'nullable|string|max:255',
+                'contact_person' => 'nullable|string|max:255',
+                'phone' => 'nullable|string|max:20',
+                'email' => 'nullable|email|max:255',
+                'support_phone' => 'nullable|string|max:20',
+                'support_email' => 'nullable|email|max:255',
+                'location' => 'nullable|string|max:500',
+                'header' => 'nullable|string|max:500',
+                'header_ar' => 'nullable|string|max:500',
+                'description' => 'nullable|string',
+                'description_ar' => 'nullable|string',
+                'facebook' => 'nullable|url|max:255',
+                'whatsapp' => 'nullable|string|max:255',
+                'twitter' => 'nullable|url|max:255',
+                'instagram' => 'nullable|url|max:255',
+                'google' => 'nullable|url|max:255',
+                'giftwrap_price' => 'nullable|numeric|min:0',
+                'imgfile' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg',
+                'imgfile_val' => 'nullable|string',
+            ]);
+        }
+
+        // Handle mail configuration update separately
+        if ($request->has('update_mail_config')) {
+            $mailConfig = [
+                'MAIL_MAILER' => $request->input('MAIL_MAILER', env('MAIL_MAILER', 'smtp')),
+                'MAIL_HOST' => $request->input('MAIL_HOST', env('MAIL_HOST', '')),
+                'MAIL_PORT' => $request->input('MAIL_PORT', env('MAIL_PORT', '587')),
+                'MAIL_USERNAME' => $request->input('MAIL_USERNAME', env('MAIL_USERNAME', '')),
+                'MAIL_ENCRYPTION' => $request->input('MAIL_ENCRYPTION', env('MAIL_ENCRYPTION', 'tls')),
+                'MAIL_FROM_ADDRESS' => $request->input('MAIL_FROM_ADDRESS', env('MAIL_FROM_ADDRESS', '')),
+                'MAIL_FROM_NAME' => $request->input('MAIL_FROM_NAME', env('MAIL_FROM_NAME', '')),
+            ];
+            
+            // Only update password if provided (to avoid overwriting with empty)
+            if (!empty($request->input('MAIL_PASSWORD'))) {
+                $mailConfig['MAIL_PASSWORD'] = $request->input('MAIL_PASSWORD');
+            }
+            
+            EnvHelper::updateEnv($mailConfig);
+            
+            return redirect()->back()->with('success', 'Mail configuration updated successfully.');
+        }
 
         Setting::where('delete_status','0')->update(['delete_status' => '1']);
 
 
 
-        $imgurl    = '';
-
-        $path   = $request->file('imgfile');
-
-        if (!empty($path)) {
-
-            $store  = Storage::putFile('public/image', $path);
-
-            //$imgurl    = Storage::url($store);
-
-            //$imgurl = url('/').'/storage/app/'.$store;
-
-            $imgurl = config('app.imgurl').basename($store);
-
+        $imgurl = $this->handleImageUpload($request);
+        
+        // If no new image uploaded, use existing one
+        if (empty($imgurl)) {
+            $imgurl = $request->imgfile_val ?? '';
         }
-
-        else{ $imgurl=$request->imgfile_val; }
 
 
 
@@ -172,8 +199,26 @@ class SettingController extends Controller
 
         $data->save();
 
-        return redirect()->back();
+        return redirect()->back()->with('success', 'Settings updated successfully.');
 
+    }
+    
+    /**
+     * Handle image upload errors and validation
+     */
+    protected function handleImageUpload($request)
+    {
+        try {
+            $path = $request->file('imgfile');
+            if (!empty($path)) {
+                $store = Storage::putFile('public/image', $path);
+                return config('app.imgurl').basename($store);
+            }
+        } catch (\Exception $e) {
+            \Log::error('Image upload failed: ' . $e->getMessage());
+            return null;
+        }
+        return null; // Return null if no file uploaded, so we can use existing value
     }
 
 

@@ -1,10 +1,70 @@
 @extends('layouts.master')
 
 @section('title',$title)
+@php
+    use Illuminate\Support\Str;
+@endphp
 
 @section('StyleContent')
 
 <link href="{{asset('/assets')}}/libs/select2/css/select2.min.css" rel="stylesheet" type="text/css" />
+
+<style>
+    /* Ensure page can scroll properly */
+    body {
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        height: auto !important;
+        min-height: 100vh;
+    }
+    
+    html {
+        overflow-y: auto !important;
+        height: auto !important;
+    }
+    
+    .main-content {
+        overflow-y: visible !important;
+        overflow-x: hidden !important;
+        height: auto !important;
+        min-height: 100vh;
+    }
+    
+    .page-content {
+        overflow-y: visible !important;
+        overflow-x: hidden !important;
+        height: auto !important;
+        padding-bottom: 20px;
+    }
+    
+    .container-fluid {
+        overflow-y: visible !important;
+        overflow-x: hidden !important;
+        height: auto !important;
+    }
+    
+    #layout-wrapper {
+        overflow-y: visible !important;
+        overflow-x: hidden !important;
+        height: auto !important;
+    }
+    
+    /* Ensure form container can expand */
+    .card-body {
+        overflow: visible !important;
+    }
+    
+    /* Fix for modal backdrop preventing scroll */
+    body.modal-open {
+        overflow: hidden !important;
+        padding-right: 0 !important;
+    }
+    
+    /* Ensure TinyMCE editors don't cause issues */
+    .tox-tinymce {
+        max-width: 100% !important;
+    }
+</style>
 
 @endsection
 
@@ -38,48 +98,6 @@
 
 <div class="row">
 
-<div class="col-md-9"></div>
-
-    <div class="col-md-3">
-
-        <a  href="{{url('/productvariants')}}/{{$log->id}}"><div class="card mini-stats-wid">
-
-            <div class="card-body">
-
-                <div class="d-flex">
-
-                    <div class="flex-grow-1">
-
-                        <p class="text-muted fw-medium">Product Variants</p>
-
-                        <h4 class="mb-0">{{$productvariants}}</h4>
-
-                    </div>
-
-
-
-                    <div class="flex-shrink-0 align-self-center">
-
-                        <div class="mini-stat-icon avatar-sm rounded-circle bg-primary">
-
-                            <span class="avatar-title">
-
-                                <i class="bx bx-copy-alt font-size-24"></i>
-
-                            </span>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div></a>
-
-    </div>
-
 <div class="col-md-12">
 
     <ul class="nav nav-tabs" role="tablist">
@@ -100,9 +118,21 @@
 
             <a class="nav-link" data-bs-toggle="tab" href="#profile" role="tab">
 
-                <span class="d-block d-sm-none"><i class="far fa-user"></i></span>
+                <span class="d-block d-sm-none"><i class="far fa-image"></i></span>
 
-                <span class="d-none d-sm-block">Paroduct Images</span>    
+                <span class="d-none d-sm-block">Product Images</span>    
+
+            </a>
+
+        </li>
+
+        <li class="nav-item">
+
+            <a class="nav-link" data-bs-toggle="tab" href="#variants" role="tab">
+
+                <span class="d-block d-sm-none"><i class="fas fa-puzzle-piece"></i></span>
+
+                <span class="d-none d-sm-block">Product Variants</span>    
 
             </a>
 
@@ -433,22 +463,34 @@
 
                                     </div>   
 
+                                    @php
+                                        $primaryImage = $log->imageurl ? (\Illuminate\Support\Str::startsWith($log->imageurl, ['http://','https://','//']) ? $log->imageurl : asset($log->imageurl)) : null;
+                                        $secondImage = $log->imageurl2 ? (\Illuminate\Support\Str::startsWith($log->imageurl2, ['http://','https://','//']) ? $log->imageurl2 : asset($log->imageurl2)) : null;
+                                        $thirdImage = $log->imageurl3 ? (\Illuminate\Support\Str::startsWith($log->imageurl3, ['http://','https://','//']) ? $log->imageurl3 : asset($log->imageurl3)) : null;
+                                    @endphp
+
                                     <div class="col-lg-2 mt-3 mb-3">
-
-                                       <img src="{{$log->imageurl}}" width="80" alt="" title=""> 
-
+                                       @if($primaryImage)
+                                           <img src="{{$primaryImage}}" width="80" alt="{{$log->name}}" title="{{$log->name}}">
+                                       @else
+                                           <span class="text-muted">No image</span>
+                                       @endif
                                     </div>   
 
                                     <div class="col-lg-2 mt-3 mb-3">
-
-                                       <img src="{{$log->imageurl2}}" width="80" alt="" title=""> 
-
+                                       @if($secondImage)
+                                           <img src="{{$secondImage}}" width="80" alt="{{$log->name}}" title="{{$log->name}}">
+                                       @else
+                                           <span class="text-muted">No image</span>
+                                       @endif
                                     </div>  
 
                                     <div class="col-lg-2 mt-3 mb-3">
-
-                                       <img src="{{$log->imageurl3}}" width="80" alt="" title=""> 
-
+                                       @if($thirdImage)
+                                           <img src="{{$thirdImage}}" width="80" alt="{{$log->name}}" title="{{$log->name}}">
+                                       @else
+                                           <span class="text-muted">No image</span>
+                                       @endif
                                     </div>  
 
                                     <div class="col-lg-6 mt-3 mb-3">
@@ -535,23 +577,38 @@
 
                         <div class="card-body">
 
-                            <h5>{{$log->name}} {{$log->name_ar}} Images</h5>
+                            <h5>{{$log->name}}@if($log->name_ar) {{$log->name_ar}}@endif Images</h5>
 
                             <div class="row">
 
-                                @foreach($productvariantimages as $log)
-
+                                @forelse($productvariantimages as $image)
+                                @php
+                                    $imageUrl = $image->imageurl 
+                                        ? (Str::startsWith($image->imageurl, ['http://', 'https://', '//']) 
+                                            ? $image->imageurl 
+                                            : asset($image->imageurl))
+                                        : null;
+                                @endphp
                                 <div class="col-lg-2 mt-3 mb-3">
-
-                                   <img src="{{$log->imageurl}}" width="100" alt="" title=""> 
-
-                                   
-
-                                   <center><a href="{{url('productvimage')}}/{{$log->id}}/delete" class="btn btn-outline-danger waves-effect waves-light btn-sm font-size-18 mt-3"><i class="mdi mdi-trash-can-outline"></i></a></center>
-
+                                   @if($imageUrl)
+                                       <img src="{{$imageUrl}}" width="100" height="100" style="object-fit: cover; border: 1px solid #ddd; border-radius: 4px;" alt="{{$log->name}}" title="{{$log->name}}"> 
+                                   @else
+                                       <div style="width: 100px; height: 100px; border: 1px solid #ddd; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #f5f5f5;">
+                                           <span class="text-muted small">No image</span>
+                                       </div>
+                                   @endif
+                                   <form action="{{url('productvimage')}}/{{$image->id}}/delete" method="POST" class="mt-2" onsubmit="return confirm('Delete this image?');">
+                                       @csrf
+                                       <button type="submit" class="btn btn-outline-danger waves-effect waves-light btn-sm font-size-18 w-100">
+                                           <i class="mdi mdi-trash-can-outline"></i> Delete
+                                       </button>
+                                   </form>
                                 </div> 
-
-                                @endforeach
+                                @empty
+                                <div class="col-12">
+                                    <p class="text-muted text-center py-4">No additional images uploaded yet.</p>
+                                </div>
+                                @endforelse
 
                             </div>
 
@@ -563,6 +620,73 @@
 
             </div>
 
+        </div>
+
+        <div class="tab-pane" id="variants" role="tabpanel">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <h5 class="mb-1">Product Variants</h5>
+                            <p class="text-muted mb-0">Manage size/color (or other variant) combinations for this product.</p>
+                        </div>
+                        <a href="{{ route('productvariantscreatenew', $log->id) }}" class="btn btn-primary">
+                            <i class="mdi mdi-plus me-1"></i> Add Variant
+                        </a>
+                    </div>
+                    @if($productVariantList->count())
+                        <div class="table-responsive">
+                            <table class="table table-bordered align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Variant</th>
+                                        <th>Price</th>
+                                        <th>Available Qty</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($productVariantList as $variant)
+                                        @php
+                                            $sizeName = $variant->size_id ? \App\Models\Variantsub::FindName($variant->size_id) : '—';
+                                            $colorName = $variant->color_id ? \App\Models\Variantsub::FindName($variant->color_id) : '—';
+                                            $variantLabel = trim($sizeName . ($colorName !== '—' ? ' / ' . $colorName : ''));
+                                        @endphp
+                                        <tr>
+                                            <td>{{ $variant->id }}</td>
+                                            <td>{{ $variantLabel ?: 'Default' }}</td>
+                                            <td>{{ number_format($variant->price ?? 0, 2) }}</td>
+                                            <td>{{ $variant->available_quantity ?? '—' }}</td>
+                                            <td>
+                                                <a href="{{ url('/productvariants') }}/{{ $variant->id }}/edit" class="btn btn-outline-secondary btn-sm me-2" title="Edit Variant">
+                                                    <i class="mdi mdi-pencil"></i>
+                                                </a>
+                                                <a href="{{ url('stock') }}/{{ $variant->id }}/{{ $variant->product_id }}" class="btn btn-outline-info btn-sm me-2" title="Manage Stock">
+                                                    <i class="mdi mdi-store"></i>
+                                                </a>
+                                                <form action="{{ url('/productvariants') }}/{{ $variant->id }}/{{ $variant->product_id }}/delete" method="POST" class="d-inline" onsubmit="return confirm('Delete this variant?');">
+                                                    @csrf
+                                                    <button type="submit" class="btn btn-outline-danger btn-sm" title="Delete Variant">
+                                                        <i class="mdi mdi-trash-can-outline"></i>
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @else
+                        <div class="text-center py-4">
+                            <p class="text-muted mb-2">No variants created yet.</p>
+                            <a href="{{ route('productvariantscreatenew', $log->id) }}" class="btn btn-outline-primary btn-sm">
+                                <i class="mdi mdi-plus me-1"></i> Create the first variant
+                            </a>
+                        </div>
+                    @endif
+                </div>
+            </div>
         </div>
 
     </div>

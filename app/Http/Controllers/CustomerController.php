@@ -101,6 +101,14 @@ class CustomerController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:users,email,'.$request->editid,
             'phone' => 'nullable|string|max:20',
+        ], [
+            'editid.required' => 'Customer ID is required.',
+            'editid.exists' => 'Selected customer does not exist.',
+            'name.required' => 'Name is required.',
+            'email.required' => 'Email is required.',
+            'email.email' => 'Please enter a valid email address.',
+            'email.unique' => 'This email is already registered.',
+            'phone.max' => 'Phone number must not exceed 20 characters.',
         ]);
 
         $data = User::find($request->editid);
@@ -109,15 +117,17 @@ class CustomerController extends Controller
             return redirect('/customer')->with('error', 'Customer not found.');
         }
 
-        $data->name = $request->name;
+        try {
+            $data->name = $request->name;
+            $data->email = $request->email;
+            $data->phone = $request->phone;
+            $data->save();
 
-        $data->email = $request->email;
-
-        $data->phone = $request->phone;
-
-        $data->save();
-
-        return redirect('/customer');
+            return redirect('/customer')->with('success', 'Customer updated successfully.');
+        } catch (\Exception $e) {
+            \Log::error('Customer update failed: ' . $e->getMessage());
+            return redirect()->back()->withInput()->with('error', 'Failed to update customer. Please try again.');
+        }
 
     }
 
@@ -130,11 +140,15 @@ class CustomerController extends Controller
             return redirect('/customer')->with('error', 'Customer not found.');
         }
 
-        $data->delete_status = '1';
+        try {
+            $data->delete_status = '1';
+            $data->save();
 
-        $data->save();
-
-        return redirect('/customer');
+            return redirect('/customer')->with('success', 'Customer deleted successfully.');
+        } catch (\Exception $e) {
+            \Log::error('Customer deletion failed: ' . $e->getMessage());
+            return redirect('/customer')->with('error', 'Failed to delete customer. Please try again.');
+        }
 
     }
 

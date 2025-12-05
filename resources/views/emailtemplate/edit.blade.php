@@ -29,20 +29,23 @@
                     <div class="col-lg-6 mb-3">
                         <div>
                             <label>Subject <span class="text-danger">*</span></label>
-                            <input class="form-control" value="{{$log->name}}" type="text" name="name" id="name" required="">
+                            <input class="form-control @error('name') is-invalid @enderror" value="{{ old('name', $log->name) }}" type="text" name="name" id="name" required="">
+                            @error('name') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
                             <input type="hidden" name="editid" value="{{$log->id}}">
                         </div>
                     </div>
                     <div class="col-lg-12 mb-3">
                         <div>
                             <label>Message</label>
-                            <textarea class="form-control" type="text" name="message" id="message">{{$log->message}}</textarea>
+                            <textarea class="form-control @error('message') is-invalid @enderror" type="text" name="message" id="message">{{ old('message', $log->message) }}</textarea>
+                            @error('message') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
                         </div>
                     </div>        
                     <div class="col-lg-12 mb-3">
                         <div>
                             <label>Message Arabic</label>
-                            <textarea class="form-control" type="text" name="message_ar" id="message_ar">{{$log->message_ar}}</textarea>
+                            <textarea class="form-control @error('message_ar') is-invalid @enderror" type="text" name="message_ar" id="message_ar">{{ old('message_ar', $log->message_ar) }}</textarea>
+                            @error('message_ar') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
                         </div>
                     </div>                    
                     <div class="col-lg-4 mt-3 mb-3">

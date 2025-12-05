@@ -58,17 +58,18 @@
 
                             <label>Size<span class="text-danger">*</span></label>
 
-                            <select class="form-control" name="size_id" id="size_id" required="">
+                            <select class="form-control @error('size_id') is-invalid @enderror" name="size_id" id="size_id" required>
 
                                 <option value="">Select</option>
 
                                  @foreach($size as $log)
 
-                                  <option value="{{$log->id}}">{{$log->name}} @if($log->name_ar!='')- {{$log->name_ar}}@endif</option>
+                                  <option value="{{$log->id}}" {{ old('size_id') == $log->id ? 'selected' : '' }}>{{$log->name}} @if($log->name_ar!='')- {{$log->name_ar}}@endif</option>
 
                                  @endforeach
 
                             </select>
+                            @error('size_id') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
 
                         </div>
 
@@ -78,19 +79,20 @@
 
                         <div>
 
-                            <label>Color<span class="text-danger">*</span></label>
+                            <label>Color</label>
 
-                            <select class="form-control" name="color_id" id="color_id" >
+                            <select class="form-control @error('color_id') is-invalid @enderror" name="color_id" id="color_id">
 
-                                <option value="0">Select</option>
+                                <option value="">None</option>
 
                                  @foreach($color as $log)
 
-                                  <option value="{{$log->id}}">{{$log->name}} @if($log->name_ar!='')- {{$log->name_ar}}@endif</option>
+                                  <option value="{{$log->id}}" {{ old('color_id') == $log->id ? 'selected' : '' }}>{{$log->name}} @if($log->name_ar!='')- {{$log->name_ar}}@endif</option>
 
                                  @endforeach
 
                             </select>
+                            @error('color_id') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
 
                         </div>
 
@@ -102,7 +104,8 @@
 
                             <label>Price <span class="text-danger">*</span></label>
 
-                            <input class="form-control" type="text" name="price" id="price" required="">
+                            <input class="form-control @error('price') is-invalid @enderror" type="text" name="price" id="price" value="{{ old('price') }}" required>
+                            @error('price') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
 
                         </div>
 
@@ -112,19 +115,16 @@
 
                         <div>
 
-                            <label for="formFileSm" class="form-label">Image File</label>
+                            <label for="formFileSm" class="form-label">Image File <span class="text-danger">*</span></label>
 
-                            <input class="form-control" name="imgfile" id="imgfile" type="file" >
+                            <input class="form-control @error('imgfile') is-invalid @enderror" name="imgfile" id="imgfile" type="file" required>
 
                             <input type="hidden" value="{{$id}}" name="product_id">
+                            @error('imgfile') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
 
                         </div>
 
-                    @error('imgfile') <span class="font-size-12 ms-1 text-danger">{{ $message }}</strong> </span> @enderror
-
                     </div>  
-
-
 
                     <div class="col-lg-4 mb-3">
 
@@ -132,15 +132,12 @@
 
                             <label for="formFileSm" class="form-label">Image file 2<small class="text-muted ms-1">(File size should be 140x175)</small></label>
 
-                            <input class="form-control" name="imgfile2" id="imgfile2" type="file">
+                            <input class="form-control @error('imgfile2') is-invalid @enderror" name="imgfile2" id="imgfile2" type="file">
+                            @error('imgfile2') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
 
                         </div>
 
-                    @error('imgfile2') <span class="font-size-12 ms-1 text-danger">{{ $message }}</strong> </span> @enderror
-
                     </div>  
-
-
 
                     <div class="col-lg-4 mb-3">
 
@@ -148,11 +145,10 @@
 
                             <label for="formFileSm" class="form-label">Image file 3<small class="text-muted ms-1">(File size should be 140x175)</small></label>
 
-                            <input class="form-control" name="imgfile3" id="imgfile3" type="file">
+                            <input class="form-control @error('imgfile3') is-invalid @enderror" name="imgfile3" id="imgfile3" type="file">
+                            @error('imgfile3') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
 
                         </div>
-
-                    @error('imgfile3') <span class="font-size-12 ms-1 text-danger">{{ $message }}</strong> </span> @enderror
 
                     </div>  
 

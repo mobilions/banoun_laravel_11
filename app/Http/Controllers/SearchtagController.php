@@ -49,7 +49,7 @@ class SearchtagController extends Controller
 
         $title = "Search Tags";
 
-        $indexes = Searchtag::active()->get();
+        $indexes = Searchtag::active()->orderByDesc('created_at')->get();
 
         return view('searchtag.index',compact('title','indexes'));  
 
@@ -95,7 +95,7 @@ class SearchtagController extends Controller
 
     {
         $this->validate($request, [
-            'title' => 'required|string|max:255',
+            'title' => 'required|string|max:255|unique:search_tags,title,NULL,id,delete_status,0',
             'title_ar' => 'nullable|string|max:255',
         ]);
 
@@ -105,11 +105,13 @@ class SearchtagController extends Controller
 
         $data->title_ar = $request->title_ar;
 
+        $data->count = 0;
+
         $data->created_by=Auth::user()->id;
 
         $data->save();
 
-        return redirect('/searchtag');
+        return redirect('/searchtag')->with('success', 'Search tag created successfully.');
 
     }
 
@@ -181,8 +183,8 @@ class SearchtagController extends Controller
 
     {
         $this->validate($request, [
-            'editid' => 'required|exists:searchtags,id',
-            'title' => 'required|string|max:255',
+            'editid' => 'required|exists:search_tags,id',
+            'title' => 'required|string|max:255|unique:search_tags,title,'.$request->editid.',id,delete_status,0',
             'title_ar' => 'nullable|string|max:255',
         ]);
 
@@ -200,7 +202,7 @@ class SearchtagController extends Controller
 
         $data->save();
 
-        return redirect('/searchtag');
+        return redirect('/searchtag')->with('success', 'Search tag updated successfully.');
 
     }
 
@@ -224,11 +226,15 @@ class SearchtagController extends Controller
 
         $data = Searchtag::find($id);
 
+        if (empty($data)) {
+            return redirect('/searchtag')->with('error', 'Search tag not found.');
+        }
+
         $data->delete_status = 1;
 
         $data->save();
 
-        return redirect('/searchtag');
+        return redirect('/searchtag')->with('success', 'Search tag deleted successfully.');
 
     }
 

@@ -58,44 +58,39 @@ tr.selected {background-color:#adf7a9  ! important;}
 
         <div class="card-body">
 
-            <table id="datatable-buttons" class="table table-bordered dt-responsive nowrap w-100">
-
+            <table id="datatable-buttons" class="table table-bordered nowrap w-100 align-middle">
                 <thead>
-
                     <tr>
-
                         <th>#</th>
-
                         <th>Title</th>
-
                         <th>Title in Arabic</th>
-
-                        <th>Action</th>
-
+                        <th>Status</th>
+                        <th class="export-ignore">Action</th>
                     </tr>
-
                 </thead>           
-
                 <tbody>
-
                     @foreach ($indexes as $index)
-
                     <tr>
-
                         <td>{{$index->id}}</td>
-
-                        <td>{{$index->title}}</td>
-
+                        <td data-export="{{$index->title}}">{{$index->title}}</td>
                         <td>{{$index->title_ar}}</td>
-
-                        <td><a href="{{url('/searchtag')}}/{{$index->id}}/edit" class="btn btn-outline-secondary me-2 waves-effect waves-light btn-sm font-size-18"><i class="mdi mdi-pencil"></i></a><a href="{{url('/searchtag')}}/{{$index->id}}/delete" class="btn btn-outline-danger waves-effect waves-light btn-sm font-size-18"><i class="mdi mdi-trash-can-outline"></i></a></td>
-
+                        <td>
+                            <span class="badge {{ (int)$index->delete_status === 0 ? 'bg-success' : 'bg-secondary' }}">
+                                {{ (int)$index->delete_status === 0 ? 'Active' : 'Deleted' }}
+                            </span>
+                        </td>
+                        <td class="export-ignore">
+                            <a href="{{url('/searchtag')}}/{{$index->id}}/edit" class="btn btn-outline-secondary me-2 waves-effect waves-light btn-sm font-size-18"><i class="mdi mdi-pencil"></i></a>
+                            <form action="{{url('/searchtag')}}/{{$index->id}}/delete" method="POST" class="d-inline" onsubmit="return confirm('Delete this search tag?');">
+                                @csrf
+                                <button type="submit" class="btn btn-outline-danger waves-effect waves-light btn-sm font-size-18">
+                                    <i class="mdi mdi-trash-can-outline"></i>
+                                </button>
+                            </form>
+                        </td>
                     </tr>
-
                     @endforeach
-
                 </tbody>
-
             </table>
 
         </div>
@@ -135,9 +130,73 @@ tr.selected {background-color:#adf7a9  ! important;}
 <script src="{{asset('/assets')}}/libs/datatables.net-responsive-bs4/js/responsive.bootstrap4.min.js"></script>
 
 <script>
-
-$(document).ready(function(){$("#datatable").DataTable(),$("#datatable-buttons").DataTable({lengthChange:!1,"iDisplayLength": 500,buttons:["copy","excel","pdf"]}).buttons().container().appendTo("#datatable-buttons_wrapper .col-md-6:eq(0)"),$(".dataTables_length select").addClass("form-select form-select-sm")});
-
+(function ($) {
+    $(document).ready(function () {
+        var table = $("#datatable-buttons").DataTable({
+            pageLength: 10,
+            lengthMenu: [[10, 20, 50, 100, -1], [10, 20, 50, 100, "All"]],
+            buttons: [
+                { 
+                    extend: "copy", 
+                    exportOptions: { 
+                        columns: ":visible:not(.export-ignore)",
+                        format: {
+                            body: function (data, row, column, node) {
+                                var exportData = $(node).attr('data-export');
+                                return exportData !== undefined ? exportData : data.replace(/<[^>]*>/g, '').trim();
+                            }
+                        }
+                    } 
+                },
+                { 
+                    extend: "excel", 
+                    exportOptions: { 
+                        columns: ":visible:not(.export-ignore)",
+                        format: {
+                            body: function (data, row, column, node) {
+                                var exportData = $(node).attr('data-export');
+                                return exportData !== undefined ? exportData : data.replace(/<[^>]*>/g, '').trim();
+                            }
+                        }
+                    },
+                    customize: function(xlsx) {
+                        var sheet = xlsx.xl.worksheets['sheet1.xml'];
+                        $('row', sheet).each(function() {
+                            var cell = $(this).find('c[is="1"]');
+                            if (cell.length) {
+                                $(this).find('c').attr('s', '1');
+                            }
+                        });
+                    }
+                },
+                { 
+                    extend: "pdf", 
+                    exportOptions: { 
+                        columns: ":visible:not(.export-ignore)",
+                        format: {
+                            body: function (data, row, column, node) {
+                                var exportData = $(node).attr('data-export');
+                                var text = exportData !== undefined ? exportData : data.replace(/<[^>]*>/g, '').trim();
+                                return text.replace(/\n/g, ' ').substring(0, 200);
+                            }
+                        }
+                    },
+                    customize: function(doc) {
+                        doc.defaultStyle.fontSize = 8;
+                        doc.styles.tableHeader.fontSize = 9;
+                        doc.pageMargins = [10, 10, 10, 10];
+                    }
+                }
+            ],
+            responsive: false,
+            columnDefs: [
+                { targets: 'export-ignore', orderable: false, searchable: false, exportable: false }
+            ]
+        });
+        table.buttons().container().appendTo("#datatable-buttons_wrapper .col-md-6:eq(0)");
+        $(".dataTables_length select").addClass("form-select form-select-sm");
+    });
+})(jQuery);
 </script>
 
 @stop

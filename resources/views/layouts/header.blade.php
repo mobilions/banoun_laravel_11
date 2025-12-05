@@ -24,9 +24,9 @@
 </button>
 
 <!-- App Search-->
-<form class="app-search d-none d-lg-block">
+<form class="app-search d-none d-lg-block global-search-form" role="search">
     <div class="position-relative">
-        <input type="text" class="form-control" placeholder="Search...">
+        <input type="search" class="form-control global-search-input" placeholder="Search..." aria-label="Global search" autocomplete="off">
         <span class="bx bx-search-alt"></span>
     </div>
 </form>
@@ -42,10 +42,10 @@
     <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end p-0"
         aria-labelledby="page-header-search-dropdown">
 
-        <form class="p-3">
+        <form class="p-3 global-search-form" role="search">
             <div class="form-group m-0">
                 <div class="input-group">
-                    <input type="text" class="form-control" placeholder="Search ..." aria-label="Recipient's username">
+                    <input type="search" class="form-control global-search-input" placeholder="Search ..." aria-label="Global search (mobile)" autocomplete="off">
                     <div class="input-group-append">
                         <button class="btn btn-primary" type="submit"><i class="mdi mdi-magnify"></i></button>
                     </div>

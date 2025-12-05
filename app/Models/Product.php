@@ -7,6 +7,11 @@ use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Searchtag;
 use App\Models\Subcategory;
+use App\Models\Productvariant;
+use App\Models\ProductImage;
+use App\Models\Cart;
+use App\Models\Stock;
+use App\Models\Wishlist;
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\SoftDeleteByStatus;
 
@@ -77,6 +82,43 @@ class Product extends Model
     public function searchtag()
     {
         return $this->belongsTo(Searchtag::class);
+    }
+    
+    // Has Many Relationships
+    public function variants()
+    {
+        return $this->hasMany(Productvariant::class);
+    }
+    
+    public function images()
+    {
+        return $this->hasMany(ProductImage::class);
+    }
+    
+    public function carts()
+    {
+        return $this->hasMany(Cart::class);
+    }
+    
+    public function stock()
+    {
+        return $this->hasMany(Stock::class);
+    }
+    
+    public function wishlists()
+    {
+        return $this->hasMany(Wishlist::class);
+    }
+    
+    // Accessors for comma-separated values (backward compatibility)
+    public function getColorsArrayAttribute()
+    {
+        return $this->colors ? explode(',', $this->colors) : [];
+    }
+    
+    public function getSizeArrayAttribute()
+    {
+        return $this->size ? explode(',', $this->size) : [];
     }
 
     public static function FindName($id){

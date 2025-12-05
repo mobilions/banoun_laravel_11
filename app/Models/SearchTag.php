@@ -9,6 +9,8 @@ class SearchTag extends Model
 {
     use SoftDeleteByStatus;
 
+    protected $table = 'search_tags';
+
     protected $fillable = [
         'title',
         'title_ar',

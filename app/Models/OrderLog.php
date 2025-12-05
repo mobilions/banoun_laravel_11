@@ -32,6 +32,6 @@ class OrderLog extends Model
     }
     public function status()
     {
-        return $this->belongsTo(Status::class);
+        return $this->belongsTo(Orderstatus::class, 'status_id');
     }
 }

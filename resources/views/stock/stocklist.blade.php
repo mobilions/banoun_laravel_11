@@ -36,7 +36,7 @@ tr.selected {background-color:#adf7a9  ! important;}
 
 </div>
 
-<form  action="{{url('admin/stock/update')}}" method="post">
+<form  action="{{route('stock.update')}}" method="post">
 
 {{csrf_field()}}  
 
@@ -136,7 +136,7 @@ tr.selected {background-color:#adf7a9  ! important;}
 
                         <th>Date Added</th>
 
-                        <th>Action</th>
+                        <th class="export-ignore">Action</th>
 
                     </tr>
 
@@ -145,18 +145,23 @@ tr.selected {background-color:#adf7a9  ! important;}
                 <tbody>
 
                     @foreach ($indexes as $index)
-
-                    <?php $product=App\Models\Product::where('id',$index->product_id)->first();
-
-                     ?>
+                    <?php $product = $index->product; ?>
 
                     <tr>
 
                             <td>{{$index->id}}</td>
 
-                            <td><a target="_balnk" href="{{url('admin/productlist')}}/{{$product->id}}/view">{{App\Models\Product::FindName($product->id)}}</a></td>
+                            <td class="export-ignore">
+                                @if($product)
+                                    <a target="_blank" href="{{ url('product/'.$product->id.'/edit') }}">
+                                        {{$product->name}}
+                                    </a>
+                                @else
+                                    <em class="text-muted">N/A</em>
+                                @endif
+                            </td>
 
-                            <td>{{App\Models\Productvariant::FindName($index->variant_id)}}</td>
+                            <td>{{optional($index->variant)->name ?? __('N/A')}}</td>
 
                             <td>{!!App\Models\Stock::stockVariant($index->variant_id)!!}</td>
 
@@ -164,7 +169,19 @@ tr.selected {background-color:#adf7a9  ! important;}
 
                             <td>{{date('d-m-Y',strtotime($index->created_at))}}</td>
 
-                            <td><a href="{{url('admin/stcokapprovelist')}}/{{$index->id}}" class="btn btn-info btn-sm waves-effect waves-light me-3"> <i class="bx bx-check font-size-14 align-middle me-2"></i> Approve </a> <button type="button" class="btn btn-success btn-sm waves-effect waves-light me-3 editbtn" data-id="{{$index->id}}" data-quantity="{{$index->quantity}}"  data-bs-toggle="modal" data-bs-target="#myModal"><i class="mdi mdi-pencil ms-1"></i></button></td>
+                            <td>
+                                <a href="{{route('stock.list.approve',$index->id)}}" class="btn btn-info btn-sm waves-effect waves-light me-2">
+                                    <i class="bx bx-check font-size-14 align-middle me-2"></i> Approve
+                                </a>
+                                <button type="button" class="btn btn-success btn-sm waves-effect waves-light me-2 editbtn" data-id="{{$index->id}}" data-quantity="{{$index->quantity}}"  data-bs-toggle="modal" data-bs-target="#myModal"><i class="mdi mdi-pencil ms-1"></i></button>
+                                <form action="{{ route('stock.destroy', $index->id) }}" method="post" class="d-inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-danger btn-sm waves-effect waves-light" onclick="return confirm('Delete this stock entry?');">
+                                        <i class="mdi mdi-trash-can-outline"></i>
+                                    </button>
+                                </form>
+                            </td>
 
                             
 
@@ -213,19 +230,34 @@ tr.selected {background-color:#adf7a9  ! important;}
 <script src="{{asset('/assets')}}/libs/datatables.net-responsive-bs4/js/responsive.bootstrap4.min.js"></script>
 
 <script>
+(function ($) {
+    var exportButtons = [
+        { extend: "copy", exportOptions: { columns: ":visible:not(.export-ignore)" } },
+        { extend: "excel", exportOptions: { columns: ":visible:not(.export-ignore)" } },
+        { extend: "pdf", exportOptions: { columns: ":visible:not(.export-ignore)" } }
+    ];
 
-$(document).ready(function(){$("#datatable").DataTable(),$("#datatable-buttons").DataTable({lengthChange:!1,"iDisplayLength": 500,buttons:["copy","excel","pdf"]}).buttons().container().appendTo("#datatable-buttons_wrapper .col-md-6:eq(0)"),$(".dataTables_length select").addClass("form-select form-select-sm")});
+    var tableOptions = {
+        pageLength: 20,
+        lengthMenu: [[20, 50, 100, -1], [20, 50, 100, "All"]],
+        buttons: exportButtons,
+        responsive: true,
+        columnDefs: [
+            { targets: 'export-ignore', orderable: false, searchable: false }
+        ]
+    };
 
+    $(document).ready(function () {
+        var table = $("#datatable-buttons").DataTable(tableOptions);
+        table.buttons().container().appendTo("#datatable-buttons_wrapper .col-md-6:eq(0)");
+        $(".dataTables_length select").addClass("form-select form-select-sm");
 
-
-$('.editbtn').click(function() {
-
-    var id = $(this).data("id"); $("#editid").val(id);
-
-    var quantity = $(this).data("quantity"); $("#quantityedit").val(quantity);
-
-});
-
+        $('.editbtn').click(function() {
+            var id = $(this).data("id"); $("#editid").val(id);
+            var quantity = $(this).data("quantity"); $("#quantityedit").val(quantity);
+        });
+    });
+})(jQuery);
 </script>
 
 @stop

@@ -48,22 +48,38 @@ class CouponController extends Controller
     public function store(Request $request)
     {
         $this->validate($request, [
-            'price_type' => 'required|string',
+            'price_type' => 'required|string|in:Percentage,Price,FreeDelivery',
             'coupon_val' => 'required|numeric|min:0',
             'coupon_code' => 'required|string|max:255|unique:coupons,coupon_code',
             'coupon_code_ar' => 'nullable|string|max:255',
+        ], [
+            'price_type.required' => 'Coupon type is required.',
+            'price_type.in' => 'Invalid coupon type selected.',
+            'coupon_val.required' => 'Coupon value is required.',
+            'coupon_val.numeric' => 'Coupon value must be a number.',
+            'coupon_val.min' => 'Coupon value must be at least 0.',
+            'coupon_code.required' => 'Coupon code is required.',
+            'coupon_code.max' => 'Coupon code must not exceed 255 characters.',
+            'coupon_code.unique' => 'This coupon code already exists.',
+            'coupon_code_ar.max' => 'Arabic coupon code must not exceed 255 characters.',
         ]);
         
-        $data = new Coupon; 
-        $data->coupon_type = 'All';
-        $data->coupon_type_id = 0;
-        $data->price_type = $request->price_type;
-        $data->coupon_val = $request->coupon_val;
-        $data->coupon_code = $request->coupon_code;
-        $data->coupon_code_ar = $request->coupon_code_ar;
-        $data->created_by=Auth::user()->id;
-        $data->save();
-        return redirect('/coupon');
+        try {
+            $data = new Coupon; 
+            $data->coupon_type = 'All';
+            $data->coupon_type_id = 0;
+            $data->price_type = $request->price_type;
+            $data->coupon_val = $request->coupon_val;
+            $data->coupon_code = $request->coupon_code;
+            $data->coupon_code_ar = $request->coupon_code_ar;
+            $data->delete_status = '0';
+            $data->created_by = Auth::user()->id;
+            $data->save();
+            return redirect('/coupon')->with('success', 'Coupon created successfully.');
+        } catch (\Exception $e) {
+            \Log::error('Coupon creation failed: ' . $e->getMessage());
+            return redirect()->back()->withInput()->with('error', 'Failed to create coupon. Please try again.');
+        }
     }
 
     /**
@@ -101,25 +117,43 @@ class CouponController extends Controller
     {
         $this->validate($request, [
             'editid' => 'required|exists:coupons,id',
-            'price_type' => 'required|string',
+            'price_type' => 'required|string|in:Percentage,Price,FreeDelivery',
             'coupon_val' => 'required|numeric|min:0',
             'coupon_code' => 'required|string|max:255|unique:coupons,coupon_code,'.$request->editid,
             'coupon_code_ar' => 'nullable|string|max:255',
+        ], [
+            'editid.required' => 'Coupon ID is required.',
+            'editid.exists' => 'Selected coupon does not exist.',
+            'price_type.required' => 'Coupon type is required.',
+            'price_type.in' => 'Invalid coupon type selected.',
+            'coupon_val.required' => 'Coupon value is required.',
+            'coupon_val.numeric' => 'Coupon value must be a number.',
+            'coupon_val.min' => 'Coupon value must be at least 0.',
+            'coupon_code.required' => 'Coupon code is required.',
+            'coupon_code.max' => 'Coupon code must not exceed 255 characters.',
+            'coupon_code.unique' => 'This coupon code already exists.',
+            'coupon_code_ar.max' => 'Arabic coupon code must not exceed 255 characters.',
         ]);
     
         $data = Coupon::find($request->editid);
         if (empty($data)) { 
             return redirect('/coupon')->with('error', 'Coupon not found.');
         }
-        $data->coupon_type = 'All';
-        $data->coupon_type_id = 0;
-        $data->price_type = $request->price_type;
-        $data->coupon_val = $request->coupon_val;
-        $data->coupon_code = $request->coupon_code;
-        $data->coupon_code_ar = $request->coupon_code_ar;
-        $data->updated_by=Auth::user()->id;
-        $data->save();
-        return redirect('/coupon');
+        
+        try {
+            $data->coupon_type = 'All';
+            $data->coupon_type_id = 0;
+            $data->price_type = $request->price_type;
+            $data->coupon_val = $request->coupon_val;
+            $data->coupon_code = $request->coupon_code;
+            $data->coupon_code_ar = $request->coupon_code_ar;
+            $data->updated_by = Auth::user()->id;
+            $data->save();
+            return redirect('/coupon')->with('success', 'Coupon updated successfully.');
+        } catch (\Exception $e) {
+            \Log::error('Coupon update failed: ' . $e->getMessage());
+            return redirect()->back()->withInput()->with('error', 'Failed to update coupon. Please try again.');
+        }
     }
 
     /**
@@ -131,8 +165,18 @@ class CouponController extends Controller
     public function destroy(Coupon $coupon,$id)
     {
         $data = Coupon::find($id);
-        $data->delete_status = 1;
-        $data->save();
-        return redirect('/coupon');
+        
+        if (empty($data)) {
+            return redirect('/coupon')->with('error', 'Coupon not found.');
+        }
+        
+        try {
+            $data->delete_status = 1;
+            $data->save();
+            return redirect('/coupon')->with('success', 'Coupon deleted successfully.');
+        } catch (\Exception $e) {
+            \Log::error('Coupon deletion failed: ' . $e->getMessage());
+            return redirect('/coupon')->with('error', 'Failed to delete coupon. Please try again.');
+        }
     }
 }

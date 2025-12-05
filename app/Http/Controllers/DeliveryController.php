@@ -96,44 +96,39 @@ class DeliveryController extends Controller
         $this->validate($request, [
             'name' => 'required|string|max:255',
             'name_ar' => 'nullable|string|max:255',
-            'imgfile' => 'nullable|image|mimes:svg',
+            'imgfile' => 'nullable|image|mimes:svg|max:2048',
+        ], [
+            'name.required' => 'Info is required.',
+            'name.max' => 'Info must not exceed 255 characters.',
+            'name_ar.max' => 'Arabic info must not exceed 255 characters.',
+            'imgfile.image' => 'The file must be an image.',
+            'imgfile.mimes' => 'The image must be a file of type: svg.',
+            'imgfile.max' => 'The image size must not exceed 2MB.',
         ]);
 
-        $imgurl    = '';
+        try {
+            $imgurl = '';
 
-        $path   = $request->file('imgfile');
+            $path = $request->file('imgfile');
 
-        if (!empty($path)) {
+            if (!empty($path) && $path->isValid()) {
+                $store = Storage::putFile('public/image', $path);
+                $imgurl = config('app.imgurl').basename($store);
+            }
 
-        $store  = Storage::putFile('public/image', $path);
+            $data = new Delivery; 
+            $data->name = $request->name;
+            $data->name_ar = $request->name_ar;
+            $data->imageurl = $imgurl;
+            $data->delete_status = '0';
+            $data->created_by = Auth::user()->id;
+            $data->save();
 
-            //$imgurl    = Storage::url($store);
-
-            //$imgurl = url('/').'/storage/app/'.$store;
-
-            $imgurl = config('app.imgurl').basename($store);
-
+            return redirect('/delivery')->with('success', 'Delivery info created successfully.');
+        } catch (\Exception $e) {
+            \Log::error('Delivery creation failed: ' . $e->getMessage());
+            return redirect()->back()->withInput()->with('error', 'Failed to create delivery info. Please try again.');
         }
-
-        //echo "hi"; exit();
-
-
-
-        $data = new Delivery; 
-
-        $data->name = $request->name;
-
-        $data->name_ar = $request->name_ar;
-
-        $data->imageurl    = $imgurl;
-
-        $data->created_by=Auth::user()->id;
-
-        $data->save();
-
-
-
-        return redirect('/delivery');
 
     }
 
@@ -208,33 +203,18 @@ class DeliveryController extends Controller
             'editid' => 'required|exists:deliveries,id',
             'name' => 'required|string|max:255',
             'name_ar' => 'nullable|string|max:255',
-            'imgfile' => 'nullable|image|mimes:svg',
+            'imgfile' => 'nullable|image|mimes:svg|max:2048',
             'imgfile_val' => 'nullable|string',
+        ], [
+            'editid.required' => 'Record ID is required.',
+            'editid.exists' => 'Selected record does not exist.',
+            'name.required' => 'Info is required.',
+            'name.max' => 'Info must not exceed 255 characters.',
+            'name_ar.max' => 'Arabic info must not exceed 255 characters.',
+            'imgfile.image' => 'The file must be an image.',
+            'imgfile.mimes' => 'The image must be a file of type: svg.',
+            'imgfile.max' => 'The image size must not exceed 2MB.',
         ]);
-
-        $imgurl    = '';
-
-        $path   = $request->file('imgfile');
-
-        if (!empty($path)) {
-
-            $store  = Storage::putFile('public/image', $path);
-
-            //$imgurl    = Storage::url($store);
-
-            //$imgurl = url('/').'/storage/app/'.$store;
-
-            $imgurl = config('app.imgurl').basename($store);
-
-        }
-
-        else{
-
-            $imgurl=$request->imgfile_val;
-
-        }
-
-
 
         $data = Delivery::find($request->editid);
 
@@ -242,17 +222,29 @@ class DeliveryController extends Controller
             return redirect('/delivery')->with('error', 'Delivery record not found.');
         }
 
-        $data->name = $request->name;
+        try {
+            $imgurl = '';
 
-        $data->name_ar = $request->name_ar;
+            $path = $request->file('imgfile');
 
-        $data->imageurl    = $imgurl;
+            if (!empty($path) && $path->isValid()) {
+                $store = Storage::putFile('public/image', $path);
+                $imgurl = config('app.imgurl').basename($store);
+            } else {
+                $imgurl = $request->imgfile_val ?? '';
+            }
 
-        $data->updated_by=Auth::user()->id;
+            $data->name = $request->name;
+            $data->name_ar = $request->name_ar;
+            $data->imageurl = $imgurl;
+            $data->updated_by = Auth::user()->id;
+            $data->save();
 
-        $data->save();
-
-        return redirect('/delivery');
+            return redirect('/delivery')->with('success', 'Delivery info updated successfully.');
+        } catch (\Exception $e) {
+            \Log::error('Delivery update failed: ' . $e->getMessage());
+            return redirect()->back()->withInput()->with('error', 'Failed to update delivery info. Please try again.');
+        }
 
     }
 
@@ -273,14 +265,21 @@ class DeliveryController extends Controller
     public function destroy(Delivery $delivery,$id)
 
     {
-
         $data = Delivery::find($id);
 
-        $data->delete_status = 1;
+        if (empty($data)) {
+            return redirect('/delivery')->with('error', 'Delivery record not found.');
+        }
 
-        $data->save();
+        try {
+            $data->delete_status = 1;
+            $data->save();
 
-        return redirect('/delivery');
+            return redirect('/delivery')->with('success', 'Delivery info deleted successfully.');
+        } catch (\Exception $e) {
+            \Log::error('Delivery deletion failed: ' . $e->getMessage());
+            return redirect('/delivery')->with('error', 'Failed to delete delivery info. Please try again.');
+        }
 
     }
 

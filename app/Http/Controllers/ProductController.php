@@ -14,10 +14,17 @@ use App\Models\Searchtag;
 
 use App\Models\Cart;
 
+use App\Models\Variant;
+
+use App\Rules\PriceOfferRule;
+
+use App\Rules\PercentageDiscountRule;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use App\Models\Productvariant;
 
 
@@ -36,15 +43,51 @@ class ProductController extends Controller
 
      */
 
-    public function index()
+    public function index(Request $request)
 
     {
-
         $title = "Product";
 
-        $indexes = Product::active()->get();
+        $query = Product::active()
+            ->with(['category', 'brand', 'subcategory'])
+            ->orderByDesc('created_at');
 
-        return view('product.index',compact('title','indexes'));  
+        // Search functionality
+        if ($request->has('search') && $request->search) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('name_ar', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        // Filter by category
+        if ($request->has('category_id') && $request->category_id) {
+            $query->where('category_id', $request->category_id);
+        }
+
+        // Filter by brand
+        if ($request->has('brand_id') && $request->brand_id) {
+            $query->where('brand_id', $request->brand_id);
+        }
+
+        // Filter by price range
+        if ($request->has('min_price') && $request->min_price) {
+            $query->where('price', '>=', $request->min_price);
+        }
+        if ($request->has('max_price') && $request->max_price) {
+            $query->where('price', '<=', $request->max_price);
+        }
+
+        // Pagination
+        $indexes = $query->paginate(15)->withQueryString();
+
+        // For filters dropdown
+        $categories = \App\Models\Category::active()->get();
+        $brands = \App\Models\Brand::active()->get();
+
+        return view('product.index', compact('title', 'indexes', 'categories', 'brands'));  
 
     }
 
@@ -99,7 +142,6 @@ class ProductController extends Controller
     public function create()
 
     {
-
         $title = "Product";
 
         $categories = \App\Models\Category::active()->get();
@@ -108,13 +150,24 @@ class ProductController extends Controller
 
         $brands = \App\Models\Brand::active()->get();
 
-        $colors = \App\Models\Variantsub::active()->where('variant_id','2')->get();
+        // Dynamic variant lookup instead of hardcoded IDs
+        $sizeVariant = Variant::where('name', 'Size')->active()->first();
+        $colorVariant = Variant::where('name', 'Color')->active()->first();
+        
+        $sizes = collect();
+        $colors = collect();
+        
+        if ($sizeVariant) {
+            $sizes = \App\Models\Variantsub::active()->where('variant_id', $sizeVariant->id)->get();
+        }
+        
+        if ($colorVariant) {
+            $colors = \App\Models\Variantsub::active()->where('variant_id', $colorVariant->id)->get();
+        }
 
-        $sizes = \App\Models\Variantsub::active()->where('variant_id','1')->get();
+        $searchtags = Searchtag::active()->get();
 
-        $searchtags=Searchtag::active()->get();
-
-        return view('product.create',compact('title','categories','subcategories','brands','colors','searchtags','sizes')); 
+        return view('product.create', compact('title', 'categories', 'subcategories', 'brands', 'colors', 'searchtags', 'sizes')); 
 
     }
 
@@ -153,7 +206,7 @@ class ProductController extends Controller
             'size_id' => 'required|array|min:1',
             'size_id.*' => 'exists:variants_sub,id',
             'searchtag_id' => 'required|array|min:1',
-            'searchtag_id.*' => 'exists:searchtags,id',
+            'searchtag_id.*' => 'exists:search_tags,id',
             'imgfile' => ['required','image','mimes:jpeg,png,jpg,gif,svg,webp','max:2048','dimensions:min_width=100,min_height=100,max_width=4000,max_height=4000'],
             'imgfile2' => ['nullable','image','mimes:jpeg,png,jpg,gif,svg,webp','max:2048','dimensions:min_width=100,min_height=100,max_width=4000,max_height=4000'],
             'imgfile3' => ['nullable','image','mimes:jpeg,png,jpg,gif,svg,webp','max:2048','dimensions:min_width=100,min_height=100,max_width=4000,max_height=4000'],
@@ -161,11 +214,30 @@ class ProductController extends Controller
 
 
 
-        $imgurl    = $this->storeImageFile($request->file('imgfile')) ?? '';
+        try {
+            $imgurl = $this->storeImageFile($request->file('imgfile')) ?? '';
+            if (empty($imgurl)) {
+                return redirect()->back()->withInput()->with('error', 'Failed to upload primary image. Please try again.');
+            }
+        } catch (\Exception $e) {
+            return redirect()->back()->withInput()->with('error', 'Error uploading primary image: ' . $e->getMessage());
+        }
 
-        $imgurl2    = $this->storeImageFile($request->file('imgfile2')) ?? '';
+        try {
+            $imgurl2 = $this->storeImageFile($request->file('imgfile2')) ?? '';
+        } catch (\Exception $e) {
+            // Log error but don't fail if secondary image fails
+            \Log::warning('Failed to upload secondary image: ' . $e->getMessage());
+            $imgurl2 = '';
+        }
 
-        $imgurl3    = $this->storeImageFile($request->file('imgfile3')) ?? '';
+        try {
+            $imgurl3 = $this->storeImageFile($request->file('imgfile3')) ?? '';
+        } catch (\Exception $e) {
+            // Log error but don't fail if tertiary image fails
+            \Log::warning('Failed to upload tertiary image: ' . $e->getMessage());
+            $imgurl3 = '';
+        }
 
 
 
@@ -211,19 +283,20 @@ class ProductController extends Controller
         $sizeIds = collect($request->size_id)->filter()->implode(',');
         $searchtagIds = collect($request->searchtag_id)->filter()->implode(',');
 
-        DB::transaction(function () use (
-            $request,
-            $imgurl,
-            $imgurl2,
-            $imgurl3,
-            $is_newarrival,
-            $is_trending,
-            $is_recommended,
-            $is_topsearch,
-            $colorIds,
-            $sizeIds,
-            $searchtagIds
-        ) {
+        try {
+            DB::transaction(function () use (
+                $request,
+                $imgurl,
+                $imgurl2,
+                $imgurl3,
+                $is_newarrival,
+                $is_trending,
+                $is_recommended,
+                $is_topsearch,
+                $colorIds,
+                $sizeIds,
+                $searchtagIds
+            ) {
             $product = new Product; 
             $product->category_id = $request->category_id;
             $product->subcategory_id = $request->subcategory_id;
@@ -272,9 +345,13 @@ class ProductController extends Controller
                 $thirdImage->created_by = Auth::user()->id;
                 $thirdImage->save();
             }
-        });
+            });
 
-        return redirect('/product');
+            return redirect('/product')->with('success', 'Product created successfully.');
+        } catch (\Exception $e) {
+            \Log::error('Product creation failed: ' . $e->getMessage());
+            return redirect()->back()->withInput()->with('error', 'Failed to create product. Please try again.');
+        }
 
     }
 
@@ -317,10 +394,15 @@ class ProductController extends Controller
     public function edit(Product $product,$id)
 
     {
-
         $title = "Product";
 
-        $log = Product::where('id',$id)->first();
+        $log = Product::with(['category', 'brand', 'subcategory', 'variants', 'images'])
+            ->where('id',$id)
+            ->first();
+
+        if (empty($log)) {
+            return redirect('/product')->with('error', 'Product not found.');
+        }
 
         $categories = \App\Models\Category::active()->get();
 
@@ -329,16 +411,40 @@ class ProductController extends Controller
         $brands = \App\Models\Brand::active()->get();
 
         $productvariants = Productvariant::active()->where('product_id',$id)->count();
+        $productVariantList = Productvariant::active()
+            ->where('product_id',$id)
+            ->with(['sizeVariant', 'colorVariant'])
+            ->orderByDesc('created_at')
+            ->get();
 
-        $colors = \App\Models\Variantsub::active()->where('variant_id','2')->get();
+        // Dynamic variant lookup instead of hardcoded IDs
+        $sizeVariant = Variant::where('name', 'Size')->active()->first();
+        $colorVariant = Variant::where('name', 'Color')->active()->first();
+        
+        $sizes = collect();
+        $colors = collect();
+        
+        if ($sizeVariant) {
+            $sizes = \App\Models\Variantsub::active()->where('variant_id', $sizeVariant->id)->get();
+        }
+        
+        if ($colorVariant) {
+            $colors = \App\Models\Variantsub::active()->where('variant_id', $colorVariant->id)->get();
+        }
 
-        $searchtags=Searchtag::active()->get();
+        $searchtags = Searchtag::active()->get();
 
-        $sizes = \App\Models\Variantsub::active()->where('variant_id','1')->get();
+        $productvariantimages=Productimage::where('product_id',$id)
+            ->where('delete_status','0')
+            ->get()
+            ->map(function ($image) {
+                $image->display_url = $image->imageurl
+                    ? (Str::startsWith($image->imageurl, ['http://','https://','//']) ? $image->imageurl : asset($image->imageurl))
+                    : null;
+                return $image;
+            });
 
-        $productvariantimages=Productimage::where('product_id',$id)->where('delete_status','0')->get();
-
-        return view('product.edit',compact('title','log','categories','subcategories','brands','productvariants','colors','searchtags','sizes','productvariantimages'));
+        return view('product.edit',compact('title','log','categories','subcategories','brands','productvariants','colors','searchtags','sizes','productvariantimages','productVariantList'));
 
     }
 
@@ -380,7 +486,7 @@ class ProductController extends Controller
             'size_id' => 'required|array|min:1',
             'size_id.*' => 'exists:variants_sub,id',
             'searchtag_id' => 'required|array|min:1',
-            'searchtag_id.*' => 'exists:searchtags,id',
+            'searchtag_id.*' => 'exists:search_tags,id',
             'imgfile' => ['nullable','image','mimes:jpeg,png,jpg,gif,svg,webp','max:2048','dimensions:min_width=100,min_height=100,max_width=4000,max_height=4000'],
             'imgfile2' => ['nullable','image','mimes:jpeg,png,jpg,gif,svg,webp','max:2048','dimensions:min_width=100,min_height=100,max_width=4000,max_height=4000'],
             'imgfile3' => ['nullable','image','mimes:jpeg,png,jpg,gif,svg,webp','max:2048','dimensions:min_width=100,min_height=100,max_width=4000,max_height=4000'],
@@ -430,17 +536,18 @@ class ProductController extends Controller
         $sizeIds = collect($request->size_id)->filter()->implode(',');
         $searchtagIds = collect($request->searchtag_id)->filter()->implode(',');
 
-        DB::transaction(function () use (
-            $data,
-            $request,
-            $is_newarrival,
-            $is_trending,
-            $is_recommended,
-            $is_topsearch,
-            $colorIds,
-            $sizeIds,
-            $searchtagIds
-        ) {
+        try {
+            DB::transaction(function () use (
+                $data,
+                $request,
+                $is_newarrival,
+                $is_trending,
+                $is_recommended,
+                $is_topsearch,
+                $colorIds,
+                $sizeIds,
+                $searchtagIds
+            ) {
             $data->category_id = $request->category_id;
             $data->subcategory_id = $request->subcategory_id;
             $data->brand_id = $request->brand_id;
@@ -463,10 +570,14 @@ class ProductController extends Controller
             $data->created_by = Auth::user()->id;
             $data->save();
 
-            $this->updatecartprices($request->editid,0,$request->price);
-        });
+                $this->updatecartprices($request->editid,0,$request->price);
+            });
 
-        return redirect('/product');
+            return redirect('/product')->with('success', 'Product updated successfully.');
+        } catch (\Exception $e) {
+            \Log::error('Product update failed: ' . $e->getMessage());
+            return redirect()->back()->withInput()->with('error', 'Failed to update product. Please try again.');
+        }
 
     }
 
@@ -510,11 +621,15 @@ class ProductController extends Controller
 
         $data = Product::find($id);
 
+        if (empty($data)) {
+            return redirect('/product')->with('error', 'Product not found.');
+        }
+
         $data->delete_status = 1;
 
         $data->save();
 
-        return redirect('/product');
+        return redirect('/product')->with('success', 'Product deleted successfully.');
 
     }
 

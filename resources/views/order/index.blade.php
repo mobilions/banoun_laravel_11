@@ -68,21 +68,21 @@ tr.selected {background-color:#adf7a9  ! important;}
                         <th>Payment Type</th>
                         <th>Payment Status</th>
                         <th>Order Status</th>
-                        <th>Action</th>
+                        <th class="export-ignore">Action</th>
                     </tr>
                 </thead>           
                 <tbody>
                     @foreach ($indexes as $index)
                     <tr>
                         <td>{{$index->order_number}}</td>
-                        <td>{{App\Models\User::findUserVal($index->id,'name')}}</td>
-                        <td>{{App\Models\User::findUserVal($index->id,'phone')}}</td>
+                        <td>{{optional($index->user)->name ?? 'N/A'}}</td>
+                        <td>{{optional($index->user)->phone ?? 'N/A'}}</td>
                         <td>{{$index->grandtotal}}</td>
                         <td>{{$index->totalqty}}</td>
                         <td>{{$index->paymenttype}}</td>
                         <td>{{$index->paymentstatus}}</td>
-                        <td>{{App\Models\Orderstatus::findUserVal($index->orderstatus,'name')}}</td>
-                        <td><a href="{{url('/order')}}/{{$index->id}}/view" class="btn btn-outline-secondary me-2 waves-effect waves-light btn-sm font-size-18"><i class="mdi mdi-eye"></i></a></td>
+                        <td>{{optional($index->orderStatus)->name ?? App\Models\Orderstatus::FindName($index->orderstatus)}}</td>
+                        <td class="export-ignore"><a href="{{url('/order')}}/{{$index->id}}/view" class="btn btn-outline-secondary me-2 waves-effect waves-light btn-sm font-size-18"><i class="mdi mdi-eye"></i></a></td>
                     </tr>
                     @endforeach
                 </tbody>
@@ -106,6 +106,23 @@ tr.selected {background-color:#adf7a9  ! important;}
 <script src="{{asset('/assets')}}/libs/datatables.net-responsive/js/dataTables.responsive.min.js"></script>
 <script src="{{asset('/assets')}}/libs/datatables.net-responsive-bs4/js/responsive.bootstrap4.min.js"></script>
 <script>
-    $(document).ready(function(){$("#datatable").DataTable(),$("#datatable-buttons").DataTable({lengthChange:!1,"iDisplayLength": 500,buttons:["copy","excel","pdf"]}).buttons().container().appendTo("#datatable-buttons_wrapper .col-md-6:eq(0)"),$(".dataTables_length select").addClass("form-select form-select-sm")});
+(function ($) {
+    var exportButtons = [
+        { extend: "copy", exportOptions: { columns: ":visible:not(.export-ignore)" } },
+        { extend: "excel", exportOptions: { columns: ":visible:not(.export-ignore)" } },
+        { extend: "pdf", exportOptions: { columns: ":visible:not(.export-ignore)" } }
+    ];
+    var defaultOptions = {
+        pageLength: 20,
+        lengthMenu: [[20, 50, 100, -1], [20, 50, 100, "All"]],
+        buttons: exportButtons,
+        responsive: true,
+        columnDefs: [{ targets: 'export-ignore', orderable: false, searchable: false }]
+    };
+    $(document).ready(function () {
+        $("#datatable-buttons").DataTable(defaultOptions).buttons().container().appendTo("#datatable-buttons_wrapper .col-md-6:eq(0)");
+        $(".dataTables_length select").addClass("form-select form-select-sm");
+    });
+})(jQuery);
 </script>
 @stop

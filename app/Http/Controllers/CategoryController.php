@@ -48,7 +48,9 @@ class CategoryController extends Controller
 
         $title = "Categories";
 
-        $indexes = Category::active()->get();
+        $indexes = Category::active()
+            ->orderByDesc('created_at')
+            ->get();
 
         return view('category.index',compact('title','indexes'));  
 
@@ -94,11 +96,11 @@ class CategoryController extends Controller
 
     {
         $this->validate($request, [
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:255|unique:categories,name,NULL,id,delete_status,0',
             'name_ar' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'description_ar' => 'nullable|string',
-            'imgfile' => 'required|image|mimes:jpeg,png,jpg,gif,svg',
+            'imgfile' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
         $imgurl    = '';
@@ -140,7 +142,7 @@ class CategoryController extends Controller
 
 
 
-        return redirect('/category');
+        return redirect('/category')->with('success', 'Category created successfully.');
 
     }
 
@@ -213,11 +215,11 @@ class CategoryController extends Controller
     {
         $this->validate($request, [
             'editid' => 'required|exists:categories,id',
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:255|unique:categories,name,' . $request->editid . ',id,delete_status,0',
             'name_ar' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'description_ar' => 'nullable|string',
-            'imgfile' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg',
+            'imgfile' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'imgfile_val' => 'nullable|string',
         ]);
 
@@ -254,7 +256,7 @@ class CategoryController extends Controller
 
         $data->save();
 
-        return redirect('/category');
+        return redirect('/category')->with('success', 'Category updated successfully.');
 
     }
 
@@ -278,11 +280,15 @@ class CategoryController extends Controller
 
         $data = Category::find($id);
 
-        $data->delete_status = 1;
+        if (!$data) {
+            return redirect('/category')->with('error', 'Category not found.');
+        }
 
+        $data->delete_status = 1;
+        $data->updated_by = Auth::user()->id;
         $data->save();
 
-        return redirect('/category');
+        return redirect('/category')->with('success', 'Category deleted successfully.');
 
     }
 

@@ -20,6 +20,99 @@
     }
 })();
 </script>
+<script>
+(function () {
+    var lastAppliedTerm = '';
+    function debounce(fn, delay) {
+        var timer = null;
+        return function () {
+            var context = this;
+            var args = arguments;
+            clearTimeout(timer);
+            timer = setTimeout(function () {
+                fn.apply(context, args);
+            }, delay);
+        };
+    }
+    function normalizeTerm(value) {
+        return (value || '').trim().toLowerCase();
+    }
+    function getSearchableTables() {
+        var explicit = document.querySelectorAll('[data-global-searchable="true"]');
+        if (explicit.length) {
+            return explicit;
+        }
+        return document.querySelectorAll('.table:not(.dataTable)');
+    }
+    function filterPlainTables(term) {
+        var tables = getSearchableTables();
+        if (!tables.length) {
+            return;
+        }
+        Array.prototype.forEach.call(tables, function (table) {
+            var bodies = table.tBodies || [];
+            Array.prototype.forEach.call(bodies, function (tbody) {
+                Array.prototype.forEach.call(tbody.rows, function (row) {
+                    if (!row.dataset.globalSearchLocked) {
+                        var shouldShow = !term || row.textContent.toLowerCase().indexOf(term) !== -1;
+                        row.style.display = shouldShow ? '' : 'none';
+                    }
+                });
+            });
+        });
+    }
+    function filterDataTables(term) {
+        if (!window.jQuery || !$.fn.dataTable) {
+            return false;
+        }
+        var tables = $.fn.dataTable.tables({ api: true });
+        if (!tables.length) {
+            return false;
+        }
+        tables.search(term).draw();
+        return true;
+    }
+    function applySearch(rawTerm) {
+        var term = normalizeTerm(rawTerm);
+        if (term === lastAppliedTerm) {
+            return;
+        }
+        lastAppliedTerm = term;
+        filterDataTables(term);
+        filterPlainTables(term);
+    }
+    function bindSearchForm(form) {
+        if (!form) {
+            return;
+        }
+        var input = form.querySelector('.global-search-input');
+        if (!input) {
+            return;
+        }
+        var trigger = debounce(function () {
+            applySearch(input.value);
+        }, 180);
+        input.addEventListener('input', trigger);
+        input.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') {
+                input.value = '';
+                applySearch('');
+            }
+        });
+        form.addEventListener('submit', function (event) {
+            event.preventDefault();
+            applySearch(input.value);
+        });
+    }
+    document.addEventListener('DOMContentLoaded', function () {
+        var forms = document.querySelectorAll('.global-search-form');
+        if (!forms.length) {
+            return;
+        }
+        Array.prototype.forEach.call(forms, bindSearchForm);
+    });
+})();
+</script>
 @yield('ScriptContent')
 @if ($errors->any())
 <script>

@@ -27,23 +27,22 @@ tr.selected {background-color:#adf7a9  ! important;}
     <div class="col-md-12">
     <div class="card">
         <div class="card-body">
-            <table id="datatable-buttons" class="table table-bordered dt-responsive nowrap w-100">
+            <table id="datatable-buttons" class="table table-bordered nowrap w-100 align-middle">
                 <thead>
                     <tr>
                         <th>#</th>
                         <th>Name</th>
                         <th>Email</th>
-                        <th>Action</th>
+                        <th class="export-ignore">Action</th>
                     </tr>
                 </thead>           
                 <tbody>
-                    <?php $x=1; ?>
                     @foreach ($indexes as $index)
                     <tr>
-                        <td>{{$x++}}</td>
-                        <td>{{$index->name}}</td>
-                        <td>{{$index->email}}</td>
-                        <td>
+                        <td>{{$index->id}}</td>
+                        <td data-export="{{$index->name}}">{{$index->name}}</td>
+                        <td data-export="{{$index->email}}">{{$index->email}}</td>
+                        <td class="export-ignore">
                             <a href="{{url('/user')}}/{{$index->id}}/edit" class="btn btn-outline-secondary me-2 waves-effect waves-light btn-sm font-size-18"><i class="mdi mdi-pencil"></i></a>
                             <form action="{{url('/user')}}/{{$index->id}}/delete" method="POST" class="d-inline" onsubmit="return confirm('Delete this user?');">
                                 @csrf
@@ -75,6 +74,42 @@ tr.selected {background-color:#adf7a9  ! important;}
 <script src="{{asset('/assets')}}/libs/datatables.net-responsive/js/dataTables.responsive.min.js"></script>
 <script src="{{asset('/assets')}}/libs/datatables.net-responsive-bs4/js/responsive.bootstrap4.min.js"></script>
 <script>
-    $(document).ready(function(){$("#datatable").DataTable(),$("#datatable-buttons").DataTable({lengthChange:!1,"iDisplayLength": 500,buttons:["copy","excel","pdf"]}).buttons().container().appendTo("#datatable-buttons_wrapper .col-md-6:eq(0)"),$(".dataTables_length select").addClass("form-select form-select-sm")});
+(function ($) {
+    $(document).ready(function () {
+        var exportOptions = {
+            columns: function (idx, data, node) {
+                return !$(node).hasClass('export-ignore');
+            },
+            format: {
+                body: function (data, row, column, node) {
+                    var text = $(node).attr('data-export') || $(data).text().trim();
+                    return text;
+                }
+            }
+        };
+        var exportButtons = [
+            { extend: "copy", exportOptions: exportOptions },
+            { extend: "excel", exportOptions: exportOptions },
+            { extend: "pdf", exportOptions: exportOptions,
+                customize: function (doc) {
+                    doc.defaultStyle.fontSize = 8;
+                    doc.styles.tableHeader.fontSize = 9;
+                    doc.pageMargins = [10, 10, 10, 10];
+                }
+            }
+        ];
+        var table = $("#datatable-buttons").DataTable({
+            pageLength: 10,
+            lengthMenu: [[10, 20, 50, 100, -1], [10, 20, 50, 100, "All"]],
+            buttons: exportButtons,
+            responsive: false,
+            columnDefs: [
+                { targets: 'export-ignore', orderable: false, searchable: false, exportable: false }
+            ]
+        });
+        table.buttons().container().appendTo("#datatable-buttons_wrapper .col-md-6:eq(0)");
+        $(".dataTables_length select").addClass("form-select form-select-sm");
+    });
+})(jQuery);
 </script>
 @stop

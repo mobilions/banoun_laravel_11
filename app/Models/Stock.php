@@ -5,7 +5,6 @@ namespace App\Models;
 
 use App\Models\Cart;
 use App\Models\Product;
-use App\Models\Variant;
 use App\Models\Productvariant;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
@@ -47,7 +46,7 @@ class Stock extends Model
     }
     public function variant()
     {
-        return $this->belongsTo(Variant::class);
+        return $this->belongsTo(Productvariant::class, 'variant_id');
     }
     public function cart()
     {

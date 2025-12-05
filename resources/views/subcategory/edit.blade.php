@@ -61,9 +61,9 @@
 
                         <div>
 
-                            <label>Category</label>
+                            <label>Category <span class="text-danger">*</span></label>
 
-                            <select class="form-control" name="category_id" id="category_id" required="">
+                            <select class="form-control @error('category_id') is-invalid @enderror" name="category_id" id="category_id" required>
 
                                 <option value="">Select</option>
 
@@ -74,6 +74,7 @@
                                  @endforeach
 
                             </select>
+                            @error('category_id') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
 
                         </div>
 
@@ -85,7 +86,8 @@
 
                             <label>Name <span class="text-danger">*</span></label>
 
-                            <input class="form-control" value="{{$log->name}}" type="text" name="name" id="name" required="">
+                            <input class="form-control @error('name') is-invalid @enderror" value="{{ old('name', $log->name) }}" type="text" name="name" id="name" required>
+                            @error('name') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
 
                         </div>
 
@@ -97,7 +99,8 @@
 
                             <label>Name in arabic</label>
 
-                            <input class="form-control" value="{{$log->name_ar}}" type="text" name="name_ar" id="name_ar">
+                            <input class="form-control @error('name_ar') is-invalid @enderror" value="{{ old('name_ar', $log->name_ar) }}" type="text" name="name_ar" id="name_ar">
+                            @error('name_ar') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
 
                         </div>
 
@@ -109,7 +112,8 @@
 
                             <label>Description</label>
 
-                            <textarea class="form-control" type="text" name="description" id="description">{{$log->description}}</textarea>
+                            <textarea class="form-control @error('description') is-invalid @enderror" type="text" name="description" id="description">{{ old('description', $log->description) }}</textarea>
+                            @error('description') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
 
                         </div>
 
@@ -121,7 +125,8 @@
 
                             <label>Description in arabic</label>
 
-                            <textarea class="form-control" type="text" name="description_ar" id="description_ar">{{$log->description_ar}}</textarea>
+                            <textarea class="form-control @error('description_ar') is-invalid @enderror" type="text" name="description_ar" id="description_ar">{{ old('description_ar', $log->description_ar) }}</textarea>
+                            @error('description_ar') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
 
                         </div>
 
@@ -131,17 +136,16 @@
 
                         <div>
 
-                            <label for="formFileSm" class="form-label">Image file </label>
+                            <label for="formFileSm" class="form-label">Image file</label>
 
-                            <input class="form-control" name="imgfile" id="imgfile" type="file">
+                            <input class="form-control @error('imgfile') is-invalid @enderror" name="imgfile" id="imgfile" type="file">
 
                             <input class="form-control" value="{{$log->imageurl}}"  name="imgfile_val" id="imgfile_val" type="hidden">
 
                             <input class="form-control" value="{{$log->id}}"  name="editid" id="editid" type="hidden">
+                            @error('imgfile') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
 
                         </div>
-
-                    @error('imgfile') <span class="font-size-12 ms-1 text-danger">{{ $message }}</strong> </span> @enderror
 
                     </div>
 

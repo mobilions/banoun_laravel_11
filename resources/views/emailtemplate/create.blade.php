@@ -28,14 +28,23 @@
                 <div class="row">
                     <div class="col-lg-6 mb-3">
                         <div>
-                            <label>Subjetc <span class="text-danger">*</span></label>
-                            <input class="form-control" type="text" name="name" id="name" required="">
+                            <label>Subject <span class="text-danger">*</span></label>
+                            <input class="form-control @error('name') is-invalid @enderror" type="text" name="name" id="name" value="{{ old('name') }}" required="">
+                            @error('name') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
                         </div>
                     </div>
                     <div class="col-lg-12 mb-3">
                         <div>
-                            <label>message</label>
-                            <textarea class="form-control" type="text" name="message" id="message"></textarea>
+                            <label>Message</label>
+                            <textarea class="form-control @error('message') is-invalid @enderror" type="text" name="message" id="message">{{ old('message') }}</textarea>
+                            @error('message') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
+                        </div>
+                    </div>
+                    <div class="col-lg-12 mb-3">
+                        <div>
+                            <label>Message (Arabic)</label>
+                            <textarea class="form-control @error('message_ar') is-invalid @enderror" type="text" name="message_ar" id="message_ar">{{ old('message_ar') }}</textarea>
+                            @error('message_ar') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
                         </div>
                     </div>
                     <div class="col-lg-6 mt-3 mb-3">

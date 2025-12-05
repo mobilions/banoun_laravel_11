@@ -16,6 +16,7 @@ use App\Enums\StockProcess;
 use Illuminate\Http\Request;
 
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 use Auth;
 
@@ -51,9 +52,12 @@ class StockController extends Controller
 
         $title = "Stock";
 
-        $indexes = Stock::where('variant_id',$variant_id)->get();
+        $indexes = Stock::where('variant_id',$variant_id)->orderByDesc('created_at')->get();
 
-        $addstock = Stock::where('variant_id',$variant_id)->where('process',StockProcess::ADD)->get();
+        $addstock = Stock::where('variant_id',$variant_id)
+            ->where('process',StockProcess::ADD)
+            ->orderByDesc('created_at')
+            ->get();
 
         return view('stock.index',compact('title','indexes','variant_id','product_id','addstock'));  
 
@@ -69,6 +73,14 @@ class StockController extends Controller
             'variant_id' => 'required|exists:productvariants,id',
             'quantity' => 'required|integer|min:1',
         ]);
+
+        $variant = Productvariant::where('id', $request->variant_id)
+            ->where('product_id', $request->product_id)
+            ->first();
+
+        if (!$variant) {
+            return redirect()->back()->with('error', 'Variant does not belong to the selected product.');
+        }
 
         Stock::updateStock($request->product_id,$request->variant_id,$request->quantity,StockProcess::ADD);
 
@@ -94,15 +106,26 @@ class StockController extends Controller
             return redirect()->back()->with('error', 'Stock record not found.');
         }
 
-        $data->quantity = $request->quantity;
+        if ((int) $data->status === 1) {
+            return redirect()->back()->with('error', 'Approved stock entries cannot be modified.');
+        }
 
-        $data->updated_by=Auth::user()->id;
+        DB::transaction(function () use ($data, $request) {
+            $data->quantity = $request->quantity;
+            $data->updated_by=Auth::user()->id;
+            $data->save();
 
-        $data->save();
+            $variant = Productvariant::lockForUpdate()->find($data->variant_id);
+            if ($variant) {
+                $variant->available_quantity = Stock::stockVariant($data->variant_id);
+                $variant->updated_by = Auth::user()->id;
+                $variant->save();
+            }
+        });
 
 
 
-        return redirect()->back();
+        return redirect()->back()->with('success','Stock entry updated.');
 
     }
 
@@ -119,6 +142,7 @@ class StockController extends Controller
         }
 
         $data->status = 1;
+        $data->updated_by = Auth::user()->id;
 
         $data->save();
 
@@ -143,6 +167,7 @@ class StockController extends Controller
         }
 
         $data->status = 1;
+        $data->updated_by = Auth::user()->id;
 
         $data->save();
 
@@ -158,7 +183,17 @@ class StockController extends Controller
 
         $title = "Stock List";
 
-        $indexes = Stock::where('process',StockProcess::ADD)->where('status',0)->get();
+        $indexes = Stock::with([
+                'product:id,name,category_id,subcategory_id,brand_id',
+                'product.category:id,name',
+                'product.subcategory:id,name',
+                'product.brand:id,name',
+                'variant:id,name'
+            ])
+            ->where('process',StockProcess::ADD)
+            ->where('status',0)
+            ->orderByDesc('created_at')
+            ->get();
 
         return view('stock.stocklist',compact('title','indexes'));
 
@@ -180,7 +215,28 @@ class StockController extends Controller
 
 
 
-    
+    public function destroy($id)
+    {
+        $stock = Stock::where('id', $id)->where('status', 0)->first();
+
+        if (!$stock) {
+            return redirect()->back()->with('error', 'Only pending stock entries can be removed.');
+        }
+
+        DB::transaction(function () use ($stock) {
+            $variantId = $stock->variant_id;
+            $stock->delete();
+
+            $variant = Productvariant::lockForUpdate()->find($variantId);
+            if ($variant) {
+                $variant->available_quantity = Stock::stockVariant($variantId);
+                $variant->updated_by = Auth::user()->id;
+                $variant->save();
+            }
+        });
+
+        return redirect()->back()->with('success', 'Stock entry deleted successfully.');
+    }
 
 }
 

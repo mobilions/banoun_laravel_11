@@ -44,6 +44,16 @@
 
         <h4 class="text-secondary"><span class="">Create</span> {{$title}}</h4>
 
+        @if ($errors->any())
+            <div class="alert alert-danger">
+                <ul class="mb-0">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         <div class="row">
 
             <div class="col-sm-12 pt-3">
@@ -58,21 +68,11 @@
 
                         <div>
 
-                            <label>Name <span class="text-danger">*</span></label>
+                            <label for="name">Name <span class="text-danger">*</span></label>
 
-                            <input class="form-control" type="text" name="name" id="name" required="">
+                            <input class="form-control @error('name') is-invalid @enderror" type="text" name="name" id="name" value="{{ old('name') }}" required>
 
-                        </div>
-
-                    </div>
-
-                    <div class="col-lg-6 mb-3">
-
-                        <div>
-
-                            <label>Name in arabic</label>
-
-                            <input class="form-control" type="text" name="name_ar" id="name_ar">
+                            @error('name') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
 
                         </div>
 
@@ -82,21 +82,11 @@
 
                         <div>
 
-                            <label>Description</label>
+                            <label for="name_ar">Name in arabic</label>
 
-                            <textarea class="form-control" type="text" name="description" id="description"></textarea>
+                            <input class="form-control @error('name_ar') is-invalid @enderror" type="text" name="name_ar" id="name_ar" value="{{ old('name_ar') }}">
 
-                        </div>
-
-                    </div>
-
-                    <div class="col-lg-6 mb-3">
-
-                        <div>
-
-                            <label>Description in arabic</label>
-
-                            <textarea class="form-control" type="text" name="description_ar" id="description_ar"></textarea>
+                            @error('name_ar') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
 
                         </div>
 
@@ -106,13 +96,41 @@
 
                         <div>
 
-                            <label for="formFileSm" class="form-label">Image file <small class="text-muted ms-1">(File size should be 80x80)</small></label>
+                            <label for="description">Description</label>
 
-                            <input class="form-control" name="imgfile" id="imgfile" type="file" required>
+                            <textarea class="form-control @error('description') is-invalid @enderror" name="description" id="description">{{ old('description') }}</textarea>
+
+                            @error('description') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
 
                         </div>
 
-                    @error('imgfile') <span class="font-size-12 ms-1 text-danger">{{ $message }}</strong> </span> @enderror
+                    </div>
+
+                    <div class="col-lg-6 mb-3">
+
+                        <div>
+
+                            <label for="description_ar">Description in arabic</label>
+
+                            <textarea class="form-control @error('description_ar') is-invalid @enderror" name="description_ar" id="description_ar">{{ old('description_ar') }}</textarea>
+
+                            @error('description_ar') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-lg-6 mb-3">
+
+                        <div>
+
+                            <label for="imgfile" class="form-label">Image file <small class="text-muted ms-1">(File size should be 80x80)</small></label>
+
+                            <input class="form-control @error('imgfile') is-invalid @enderror" name="imgfile" id="imgfile" type="file" required>
+
+                        </div>
+
+                    @error('imgfile') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
 
                     </div>                    
 

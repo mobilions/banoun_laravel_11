@@ -131,25 +131,32 @@ class FaqController extends Controller
             'description' => 'nullable|string',
             'description_ar' => 'nullable|string',
             'type' => 'required|string|in:about,faq,terms',
+        ], [
+            'name.required' => 'Name is required.',
+            'name.max' => 'Name must not exceed 255 characters.',
+            'name_ar.max' => 'Arabic name must not exceed 255 characters.',
+            'type.required' => 'Type is required.',
+            'type.in' => 'Invalid type selected.',
         ]);
 
-        $data = new Faq; 
+        try {
+            $data = new Faq; 
 
-        $data->title = $request->name;
+            $data->title = $request->name;
+            $data->content = $request->description;
+            $data->title_ar = $request->name_ar;
+            $data->content_ar = $request->description_ar;
+            $data->type = $request->type;
+            $data->delete_status = '0';
+            $data->created_by = Auth::user()->id;
 
-        $data->content = $request->description;
+            $data->save();
 
-        $data->title_ar = $request->name_ar;
-
-        $data->content_ar = $request->description_ar;
-
-        $data->type = $request->type;
-
-        $data->created_by=Auth::user()->id;
-
-        $data->save();
-
-        return redirect('/faq/'.$request->type);
+            return redirect('/faq/'.$request->type)->with('success', 'Record created successfully.');
+        } catch (\Exception $e) {
+            \Log::error('FAQ creation failed: ' . $e->getMessage());
+            return redirect()->back()->withInput()->with('error', 'Failed to create record. Please try again.');
+        }
 
     }
 
@@ -238,11 +245,6 @@ class FaqController extends Controller
     public function update(Request $request, Faq $faq)
 
     {
-
-        
-
-
-
         $this->validate($request, [
             'editid' => 'required|exists:faqs,id',
             'name' => 'required|string|max:255',
@@ -250,27 +252,36 @@ class FaqController extends Controller
             'description' => 'nullable|string',
             'description_ar' => 'nullable|string',
             'type' => 'required|string|in:about,faq,terms',
+        ], [
+            'editid.required' => 'Record ID is required.',
+            'editid.exists' => 'Selected record does not exist.',
+            'name.required' => 'Name is required.',
+            'name.max' => 'Name must not exceed 255 characters.',
+            'name_ar.max' => 'Arabic name must not exceed 255 characters.',
+            'type.required' => 'Type is required.',
+            'type.in' => 'Invalid type selected.',
         ]);
 
         $data = Faq::find($request->editid);
 
         if (empty($data)) { 
-            return redirect('/faq/'.$request->type)->with('error', 'FAQ not found.');
+            return redirect('/faq/'.$request->type)->with('error', 'Record not found.');
         }
 
-        $data->title = $request->name;
+        try {
+            $data->title = $request->name;
+            $data->content = $request->description;
+            $data->title_ar = $request->name_ar;
+            $data->content_ar = $request->description_ar;
+            $data->updated_by = Auth::user()->id;
 
-        $data->content = $request->description;
+            $data->save();
 
-        $data->title_ar = $request->name_ar;
-
-        $data->content_ar = $request->description_ar;
-
-        $data->updated_by=Auth::user()->id;
-
-        $data->save();
-
-        return redirect('/faq/'.$request->type);
+            return redirect('/faq/'.$request->type)->with('success', 'Record updated successfully.');
+        } catch (\Exception $e) {
+            \Log::error('FAQ update failed: ' . $e->getMessage());
+            return redirect()->back()->withInput()->with('error', 'Failed to update record. Please try again.');
+        }
 
     }
 
@@ -291,14 +302,21 @@ class FaqController extends Controller
     public function destroy(Faq $faq,$id,$val)
 
     {
-
         $data = Faq::find($id);
 
-        $data->delete_status = 1;
+        if (empty($data)) {
+            return redirect('/faq/'.$val)->with('error', 'Record not found.');
+        }
 
-        $data->save();
+        try {
+            $data->delete_status = 1;
+            $data->save();
 
-        return redirect('/faq/'.$val);
+            return redirect('/faq/'.$val)->with('success', 'Record deleted successfully.');
+        } catch (\Exception $e) {
+            \Log::error('FAQ deletion failed: ' . $e->getMessage());
+            return redirect('/faq/'.$val)->with('error', 'Failed to delete record. Please try again.');
+        }
 
     }
 

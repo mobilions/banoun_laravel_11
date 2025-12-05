@@ -5,6 +5,9 @@ namespace App\Models;
 
 use App\Models\Product;
 use App\Models\Variantsub;
+use App\Models\Stock;
+use App\Models\Cart;
+use App\Models\ProductImage;
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\SoftDeleteByStatus;
 
@@ -40,13 +43,42 @@ class Productvariant extends Model
     {
         return $this->belongsTo(Product::class);
     }
+    
+    public function sizeVariant()
+    {
+        return $this->belongsTo(Variantsub::class, 'size_id');
+    }
+    
+    public function colorVariant()
+    {
+        return $this->belongsTo(Variantsub::class, 'color_id');
+    }
+    
+    // Backward compatibility aliases
     public function size()
     {
-        return $this->belongsTo(Size::class);
+        return $this->sizeVariant();
     }
+    
     public function color()
     {
-        return $this->belongsTo(Color::class);
+        return $this->colorVariant();
+    }
+    
+    // Has Many Relationships
+    public function stock()
+    {
+        return $this->hasMany(Stock::class, 'variant_id');
+    }
+    
+    public function carts()
+    {
+        return $this->hasMany(Cart::class, 'variant_id');
+    }
+    
+    public function images()
+    {
+        return $this->hasMany(ProductImage::class, 'variant_id');
     }
 
     public static function FindName($id){

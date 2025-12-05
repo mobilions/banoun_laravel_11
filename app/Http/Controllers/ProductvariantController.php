@@ -65,14 +65,24 @@ class ProductvariantController extends Controller
     public function create($id)
 
     {   
-
         $title = "Product Variant";
 
-        $size = Variantsub::active()->where('variant_id','1')->get();
+        // Dynamic variant lookup instead of hardcoded IDs
+        $sizeVariant = \App\Models\Variant::where('name', 'Size')->active()->first();
+        $colorVariant = \App\Models\Variant::where('name', 'Color')->active()->first();
+        
+        $size = collect();
+        $color = collect();
+        
+        if ($sizeVariant) {
+            $size = Variantsub::active()->where('variant_id', $sizeVariant->id)->get();
+        }
+        
+        if ($colorVariant) {
+            $color = Variantsub::active()->where('variant_id', $colorVariant->id)->get();
+        }
 
-        $color = Variantsub::active()->where('variant_id','2')->get();
-
-        return view('productvariant.create',compact('title','id','size','color'));
+        return view('productvariant.create', compact('title', 'id', 'size', 'color'));
 
     }
 
@@ -93,14 +103,41 @@ class ProductvariantController extends Controller
     public function store(Request $request)
 
     {
+        // Convert "0" to null for color_id and size_id to avoid validation errors
+        if($request->color_id == '0' || $request->color_id == '') {
+            $request->merge(['color_id' => null]);
+        }
+        if($request->size_id == '0' || $request->size_id == '') {
+            $request->merge(['size_id' => null]);
+        }
+
         $this->validate($request, [
             'product_id' => 'required|exists:products,id',
             'color_id' => 'nullable|exists:variants_sub,id',
-            'size_id' => 'nullable|exists:variants_sub,id',
+            'size_id' => 'required|exists:variants_sub,id',
             'price' => 'required|numeric|min:0',
-            'imgfile' => 'required|image|mimes:jpeg,png,jpg,gif,svg',
-            'imgfile2' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg',
-            'imgfile3' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg',
+            'imgfile' => 'required|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
+            'imgfile2' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
+            'imgfile3' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
+        ], [
+            'product_id.required' => 'Product is required.',
+            'product_id.exists' => 'Selected product does not exist.',
+            'size_id.required' => 'Size is required. Please select a size.',
+            'size_id.exists' => 'Selected size is invalid.',
+            'color_id.exists' => 'Selected color is invalid.',
+            'price.required' => 'Price is required.',
+            'price.numeric' => 'Price must be a valid number.',
+            'price.min' => 'Price must be at least 0.',
+            'imgfile.required' => 'Image file is required. Please upload an image.',
+            'imgfile.image' => 'The file must be an image.',
+            'imgfile.mimes' => 'Image must be a file of type: jpeg, png, jpg, gif, svg, webp.',
+            'imgfile.max' => 'Image size must not exceed 2MB.',
+            'imgfile2.image' => 'Image file 2 must be an image.',
+            'imgfile2.mimes' => 'Image file 2 must be a file of type: jpeg, png, jpg, gif, svg, webp.',
+            'imgfile2.max' => 'Image file 2 size must not exceed 2MB.',
+            'imgfile3.image' => 'Image file 3 must be an image.',
+            'imgfile3.mimes' => 'Image file 3 must be a file of type: jpeg, png, jpg, gif, svg, webp.',
+            'imgfile3.max' => 'Image file 3 size must not exceed 2MB.',
         ]);
 
 
@@ -181,7 +218,7 @@ class ProductvariantController extends Controller
 
         $data->save();
 
-        return redirect('/productvariants/'.$request->product_id);
+        return redirect('/productvariants/'.$request->product_id)->with('success', 'Product variant created successfully.');
 
     }
 
@@ -223,15 +260,33 @@ class ProductvariantController extends Controller
 
     public function edit(Productvariant $Productvariant,$id)
 
-    {   $title = "Product Variant";
+    {   
+        $title = "Product Variant";
 
-        $log = Productvariant::where('id',$id)->first();
+        $log = Productvariant::with(['product', 'sizeVariant', 'colorVariant'])
+            ->where('id',$id)
+            ->first();
 
-        $size = Variantsub::active()->where('variant_id','1')->get();
+        if (empty($log)) {
+            return redirect()->back()->with('error', 'Product variant not found.');
+        }
 
-        $color = Variantsub::active()->where('variant_id','2')->get();
+        // Dynamic variant lookup instead of hardcoded IDs
+        $sizeVariant = \App\Models\Variant::where('name', 'Size')->active()->first();
+        $colorVariant = \App\Models\Variant::where('name', 'Color')->active()->first();
+        
+        $size = collect();
+        $color = collect();
+        
+        if ($sizeVariant) {
+            $size = Variantsub::active()->where('variant_id', $sizeVariant->id)->get();
+        }
+        
+        if ($colorVariant) {
+            $color = Variantsub::active()->where('variant_id', $colorVariant->id)->get();
+        }
 
-        return view('productvariant.edit',compact('title','log','size','color'));
+        return view('productvariant.edit', compact('title', 'log', 'size', 'color'));
 
     }
 
@@ -254,18 +309,46 @@ class ProductvariantController extends Controller
     public function update(Request $request, Productvariant $Productvariant)
 
     {
+        // Convert "0" to null for color_id and size_id to avoid validation errors
+        if($request->color_id == '0' || $request->color_id == '') {
+            $request->merge(['color_id' => null]);
+        }
+        if($request->size_id == '0' || $request->size_id == '') {
+            $request->merge(['size_id' => null]);
+        }
+
         $this->validate($request, [
             'editid' => 'required|exists:productvariants,id',
             'product_id' => 'required|exists:products,id',
             'color_id' => 'nullable|exists:variants_sub,id',
-            'size_id' => 'nullable|exists:variants_sub,id',
+            'size_id' => 'required|exists:variants_sub,id',
             'price' => 'required|numeric|min:0',
-            'imgfile' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg',
-            'imgfile2' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg',
-            'imgfile3' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg',
+            'imgfile' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
+            'imgfile2' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
+            'imgfile3' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
             'imgfile_val' => 'nullable|string',
             'imgfile_val2' => 'nullable|string',
             'imgfile_val3' => 'nullable|string',
+        ], [
+            'editid.required' => 'Variant ID is required.',
+            'editid.exists' => 'Selected variant does not exist.',
+            'product_id.required' => 'Product is required.',
+            'product_id.exists' => 'Selected product does not exist.',
+            'size_id.required' => 'Size is required. Please select a size.',
+            'size_id.exists' => 'Selected size is invalid.',
+            'color_id.exists' => 'Selected color is invalid.',
+            'price.required' => 'Price is required.',
+            'price.numeric' => 'Price must be a valid number.',
+            'price.min' => 'Price must be at least 0.',
+            'imgfile.image' => 'The file must be an image.',
+            'imgfile.mimes' => 'Image must be a file of type: jpeg, png, jpg, gif, svg, webp.',
+            'imgfile.max' => 'Image size must not exceed 2MB.',
+            'imgfile2.image' => 'Image file 2 must be an image.',
+            'imgfile2.mimes' => 'Image file 2 must be a file of type: jpeg, png, jpg, gif, svg, webp.',
+            'imgfile2.max' => 'Image file 2 size must not exceed 2MB.',
+            'imgfile3.image' => 'Image file 3 must be an image.',
+            'imgfile3.mimes' => 'Image file 3 must be a file of type: jpeg, png, jpg, gif, svg, webp.',
+            'imgfile3.max' => 'Image file 3 size must not exceed 2MB.',
         ]);
 
 
@@ -372,7 +455,7 @@ class ProductvariantController extends Controller
 
         $this->updatecartprices($request->product_id,$request->editid,$request->price);
         
-         return redirect('/productvariants/'.$request->product_id);
+         return redirect('/productvariants/'.$request->product_id)->with('success', 'Product variant updated successfully.');
 
     }
 
@@ -395,11 +478,15 @@ class ProductvariantController extends Controller
 
         $data = Productvariant::find($id);
 
+        if (empty($data)) {
+            return redirect('/productvariants/'.$product_id)->with('error', 'Product variant not found.');
+        }
+
         $data->delete_status = 1;
 
         $data->save();
 
-        return redirect('/productvariants/'.$product_id);
+        return redirect('/productvariants/'.$product_id)->with('success', 'Product variant deleted successfully.');
 
     }
 

@@ -49,11 +49,11 @@ class VariantsubController extends Controller
         $title = "variant";
 
         $indexes = Variantsub::join('variants', 'variants_sub.variant_id', '=', 'variants.id')
+            ->where('variants.delete_status', 0)
+            ->where('variants_sub.delete_status', 0)
             ->addSelect('variants.name as variant','variants.name_ar as variant_ar','variants_sub.*')
-            ->active()
+            ->orderByDesc('variants_sub.created_at')
             ->get();
-
-        
 
         return view('variantsub.index',compact('title','indexes'));  
 
@@ -108,19 +108,22 @@ class VariantsubController extends Controller
             'color_val' => 'nullable|string|max:50',
         ]);
 
-        if($request->variant_id=='1'){
-
-            $color_val=$request->age;
-
-        }
-
-        else{
+        // Get variant to check its name
+        $variant = Variant::find($request->variant_id);
+        $variantName = $variant ? strtolower($variant->name) : '';
+        
+        // If variant is "Color", use color_val, otherwise use age field
+        if($variantName === 'color'){
 
             $color_val=$request->color_val;
 
         }
 
-        
+        else{
+
+            $color_val=$request->age ?: '';
+
+        }
 
         $data = new Variantsub; 
 
@@ -136,7 +139,7 @@ class VariantsubController extends Controller
 
         $data->save();
 
-        return redirect('/variantsub');
+        return redirect('/variantsub')->with('success', 'Variant value created successfully.');
 
     }
 
@@ -218,19 +221,22 @@ class VariantsubController extends Controller
             'color_val' => 'nullable|string|max:50',
         ]);
 
-        if($request->variant_id=='1'){
-
-            $color_val=$request->age;
-
-        }
-
-        else{
+        // Get variant to check its name
+        $variant = Variant::find($request->variant_id);
+        $variantName = $variant ? strtolower($variant->name) : '';
+        
+        // If variant is "Color", use color_val, otherwise use age field
+        if($variantName === 'color'){
 
             $color_val=$request->color_val;
 
         }
 
-        
+        else{
+
+            $color_val=$request->age ?: '';
+
+        }
 
         $data = Variantsub::find($request->editid);
 
@@ -250,7 +256,7 @@ class VariantsubController extends Controller
 
         $data->save();
 
-        return redirect('/variantsub');
+        return redirect('/variantsub')->with('success', 'Variant value updated successfully.');
 
     }
 
@@ -274,12 +280,33 @@ class VariantsubController extends Controller
 
         $data = Variantsub::find($id);
 
+        if (empty($data)) {
+            return redirect('/variantsub')->with('error', 'Variant value not found.');
+        }
+
         $data->delete_status = 1;
 
         $data->save();
 
-        return redirect('/variantsub');
+        return redirect('/variantsub')->with('success', 'Variant value deleted successfully.');
 
+    }
+
+    public function addVariantValue($variant_id='', $name='', $name_ar='', $color_val='')
+    {
+        if(empty($variant_id) || empty($name)) {
+            return response()->json(['error' => 'Variant ID and Name are required.'], 400);
+        }
+
+        $data = new Variantsub; 
+        $data->name = $name;
+        $data->variant_id = $variant_id;
+        $data->name_ar = $name_ar ?: $name;
+        $data->color_val = $color_val ?: '';
+        $data->created_by = Auth::user()->id;
+        $data->save();
+
+        return response()->json(['id' => $data->id, 'name' => $data->name, 'name_ar' => $data->name_ar]);
     }
 
 }

@@ -57,57 +57,39 @@ tr.selected {background-color:#adf7a9  ! important;}
     <div class="card">
 
         <div class="card-body">
-            <div class="table-responsive">
-            <table id="datatable-buttons" class="table table-bordered w-100">
-
+            <table id="datatable-buttons" class="table table-bordered nowrap w-100 align-middle">
                 <thead>
-
                     <tr>
-
                         <th>#</th>
-
                         <th>Name</th>
-
                         <th>Phone</th>
-
                         <th>Email</th>
-
                         <th>Credit Balance</th>
-
-                        <th>Action</th>
-
+                        <th class="export-ignore">Action</th>
                     </tr>
-
                 </thead>           
-
                 <tbody>
-
                     @foreach ($indexes as $index)
-
                     <tr>
-
                         <td>{{$index->id}}</td>
-
-                        <td>{{$index->name}}</td>
-
-                        <td>{{$index->phone}}</td>
-
-                        <td>{{$index->email}}</td>
-
-                        <td>{{$index->credit_balance}}</td>
-
-                        <td><a href="{{url('/customer')}}/{{$index->id}}/view" class="btn btn-outline-secondary me-2 waves-effect waves-light btn-sm font-size-18"><i class="mdi mdi-eye"></i></a>
-                        <a href="{{url('/customer')}}/{{$index->id}}/edit" class="btn btn-outline-warning me-2 waves-effect waves-light btn-sm font-size-18"><i class="mdi mdi-pencil"></i></a><a href="{{url('/customer')}}/{{$index->id}}/delete" class="btn btn-outline-danger waves-effect waves-light btn-sm font-size-18"><i class="mdi mdi-trash-can-outline"></i></a>
+                        <td data-export="{{$index->name}}">{{$index->name}}</td>
+                        <td data-export="{{$index->phone ?? '—'}}">{{$index->phone ?? '—'}}</td>
+                        <td data-export="{{$index->email}}">{{$index->email}}</td>
+                        <td data-export="{{$index->credit_balance ?? 0}}">{{number_format($index->credit_balance ?? 0, 2)}}</td>
+                        <td class="export-ignore">
+                            <a href="{{url('/customer')}}/{{$index->id}}/view" class="btn btn-outline-info me-2 waves-effect waves-light btn-sm font-size-18" title="View Details"><i class="mdi mdi-eye"></i></a>
+                            <a href="{{url('/customer')}}/{{$index->id}}/edit" class="btn btn-outline-secondary me-2 waves-effect waves-light btn-sm font-size-18" title="Edit"><i class="mdi mdi-pencil"></i></a>
+                            <form action="{{url('/customer')}}/{{$index->id}}/delete" method="POST" class="d-inline" onsubmit="return confirm('Delete this customer?');">
+                                @csrf
+                                <button type="submit" class="btn btn-outline-danger waves-effect waves-light btn-sm font-size-18" title="Delete">
+                                    <i class="mdi mdi-trash-can-outline"></i>
+                                </button>
+                            </form>
                         </td>
-
                     </tr>
-
                     @endforeach
-
                 </tbody>
-
             </table>
-        </div>
         </div>
 
     </div>
@@ -145,9 +127,43 @@ tr.selected {background-color:#adf7a9  ! important;}
 <script src="{{asset('/assets')}}/libs/datatables.net-responsive-bs4/js/responsive.bootstrap4.min.js"></script>
 
 <script>
-
-$(document).ready(function(){$("#datatable").DataTable(),$("#datatable-buttons").DataTable({lengthChange:!1,"iDisplayLength": 500,buttons:["copy","excel","pdf"]}).buttons().container().appendTo("#datatable-buttons_wrapper .col-md-6:eq(0)"),$(".dataTables_length select").addClass("form-select form-select-sm")});
-
+(function ($) {
+    $(document).ready(function () {
+        var exportOptions = {
+            columns: function (idx, data, node) {
+                return !$(node).hasClass('export-ignore');
+            },
+            format: {
+                body: function (data, row, column, node) {
+                    var text = $(node).attr('data-export') || $(data).text().trim();
+                    return text;
+                }
+            }
+        };
+        var exportButtons = [
+            { extend: "copy", exportOptions: exportOptions },
+            { extend: "excel", exportOptions: exportOptions },
+            { extend: "pdf", exportOptions: exportOptions,
+                customize: function (doc) {
+                    doc.defaultStyle.fontSize = 8;
+                    doc.styles.tableHeader.fontSize = 9;
+                    doc.pageMargins = [10, 10, 10, 10];
+                }
+            }
+        ];
+        var table = $("#datatable-buttons").DataTable({
+            pageLength: 10,
+            lengthMenu: [[10, 20, 50, 100, -1], [10, 20, 50, 100, "All"]],
+            buttons: exportButtons,
+            responsive: false,
+            columnDefs: [
+                { targets: 'export-ignore', orderable: false, searchable: false, exportable: false }
+            ]
+        });
+        table.buttons().container().appendTo("#datatable-buttons_wrapper .col-md-6:eq(0)");
+        $(".dataTables_length select").addClass("form-select form-select-sm");
+    });
+})(jQuery);
 </script>
 
 @stop

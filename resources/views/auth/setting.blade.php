@@ -208,7 +208,14 @@
 
                     <div class="col-md-8">
 
+                        @if($setting->imageurl)
+                            <div class="mb-2">
+                                <img src="{{$setting->imageurl}}" alt="Current Logo" style="max-width: 200px; max-height: 100px;" class="img-thumbnail">
+                            </div>
+                        @endif
                         <input class="form-control" name="imgfile" id="imgfile" type="file">
+                        <input type="hidden" name="imgfile_val" value="{{$setting->imageurl ?? ''}}">
+                        <small class="form-text text-muted">Leave empty to keep current logo</small>
 
                     </div>
 
@@ -306,6 +313,99 @@
 
 </div>
 
+<!-- Mail Configuration Section -->
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Mail Configuration</h5>
+            </div>
+            <div class="card-body">
+                <form action="{{url('/settings/store')}}" method="post">
+                    {{csrf_field()}}
+                    <input type="hidden" name="update_mail_config" value="1">
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="MAIL_MAILER" class="form-label">Mail Driver <span class="text-danger">*</span></label>
+                                <select class="form-control mail-config-field" name="MAIL_MAILER" id="MAIL_MAILER" readonly>
+                                    <option value="smtp" {{ env('MAIL_MAILER', 'smtp') == 'smtp' ? 'selected' : '' }}>SMTP</option>
+                                    <option value="sendmail" {{ env('MAIL_MAILER') == 'sendmail' ? 'selected' : '' }}>Sendmail</option>
+                                    <option value="mailgun" {{ env('MAIL_MAILER') == 'mailgun' ? 'selected' : '' }}>Mailgun</option>
+                                    <option value="ses" {{ env('MAIL_MAILER') == 'ses' ? 'selected' : '' }}>Amazon SES</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="MAIL_HOST" class="form-label">Mail Host <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control mail-config-field" name="MAIL_HOST" id="MAIL_HOST" value="{{ env('MAIL_HOST', '') }}" placeholder="smtp.mailtrap.io" readonly>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="MAIL_PORT" class="form-label">Mail Port <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control mail-config-field" name="MAIL_PORT" id="MAIL_PORT" value="{{ env('MAIL_PORT', '587') }}" placeholder="587" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="MAIL_ENCRYPTION" class="form-label">Encryption <span class="text-danger">*</span></label>
+                                <select class="form-control mail-config-field" name="MAIL_ENCRYPTION" id="MAIL_ENCRYPTION" readonly>
+                                    <option value="tls" {{ env('MAIL_ENCRYPTION', 'tls') == 'tls' ? 'selected' : '' }}>TLS</option>
+                                    <option value="ssl" {{ env('MAIL_ENCRYPTION') == 'ssl' ? 'selected' : '' }}>SSL</option>
+                                    <option value="" {{ empty(env('MAIL_ENCRYPTION')) ? 'selected' : '' }}>None</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="MAIL_USERNAME" class="form-label">Mail Username <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control mail-config-field" name="MAIL_USERNAME" id="MAIL_USERNAME" value="{{ env('MAIL_USERNAME', '') }}" placeholder="your-username" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="MAIL_PASSWORD" class="form-label">Mail Password</label>
+                                <input type="password" class="form-control mail-config-field" name="MAIL_PASSWORD" id="MAIL_PASSWORD" value="" placeholder="Leave blank to keep current password" readonly>
+                                <small class="form-text text-muted">Leave blank if you don't want to change the password</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="MAIL_FROM_ADDRESS" class="form-label">From Address <span class="text-danger">*</span></label>
+                                <input type="email" class="form-control mail-config-field" name="MAIL_FROM_ADDRESS" id="MAIL_FROM_ADDRESS" value="{{ env('MAIL_FROM_ADDRESS', '') }}" placeholder="noreply@example.com" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="MAIL_FROM_NAME" class="form-label">From Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control mail-config-field" name="MAIL_FROM_NAME" id="MAIL_FROM_NAME" value="{{ env('MAIL_FROM_NAME', '') }}" placeholder="{{ $setting->company ?? 'Your App Name' }}" readonly>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-12 text-center">
+                            <button type="submit" class="btn btn-primary waves-effect waves-light me-2 mail-update-btn" style="display:none;">Update Mail Configuration</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 @endif
 
 @endsection
@@ -317,20 +417,27 @@
 $('.editbtn').click(function() {
 
     $( ".form-control" ).prop( "readonly", false );
+    $( ".mail-config-field" ).prop( "readonly", false );
 
     $(".editbtn").hide();
 
     $(".cancelbtn").show();
+    $(".mail-update-btn").show();
 
 });
 
 $('.cancelbtn').click(function() {
 
     $( ".form-control" ).prop( "readonly", true );
+    $( ".mail-config-field" ).prop( "readonly", true );
 
     $(".editbtn").show();
 
     $(".cancelbtn").hide();
+    $(".mail-update-btn").hide();
+    
+    // Reset mail password field
+    $("#MAIL_PASSWORD").val('');
 
 });
 

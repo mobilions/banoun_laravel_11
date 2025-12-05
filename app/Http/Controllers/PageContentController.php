@@ -123,6 +123,9 @@ class PageContentController extends Controller
             'editid' => 'required|exists:page_contents,id',
             'description' => 'nullable|string',
             'description_ar' => 'nullable|string',
+        ], [
+            'editid.required' => 'Record ID is required.',
+            'editid.exists' => 'Selected record does not exist.',
         ]);
 
         $data = PageContent::find($request->editid);
@@ -131,15 +134,17 @@ class PageContentController extends Controller
             return redirect('/pagecontent')->with('error', 'Page content not found.');
         }
 
-        $data->description = $request->description;
+        try {
+            $data->description = $request->description;
+            $data->description_ar = $request->description_ar;
+            $data->updated_by = Auth::user()->id;
+            $data->save();
 
-        $data->description_ar = $request->description_ar;
-
-        $data->updated_by=Auth::user()->id;
-
-        $data->save();
-
-        return redirect('/pagecontent');
+            return redirect('/pagecontent')->with('success', 'Page content updated successfully.');
+        } catch (\Exception $e) {
+            \Log::error('Page content update failed: ' . $e->getMessage());
+            return redirect()->back()->withInput()->with('error', 'Failed to update page content. Please try again.');
+        }
 
     }
 
@@ -160,14 +165,21 @@ class PageContentController extends Controller
     public function destroy(PageContent $pagecontent,$id)
 
     {
-
         $data = PageContent::find($id);
 
-        $data->delete_status = 1;
+        if (empty($data)) {
+            return redirect('/pagecontent')->with('error', 'Page content not found.');
+        }
 
-        $data->save();
+        try {
+            $data->delete_status = 1;
+            $data->save();
 
-        return redirect('/pagecontent');
+            return redirect('/pagecontent')->with('success', 'Page content deleted successfully.');
+        } catch (\Exception $e) {
+            \Log::error('Page content deletion failed: ' . $e->getMessage());
+            return redirect('/pagecontent')->with('error', 'Failed to delete page content. Please try again.');
+        }
 
     }
 

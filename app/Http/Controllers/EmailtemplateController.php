@@ -50,15 +50,24 @@ class EmailtemplateController extends Controller
             'name' => 'required|string|max:255',
             'message' => 'nullable|string',
             'message_ar' => 'nullable|string',
+        ], [
+            'name.required' => 'Subject is required.',
+            'name.max' => 'Subject must not exceed 255 characters.',
         ]);
 
-        $data = new Emailtemplate; 
-        $data->name = $request->name;
-        $data->message = $request->message;
-        $data->message_ar = $request->message_ar;
-        $data->created_by=Auth::user()->id;
-        $data->save();
-        return redirect('/emailtemplate');
+        try {
+            $data = new Emailtemplate; 
+            $data->name = $request->name;
+            $data->message = $request->message;
+            $data->message_ar = $request->message_ar;
+            $data->delete_status = '0';
+            $data->created_by = Auth::user()->id;
+            $data->save();
+            return redirect('/emailtemplate')->with('success', 'Email template created successfully.');
+        } catch (\Exception $e) {
+            \Log::error('Email template creation failed: ' . $e->getMessage());
+            return redirect()->back()->withInput()->with('error', 'Failed to create email template. Please try again.');
+        }
     }
 
     /**
@@ -99,18 +108,29 @@ class EmailtemplateController extends Controller
             'name' => 'required|string|max:255',
             'message' => 'nullable|string',
             'message_ar' => 'nullable|string',
+        ], [
+            'editid.required' => 'Template ID is required.',
+            'editid.exists' => 'Selected template does not exist.',
+            'name.required' => 'Subject is required.',
+            'name.max' => 'Subject must not exceed 255 characters.',
         ]);
 
         $data = Emailtemplate::find($request->editid);
         if (empty($data)) { 
             return redirect('/emailtemplate')->with('error', 'Email template not found.');
         }
-        $data->name = $request->name;
-        $data->message = $request->message;
-        $data->message_ar = $request->message_ar;
-        $data->updated_by=Auth::user()->id;
-        $data->save();
-        return redirect('/emailtemplate');
+        
+        try {
+            $data->name = $request->name;
+            $data->message = $request->message;
+            $data->message_ar = $request->message_ar;
+            $data->updated_by = Auth::user()->id;
+            $data->save();
+            return redirect('/emailtemplate')->with('success', 'Email template updated successfully.');
+        } catch (\Exception $e) {
+            \Log::error('Email template update failed: ' . $e->getMessage());
+            return redirect()->back()->withInput()->with('error', 'Failed to update email template. Please try again.');
+        }
     }
 
     /**
@@ -122,8 +142,18 @@ class EmailtemplateController extends Controller
     public function destroy(Emailtemplate $emailtemplate,$id)
     {
         $data = Emailtemplate::find($id);
-        $data->delete_status = 1;
-        $data->save();
-        return redirect('/emailtemplate');
+        
+        if (empty($data)) {
+            return redirect('/emailtemplate')->with('error', 'Email template not found.');
+        }
+        
+        try {
+            $data->delete_status = 1;
+            $data->save();
+            return redirect('/emailtemplate')->with('success', 'Email template deleted successfully.');
+        } catch (\Exception $e) {
+            \Log::error('Email template deletion failed: ' . $e->getMessage());
+            return redirect('/emailtemplate')->with('error', 'Failed to delete email template. Please try again.');
+        }
     }
 }

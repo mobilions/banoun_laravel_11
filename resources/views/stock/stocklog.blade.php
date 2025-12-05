@@ -50,7 +50,7 @@ tr.selected {background-color:#adf7a9  ! important;}
 
                         <th>Current Stock</th>
 
-                        <th>Action</th>
+                        <th class="export-ignore">Action</th>
 
                     
 
@@ -72,9 +72,9 @@ tr.selected {background-color:#adf7a9  ! important;}
 
                             <td>{{App\Models\Category::FindName($index->category_id)}}</td>
 
-                            <td>{{App\Models\Subcategory::FindName($index->subcategory_id)}}</td>
-
                             <td>{{App\Models\Brand::FindName($index->brand_id)}}</td>
+
+                            <td>{{App\Models\Subcategory::FindName($index->subcategory_id)}}</td>
 
                             <td>{{$index->product}}</td>
 
@@ -82,7 +82,7 @@ tr.selected {background-color:#adf7a9  ! important;}
 
                             <td>{{$index->available_quantity}}</td>
 
-                            <td><a href="{{url('stock')}}/{{$index->id}}/{{$index->product_id}}" class="btn btn-outline-info me-2 waves-effect waves-light btn-sm font-size-18"><i class="mdi mdi-store"></i></a></td>
+                            <td class="export-ignore"><a href="{{url('stock')}}/{{$index->id}}/{{$index->product_id}}" class="btn btn-outline-info me-2 waves-effect waves-light btn-sm font-size-18"><i class="mdi mdi-store"></i></a></td>
 
                     </tr>
 
@@ -129,19 +129,27 @@ tr.selected {background-color:#adf7a9  ! important;}
 <script src="{{asset('/assets')}}/libs/datatables.net-responsive-bs4/js/responsive.bootstrap4.min.js"></script>
 
 <script>
+(function ($) {
+    var exportButtons = [
+        { extend: "copy", exportOptions: { columns: ":visible:not(.export-ignore)" } },
+        { extend: "excel", exportOptions: { columns: ":visible:not(.export-ignore)" } },
+        { extend: "pdf", exportOptions: { columns: ":visible:not(.export-ignore)" } }
+    ];
 
-$(document).ready(function(){$("#datatable").DataTable(),$("#datatable-buttons").DataTable({lengthChange:!1,"iDisplayLength": 500,buttons:["copy","excel","pdf"]}).buttons().container().appendTo("#datatable-buttons_wrapper .col-md-6:eq(0)"),$(".dataTables_length select").addClass("form-select form-select-sm")});
-
-
-
-$('.editbtn').click(function() {
-
-    var id = $(this).data("id"); $("#editid").val(id);
-
-    var quantity = $(this).data("quantity"); $("#quantityedit").val(quantity);
-
-});
-
+    $(document).ready(function () {
+        var table = $("#datatable-buttons").DataTable({
+            pageLength: 20,
+            lengthMenu: [[20, 50, 100, -1], [20, 50, 100, "All"]],
+            buttons: exportButtons,
+            responsive: true,
+            columnDefs: [
+                { targets: 'export-ignore', orderable: false, searchable: false }
+            ]
+        });
+        table.buttons().container().appendTo("#datatable-buttons_wrapper .col-md-6:eq(0)");
+        $(".dataTables_length select").addClass("form-select form-select-sm");
+    });
+})(jQuery);
 </script>
 
 @stop

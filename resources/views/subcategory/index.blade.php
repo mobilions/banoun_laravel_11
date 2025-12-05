@@ -61,46 +61,27 @@ tr.selected {background-color:#adf7a9  ! important;}
 
         <div class="card-body">
 
-            <table id="datatable-buttons" class="table table-bordered w-100 align-middle">
-
+            <table id="datatable-buttons" class="table table-bordered nowrap w-100 align-middle">
                 <thead>
-
                     <tr>
-
                         <th>#</th>
-
                         <th>Category</th>
-
                         <th>Name</th>
-
                         <th>Description</th>
-
-                        <th>Image</th>
-
-                        <th>Action</th>
-
+                        <th class="export-ignore">Image</th>
+                        <th>Status</th>
+                        <th class="export-ignore">Action</th>
                     </tr>
-
                 </thead>           
-
                 <tbody>
-
                     @foreach ($indexes as $index)
-
                     <tr>
-
                         <td>{{$index->id}}</td>
-
-                        <td>{{$index->category}}</td>
-
-                        <td>{{$index->name}}<br>
-
-                            {{$index->name_ar}}</td>
-
-                        <td>{{$index->description}}<br>
-
-                            {{$index->description_ar}}</td>
-
+                        <td data-export="{{$index->category}}">{{$index->category}}@if($index->category_ar)<br>{{$index->category_ar}}@endif</td>
+                        <td data-export="{{$index->name}}">{{$index->name}}<br>{{$index->name_ar}}</td>
+                        <td class="text-wrap" style="white-space: normal; word-break: break-word; max-width: 420px;" data-export="{{$index->description}}">
+                            {{$index->description}}<br>{{$index->description_ar}}
+                        </td>
                         @php
                             $subcategoryImage = $index->imageurl
                                 ? (Str::startsWith($index->imageurl, ['http://', 'https://', '//'])
@@ -108,15 +89,19 @@ tr.selected {background-color:#adf7a9  ! important;}
                                     : asset($index->imageurl))
                                 : null;
                         @endphp
-                        <td>
+                        <td class="text-center export-ignore">
                             @if($subcategoryImage)
                                 <img src="{{$subcategoryImage}}" width="100" alt="{{$index->name}}" title="{{$index->name}}">
                             @else
                                 <span class="text-muted">No image</span>
                             @endif
                         </td>
-
                         <td>
+                            <span class="badge {{ (int)$index->delete_status === 0 ? 'bg-success' : 'bg-secondary' }}">
+                                {{ (int)$index->delete_status === 0 ? 'Active' : 'Deleted' }}
+                            </span>
+                        </td>
+                        <td class="export-ignore">
                             <a href="{{url('/subcategory')}}/{{$index->id}}/edit" class="btn btn-outline-secondary me-2 waves-effect waves-light btn-sm font-size-18"><i class="mdi mdi-pencil"></i></a>
                             <form action="{{url('/subcategory')}}/{{$index->id}}/delete" method="POST" class="d-inline" onsubmit="return confirm('Delete this subcategory?');">
                                 @csrf
@@ -125,13 +110,9 @@ tr.selected {background-color:#adf7a9  ! important;}
                                 </button>
                             </form>
                         </td>
-
                     </tr>
-
                     @endforeach
-
                 </tbody>
-
             </table>
 
         </div>
@@ -171,18 +152,73 @@ tr.selected {background-color:#adf7a9  ! important;}
 <script src="{{asset('/assets')}}/libs/datatables.net-responsive-bs4/js/responsive.bootstrap4.min.js"></script>
 
 <script>
-
-$(document).ready(function(){
-    $("#datatable").DataTable();
-    $("#datatable-buttons").DataTable({
-        lengthChange:!1,
-        iDisplayLength: 500,
-        responsive:false,
-        buttons:["copy","excel","pdf"]
-    }).buttons().container().appendTo("#datatable-buttons_wrapper .col-md-6:eq(0)");
-    $(".dataTables_length select").addClass("form-select form-select-sm");
-});
-
+(function ($) {
+    $(document).ready(function () {
+        var table = $("#datatable-buttons").DataTable({
+            pageLength: 10,
+            lengthMenu: [[10, 20, 50, 100, -1], [10, 20, 50, 100, "All"]],
+            buttons: [
+                { 
+                    extend: "copy", 
+                    exportOptions: { 
+                        columns: ":visible:not(.export-ignore)",
+                        format: {
+                            body: function (data, row, column, node) {
+                                var exportData = $(node).attr('data-export');
+                                return exportData !== undefined ? exportData : data.replace(/<[^>]*>/g, '').trim();
+                            }
+                        }
+                    } 
+                },
+                { 
+                    extend: "excel", 
+                    exportOptions: { 
+                        columns: ":visible:not(.export-ignore)",
+                        format: {
+                            body: function (data, row, column, node) {
+                                var exportData = $(node).attr('data-export');
+                                return exportData !== undefined ? exportData : data.replace(/<[^>]*>/g, '').trim();
+                            }
+                        }
+                    },
+                    customize: function(xlsx) {
+                        var sheet = xlsx.xl.worksheets['sheet1.xml'];
+                        $('row', sheet).each(function() {
+                            var cell = $(this).find('c[is="1"]');
+                            if (cell.length) {
+                                $(this).find('c').attr('s', '1');
+                            }
+                        });
+                    }
+                },
+                { 
+                    extend: "pdf", 
+                    exportOptions: { 
+                        columns: ":visible:not(.export-ignore)",
+                        format: {
+                            body: function (data, row, column, node) {
+                                var exportData = $(node).attr('data-export');
+                                var text = exportData !== undefined ? exportData : data.replace(/<[^>]*>/g, '').trim();
+                                return text.replace(/\n/g, ' ').substring(0, 200);
+                            }
+                        }
+                    },
+                    customize: function(doc) {
+                        doc.defaultStyle.fontSize = 8;
+                        doc.styles.tableHeader.fontSize = 9;
+                        doc.pageMargins = [10, 10, 10, 10];
+                    }
+                }
+            ],
+            responsive: false,
+            columnDefs: [
+                { targets: 'export-ignore', orderable: false, searchable: false, exportable: false }
+            ]
+        });
+        table.buttons().container().appendTo("#datatable-buttons_wrapper .col-md-6:eq(0)");
+        $(".dataTables_length select").addClass("form-select form-select-sm");
+    });
+})(jQuery);
 </script>
 
 @stop

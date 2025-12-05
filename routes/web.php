@@ -205,6 +205,8 @@ Route::prefix('searchtag')->group(function () {
 Route::get('/addsearchTag/{name}/{name_ar}', [SearchtagController::class, 'addsearchTag']);
 Route::get('/selectBrandTag/{brandid}', [SearchtagController::class, 'selectBrandTag']);
 
+Route::get('/addVariantValue/{variant_id}/{name}/{name_ar}/{color_val}', [VariantsubController::class, 'addVariantValue']);
+
 Route::prefix('delivery')->group(function () {
     Route::get('/', [DeliveryController::class, 'index'])->name('delivery');
     Route::get('/create', [DeliveryController::class, 'create'])->name('deliverycreate');
@@ -215,12 +217,16 @@ Route::prefix('delivery')->group(function () {
 });
 
 Route::prefix('stock')->group(function () {
-    Route::get('/{variant_id}/{product_id}', [StockController::class, 'index']);
-    Route::post('/store', [StockController::class, 'store']);
-    Route::post('/update', [StockController::class, 'update']);
+    Route::get('/{variant_id}/{product_id}', [StockController::class, 'index'])->name('stock.variant');
+    Route::post('/store', [StockController::class, 'store'])->name('stock.store');
+    Route::post('/update', [StockController::class, 'update'])->name('stock.update');
+    Route::get('/{id}/approve', [StockController::class, 'stcokapprove'])->name('stock.approve');
+    Route::delete('/entry/{id}', [StockController::class, 'destroy'])->name('stock.destroy');
 });
 
-Route::get('/stocklog', [StockController::class, 'stocklog']);
+Route::get('/stocklist', [StockController::class, 'stocklist'])->name('stock.list');
+Route::get('/stocklist/{id}/approve', [StockController::class, 'stcokapprovelist'])->name('stock.list.approve');
+Route::get('/stocklog', [StockController::class, 'stocklog'])->name('stock.log');
 
 Route::prefix('coupon')->group(function () {
     Route::get('/', [CouponController::class, 'index'])->name('coupon');
@@ -239,8 +245,8 @@ Route::post('/user/update', [ProfileController::class, 'update']);
 Route::post('/user/{id}/delete', [ProfileController::class, 'destroy']);
 
 Route::match(['get', 'post'], '/orders', [OrderController::class, 'index'])->name('order');
-Route::get('/order/{id}/view', [OrderController::class, 'view']);
-Route::post('/orderstatus/{id}/{val}', [OrderController::class, 'updateorderstatus']);
+Route::get('/order/{id}/view', [OrderController::class, 'view'])->name('order.view');
+Route::post('/orderstatus/{id}/{val}', [OrderController::class, 'updateorderstatus'])->name('order.status.update');
 
 Route::get('/mailcontent', [HomeController::class, 'mailcontent']);
 

@@ -8,6 +8,7 @@ use App\Models\UserCredit;
 use App\Models\UserKid;
 use App\Models\Wishlist;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
@@ -15,7 +16,7 @@ use App\Traits\SoftDeleteByStatus;
 
 class User extends Authenticatable
 {
-    use Notifiable, HasApiTokens, SoftDeleteByStatus;
+    use HasFactory, Notifiable, HasApiTokens, SoftDeleteByStatus;
 
     protected $guarded = ['id'
         // 'role',

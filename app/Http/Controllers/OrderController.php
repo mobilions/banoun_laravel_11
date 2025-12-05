@@ -24,15 +24,20 @@ class OrderController extends Controller
     {
         $title = "Orders";
 
-        $fromdate = date('Y-m-01');
-        $todate = date('Y-m-d');
-        if (!empty($request->fromdate) && !empty($request->todate)){
-            $fromdate = $request->fromdate;
-            $todate = $request->todate;
-        }
+        $this->validate($request, [
+            'fromdate' => 'nullable|date',
+            'todate' => 'nullable|date|after_or_equal:fromdate',
+        ]);
+
+        $fromdate = $request->input('fromdate', date('Y-m-01'));
+        $todate = $request->input('todate', date('Y-m-d'));
+        
         $todate1 = date('Y-m-d', strtotime("+1 day", strtotime($todate)));
 
-        $indexes = Cartmaster::whereBetween('created_at',[$fromdate, $todate1])->get();
+        $indexes = Cartmaster::with(['user'])
+            ->whereBetween('created_at',[$fromdate, $todate1])
+            ->orderByDesc('created_at')
+            ->get();
 
         return view('order.index',compact('title','indexes','fromdate','todate'));  
     }
@@ -55,10 +60,10 @@ class OrderController extends Controller
     public function view($id)
     {
         $title = "View Order";
-        $order = Cartmaster::where('id',$id)->firstOrFail();
+        $order = Cartmaster::with(['user'])->where('id',$id)->firstOrFail();
         $this->authorizeOrderAccess($order);
         $orderlist = Cart::with(['product','variant'])->where('master_id',$id)->get();
-        $order_tracks = Orderlog::where('cartmaster_id',$id)->get();
+        $order_tracks = Orderlog::with(['status'])->where('cartmaster_id',$id)->orderByDesc('created_at')->get();
         return view('order.view',compact('title','order','orderlist','order_tracks'));  
     }
 
@@ -76,23 +81,22 @@ class OrderController extends Controller
             abort(403, 'Unauthorized.');
         }
 
-        $data = Cartmaster::find($id);
+        $order = Cartmaster::with('user')->findOrFail($id);
+        $user = $order->user;
 
-        $data->orderstatus = $val;
+        if (!$user || !$user->email) {
+            return redirect()->back()->with('error', 'User email not found for this order.');
+        }
 
-        $data->save();
+        $order->orderstatus = $val;
+        $order->updated_by = Auth::user()->id;
+        $order->save();
 
-
-
-        $data = new Orderlog; 
-
-        $data->cartmaster_id = $id;
-
-        $data->status_id = $val;
-
-        $data->created_by=Auth::user()->id;
-
-        $data->save();
+        $orderLog = new Orderlog; 
+        $orderLog->cartmaster_id = $id;
+        $orderLog->status_id = $val;
+        $orderLog->created_by = Auth::user()->id;
+        $orderLog->save();
 
         if($val==2){
             $subject = Emailtemplate::FindSubject('Out for Delivery');

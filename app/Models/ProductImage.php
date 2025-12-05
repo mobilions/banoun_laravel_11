@@ -4,7 +4,7 @@ namespace App\Models;
 
 
 use App\Models\Product;
-use App\Models\Variant;
+use App\Models\Productvariant;
 use Illuminate\Database\Eloquent\Model;
 
 class ProductImage extends Model
@@ -32,8 +32,9 @@ class ProductImage extends Model
     {
         return $this->belongsTo(Product::class);
     }
+    
     public function variant()
     {
-        return $this->belongsTo(Variant::class);
+        return $this->belongsTo(Productvariant::class, 'variant_id');
     }
 }

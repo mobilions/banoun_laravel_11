@@ -58,43 +58,37 @@ tr.selected {background-color:#adf7a9  ! important;}
 
         <div class="card-body">
 
-            <table id="datatable-buttons" class="table table-bordered dt-responsive nowrap w-100">
-
+            <table id="datatable-buttons" class="table table-bordered nowrap w-100 align-middle">
                 <thead>
-
                     <tr>
-
                         <th>#</th>
-
                         <th>Variant</th>
-
                         <th>Name</th>
-
                         <th>Value</th>
-
-                        <th>Action</th>
-
+                        <th>Status</th>
+                        <th class="export-ignore">Action</th>
                     </tr>
-
                 </thead>           
-
                 <tbody>
-
                     @foreach ($indexes as $index)
-
                     <tr>
-
                         <td>{{$index->id}}</td>
-
-                        <td>{{$index->variant}} {{$index->variant_ar}}</td>
-
-                        <td>{{$index->name}}<br>
-
-                            {{$index->name_ar}}</td>
-
-                        <td>{{$index->color_val}}</td>
-
+                        <td data-export="{{$index->variant}}">{{$index->variant}}@if($index->variant_ar)<br>{{$index->variant_ar}}@endif</td>
+                        <td data-export="{{$index->name}}">{{$index->name}}<br>{{$index->name_ar}}</td>
+                        <td data-export="{{$index->color_val}}">
+                            @if($index->color_val && str_starts_with($index->color_val, '#'))
+                                <span style="display: inline-block; width: 20px; height: 20px; background-color: {{$index->color_val}}; border: 1px solid #ddd; border-radius: 3px; vertical-align: middle;"></span>
+                                {{$index->color_val}}
+                            @else
+                                {{$index->color_val}}
+                            @endif
+                        </td>
                         <td>
+                            <span class="badge {{ (int)$index->delete_status === 0 ? 'bg-success' : 'bg-secondary' }}">
+                                {{ (int)$index->delete_status === 0 ? 'Active' : 'Deleted' }}
+                            </span>
+                        </td>
+                        <td class="export-ignore">
                             <a href="{{url('/variantsub')}}/{{$index->id}}/edit" class="btn btn-outline-secondary me-2 waves-effect waves-light btn-sm font-size-18"><i class="mdi mdi-pencil"></i></a>
                             <form action="{{url('/variantsub')}}/{{$index->id}}/delete" method="POST" class="d-inline" onsubmit="return confirm('Delete this variant value?');">
                                 @csrf
@@ -103,13 +97,9 @@ tr.selected {background-color:#adf7a9  ! important;}
                                 </button>
                             </form>
                         </td>
-
                     </tr>
-
                     @endforeach
-
                 </tbody>
-
             </table>
 
         </div>
@@ -149,9 +139,73 @@ tr.selected {background-color:#adf7a9  ! important;}
 <script src="{{asset('/assets')}}/libs/datatables.net-responsive-bs4/js/responsive.bootstrap4.min.js"></script>
 
 <script>
-
-$(document).ready(function(){$("#datatable").DataTable(),$("#datatable-buttons").DataTable({lengthChange:!1,"iDisplayLength": 500,buttons:["copy","excel","pdf"]}).buttons().container().appendTo("#datatable-buttons_wrapper .col-md-6:eq(0)"),$(".dataTables_length select").addClass("form-select form-select-sm")});
-
+(function ($) {
+    $(document).ready(function () {
+        var table = $("#datatable-buttons").DataTable({
+            pageLength: 10,
+            lengthMenu: [[10, 20, 50, 100, -1], [10, 20, 50, 100, "All"]],
+            buttons: [
+                { 
+                    extend: "copy", 
+                    exportOptions: { 
+                        columns: ":visible:not(.export-ignore)",
+                        format: {
+                            body: function (data, row, column, node) {
+                                var exportData = $(node).attr('data-export');
+                                return exportData !== undefined ? exportData : data.replace(/<[^>]*>/g, '').trim();
+                            }
+                        }
+                    } 
+                },
+                { 
+                    extend: "excel", 
+                    exportOptions: { 
+                        columns: ":visible:not(.export-ignore)",
+                        format: {
+                            body: function (data, row, column, node) {
+                                var exportData = $(node).attr('data-export');
+                                return exportData !== undefined ? exportData : data.replace(/<[^>]*>/g, '').trim();
+                            }
+                        }
+                    },
+                    customize: function(xlsx) {
+                        var sheet = xlsx.xl.worksheets['sheet1.xml'];
+                        $('row', sheet).each(function() {
+                            var cell = $(this).find('c[is="1"]');
+                            if (cell.length) {
+                                $(this).find('c').attr('s', '1');
+                            }
+                        });
+                    }
+                },
+                { 
+                    extend: "pdf", 
+                    exportOptions: { 
+                        columns: ":visible:not(.export-ignore)",
+                        format: {
+                            body: function (data, row, column, node) {
+                                var exportData = $(node).attr('data-export');
+                                var text = exportData !== undefined ? exportData : data.replace(/<[^>]*>/g, '').trim();
+                                return text.replace(/\n/g, ' ').substring(0, 200);
+                            }
+                        }
+                    },
+                    customize: function(doc) {
+                        doc.defaultStyle.fontSize = 8;
+                        doc.styles.tableHeader.fontSize = 9;
+                        doc.pageMargins = [10, 10, 10, 10];
+                    }
+                }
+            ],
+            responsive: false,
+            columnDefs: [
+                { targets: 'export-ignore', orderable: false, searchable: false, exportable: false }
+            ]
+        });
+        table.buttons().container().appendTo("#datatable-buttons_wrapper .col-md-6:eq(0)");
+        $(".dataTables_length select").addClass("form-select form-select-sm");
+    });
+})(jQuery);
 </script>
 
 @stop

@@ -186,7 +186,7 @@ tr.selected {background-color:#adf7a9  ! important;}
 
                             <th>Status</th>
 
-                            <th>Action</th>
+                            <th class="export-ignore">Action</th>
 
                         </tr>
 
@@ -208,7 +208,13 @@ tr.selected {background-color:#adf7a9  ! important;}
 
                             
 
-                            <td><button type="button" class="btn btn-success btn-sm waves-effect waves-light me-3 editbtn" data-id="{{$index->id}}" data-quantity="{{$index->quantity}}"  data-bs-toggle="modal" data-bs-target="#myModal"><i class="mdi mdi-pencil ms-1"></i></button> </td>
+                            <td class="export-ignore">
+                                @if($index->status == 0)
+                                <button type="button" class="btn btn-success btn-sm waves-effect waves-light me-3 editbtn" data-id="{{$index->id}}" data-quantity="{{$index->quantity}}"  data-bs-toggle="modal" data-bs-target="#myModal"><i class="mdi mdi-pencil ms-1"></i></button>
+                                @else
+                                <span class="text-muted">—</span>
+                                @endif
+                            </td>
 
                             
 
@@ -254,7 +260,7 @@ tr.selected {background-color:#adf7a9  ! important;}
 
                     <tbody>
 
-                        @foreach ($addstock as $index)
+                        @foreach ($indexes as $index)
 
                         <tr>
 
@@ -264,7 +270,7 @@ tr.selected {background-color:#adf7a9  ! important;}
 
                             <td>{{date('d-m-Y',strtotime($index->created_at))}}</td>
 
-                            <td>{{$index->process}}</td>
+                                <td>{{$index->process}}</td>
 
                         </tr>
 
@@ -311,23 +317,41 @@ tr.selected {background-color:#adf7a9  ! important;}
 <script src="{{asset('/assets')}}/libs/datatables.net-responsive-bs4/js/responsive.bootstrap4.min.js"></script>
 
 <script>
+(function ($) {
+    var exportButtons = [
+        { extend: "copy", exportOptions: { columns: ":visible:not(.export-ignore)" } },
+        { extend: "excel", exportOptions: { columns: ":visible:not(.export-ignore)" } },
+        { extend: "pdf", exportOptions: { columns: ":visible:not(.export-ignore)" } }
+    ];
 
-$(document).ready(function(){$("#datatable").DataTable(),$("#datatable-buttons").DataTable({lengthChange:!1,"iDisplayLength": 500,buttons:["copy","excel","pdf"]}).buttons().container().appendTo("#datatable-buttons_wrapper .col-md-6:eq(0)"),$(".dataTables_length select").addClass("form-select form-select-sm")});
+    var defaultOptions = {
+        pageLength: 20,
+        lengthMenu: [[20, 50, 100, -1], [20, 50, 100, "All"]],
+        buttons: exportButtons,
+        responsive: true,
+        columnDefs: [
+            { targets: 'export-ignore', orderable: false, searchable: false }
+        ]
+    };
 
+    function initTable(selector, wrapperSelector) {
+        var table = $(selector).DataTable(defaultOptions);
+        if (wrapperSelector) {
+            table.buttons().container().appendTo(wrapperSelector);
+        }
+    }
 
+    $(document).ready(function () {
+        initTable("#datatable-buttons", "#datatable-buttons_wrapper .col-md-6:eq(0)");
+        initTable("#datatable-buttons1", "#datatable-buttons1_wrapper .col-md-6:eq(0)");
+        $(".dataTables_length select").addClass("form-select form-select-sm");
 
-$(document).ready(function(){$("#datatable").DataTable(),$("#datatable-buttons1").DataTable({lengthChange:!1,"iDisplayLength": 500,buttons:["copy","excel","pdf"]}).buttons().container().appendTo("#datatable-buttons1_wrapper .col-md-6:eq(0)"),$(".dataTables_length select").addClass("form-select form-select-sm")});
-
-
-
-$('.editbtn').click(function() {
-
-    var id = $(this).data("id"); $("#editid").val(id);
-
-    var quantity = $(this).data("quantity"); $("#quantityedit").val(quantity);
-
-});
-
+        $('.editbtn').click(function() {
+            var id = $(this).data("id"); $("#editid").val(id);
+            var quantity = $(this).data("quantity"); $("#quantityedit").val(quantity);
+        });
+    });
+})(jQuery);
 </script>
 
 @stop

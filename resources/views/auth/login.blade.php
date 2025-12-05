@@ -48,7 +48,7 @@
         <label class="form-label">Password</label>
         <div class="input-group auth-pass-inputgroup">
             <input id="password" type="password" class="form-control @error('password') is-invalid @enderror" name="password" required autocomplete="current-password" aria-describedby="password-addon">
-            <button class="btn btn-light " type="button" id="password-addon"><i class="mdi mdi-eye-outline"></i></button>
+            <button class="btn btn-light " type="button" id="password-addon" aria-label="Toggle password visibility"><i class="mdi mdi-eye-outline"></i></button>
         </div>
     </div>
     @error('password')
@@ -58,7 +58,7 @@
     @enderror
 
     <div class="form-check">
-        <input class="form-check-input" type="checkbox" id="remember-check">
+        <input class="form-check-input" type="checkbox" id="remember-check" name="remember" value="1" {{ old('remember') ? 'checked' : '' }}>
         <label class="form-check-label" for="remember-check">
             Remember me
         </label>
@@ -76,4 +76,23 @@
 </div>
 @endsection
 @section('ScriptContent')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const toggleBtn = document.getElementById('password-addon');
+    const passwordInput = document.getElementById('password');
+    const icon = toggleBtn ? toggleBtn.querySelector('i') : null;
+
+    if (!toggleBtn || !passwordInput || !icon) {
+        return;
+    }
+
+    toggleBtn.addEventListener('click', function () {
+        const isHidden = passwordInput.getAttribute('type') === 'password';
+        passwordInput.setAttribute('type', isHidden ? 'text' : 'password');
+
+        icon.classList.toggle('mdi-eye-outline', !isHidden);
+        icon.classList.toggle('mdi-eye-off-outline', isHidden);
+    });
+});
+</script>
 @endsection

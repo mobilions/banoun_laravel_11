@@ -56,7 +56,7 @@ class Cart extends Model
     }
     public function variant()
     {
-        return $this->belongsTo(Variant::class);
+        return $this->belongsTo(Productvariant::class, 'variant_id');
     }
     public function size()
     {
@@ -64,6 +64,6 @@ class Cart extends Model
     }
     public function master()
     {
-        return $this->belongsTo(Master::class);
+        return $this->belongsTo(Cartmaster::class, 'master_id');
     }
 }

@@ -29,21 +29,25 @@
                     <div class="col-lg-6 mb-3">
                         <div>
                             <label>Name <span class="text-danger">*</span></label>
-                            <input class="form-control" type="text" name="name" id="name" required="">
+                            <input class="form-control @error('name') is-invalid @enderror" type="text" name="name" id="name" value="{{ old('name') }}" required="">
+                            @error('name') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
                         </div>
                     </div>
                     <div class="col-lg-6 mb-3">
                         <div>
-                            <label>Email (Username)</label>
-                            <input class="form-control" type="text" name="email" id="email">
+                            <label>Email (Username) <span class="text-danger">*</span></label>
+                            <input class="form-control @error('email') is-invalid @enderror" type="email" name="email" id="email" value="{{ old('email') }}" required="">
+                            @error('email') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
                         </div>
                     </div>
                     <div class="col-lg-6 mb-3">
                         <div>
-                            <label>Password</label>
-                            <input class="form-control" type="text" name="password" id="password">
+                            <label>Password <span class="text-danger">*</span></label>
+                            <input class="form-control @error('password') is-invalid @enderror" type="password" name="password" id="password" required="">
+                            @error('password') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
                         </div>
                     </div>      
+                </div>
                     <div class="col-lg-6 mt-3">
                         <button type="submit" class="btn btn-primary waves-effect waves-light me-2 mt-2">Create</button>
                         <a href="{{url('/users')}}" class="btn btn-secondary waves-effect waves-light resetbtn mt-2">Cancel</a>

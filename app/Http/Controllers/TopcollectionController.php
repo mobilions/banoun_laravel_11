@@ -111,106 +111,91 @@ class TopcollectionController extends Controller
     public function store(Request $request)
 
     {
-        $this->validate($request, [
+        $rules = [
             'name' => 'required|string|max:255',
             'name_ar' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'description_ar' => 'nullable|string',
-            'shopby' => 'nullable|string|in:category,subcategory,brand,product',
             'redirect_type' => 'required|string',
-            'category_id' => 'nullable|exists:categories,id',
-            'imgfile' => 'required|image|mimes:jpeg,png,jpg,gif,svg',
+            'imgfile' => 'required|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048|dimensions:min_width=100,min_height=100,max_width=4000,max_height=4000',
+        ];
+
+        // If redirect_type is productlist, shopby and category_id are required
+        if ($request->redirect_type == 'productlist') {
+            $rules['shopby'] = 'required|string|in:category,subcategory,brand,product';
+            $rules['category_id'] = 'required|exists:categories,id';
+        } else {
+            $rules['shopby'] = 'nullable|string|in:category,subcategory,brand,product';
+            $rules['category_id'] = 'nullable|exists:categories,id';
+        }
+
+        $this->validate($request, $rules, [
+            'name.required' => 'Name is required.',
+            'name.max' => 'Name must not exceed 255 characters.',
+            'name_ar.max' => 'Arabic name must not exceed 255 characters.',
+            'redirect_type.required' => 'Redirect type is required.',
+            'shopby.required' => 'Shop by is required when redirect type is Product List.',
+            'shopby.in' => 'Invalid shop by value.',
+            'category_id.required' => 'Category is required when redirect type is Product List.',
+            'category_id.exists' => 'Selected category does not exist.',
+            'imgfile.required' => 'Image is required.',
+            'imgfile.image' => 'The file must be an image.',
+            'imgfile.mimes' => 'The image must be a file of type: jpeg, png, jpg, gif, svg, webp.',
+            'imgfile.max' => 'The image size must not exceed 2MB.',
+            'imgfile.dimensions' => 'The image dimensions must be between 100x100 and 4000x4000 pixels.',
         ]);
 
+        try {
+            $imgurl = '';
 
+            $path = $request->file('imgfile');
 
-        $imgurl    = '';
+            if (!empty($path) && $path->isValid()) {
+                $store = Storage::putFile('public/image', $path);
+                $imgurl = config('app.imgurl').basename($store);
+            }
 
-        $path   = $request->file('imgfile');
+            $redirect_type = $request->redirect_type;
+            $redirect_by = null;
 
-        if (!empty($path)) {
+            if($redirect_type == 'productlist'){
+                if($request->shopby == 'category'){
+                    $redirect_by = 'categoryId';
+                } elseif($request->shopby == 'subcategory'){
+                    $redirect_by = 'subcategoryId';
+                } elseif($request->shopby == 'brand'){
+                    $redirect_by = 'brandId';
+                } elseif($request->shopby == 'product'){
+                    $redirect_by = 'productId';
+                }
+            } else {
+                $bannerUrl = DB::table('banner_url')->where('base_url', $redirect_type)->first();
+                if ($bannerUrl) {
+                    $redirect_by = $bannerUrl->base_id;
+                } else {
+                    return redirect()->back()->withInput()->with('error', 'Invalid redirect type selected.');
+                }
+            }
 
-        $store  = Storage::putFile('public/image', $path);
+            $data = new Topcollection; 
+            $data->name = $request->name;
+            $data->description = $request->description;
+            $data->name_ar = $request->name_ar;
+            $data->description_ar = $request->description_ar;
+            $data->imageurl = $imgurl;
+            $data->shopby = $request->shopby;
+            $data->category_id = $request->category_id;
+            $data->redirect_type = $redirect_type;
+            $data->redirect_by = $redirect_by;
+            $data->delete_status = '0';
+            $data->created_by = Auth::user()->id;
+            $data->save();
 
-            //$imgurl    = Storage::url($store);
-
-            //$imgurl = url('/').'/storage/app/'.$store;
-
-            $imgurl = config('app.imgurl').basename($store);
-
+            return redirect('/topcollection')->with('success', 'Top banner created successfully.');
+        } catch (\Exception $e) {
+            \Log::error('Top banner creation failed: ' . $e->getMessage());
+            return redirect()->back()->withInput()->with('error', 'Failed to create top banner. Please try again.');
         }
-
-
-
-        //echo "hi"; exit();
-
-        $redirect_type=$request->redirect_type;
-
-        if($redirect_type=='productlist'){
-
-            if($request->shopby=='category'){
-
-                $redirect_by='categoryId';
-
-            }
-
-            if($request->shopby=='subcategory'){
-
-                $redirect_by='subcategoryId';
-
-            }
-
-            if($request->shopby=='brand'){
-
-                $redirect_by='brandId';
-
-            }
-
-            if($request->shopby=='product'){
-
-                $redirect_by='productId';
-
-            }
-
-            
-
-        }
-
-        else{
-
-            $redirect_by=DB::table('banner_url')->where('base_url',$redirect_type)->first();
-
-            $redirect_by=$redirect_by->base_id;
-
-        }
-
-
-
-        $data = new Topcollection; 
-
-        $data->name = $request->name;
-
-        $data->description = $request->description;
-
-        $data->name_ar = $request->name_ar;
-
-        $data->description_ar = $request->description_ar;
-
-        $data->imageurl    = $imgurl;
-
-        $data->shopby = $request->shopby;
-
-        $data->category_id = $request->category_id;
-
-        $data->redirect_type = $redirect_type;
-
-        $data->redirect_by = $redirect_by;
-
-        $data->created_by=Auth::user()->id;
-
-        $data->save();
-
-        return redirect('/topcollection');
 
     }
 
@@ -291,86 +276,42 @@ class TopcollectionController extends Controller
     public function update(Request $request, Topcollection $topcollection)
 
     {
-        $this->validate($request, [
+        $rules = [
             'editid' => 'required|exists:topcollections,id',
             'name' => 'required|string|max:255',
             'name_ar' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'description_ar' => 'nullable|string',
-            'shopby' => 'nullable|string|in:category,subcategory,brand,product',
             'redirect_type' => 'required|string',
-            'category_id' => 'nullable|exists:categories,id',
-            'imgfile' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg',
+            'imgfile' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048|dimensions:min_width=100,min_height=100,max_width=4000,max_height=4000',
             'imgfile_val' => 'nullable|string',
+        ];
+
+        // If redirect_type is productlist, shopby and category_id are required
+        if ($request->redirect_type == 'productlist') {
+            $rules['shopby'] = 'required|string|in:category,subcategory,brand,product';
+            $rules['category_id'] = 'required|exists:categories,id';
+        } else {
+            $rules['shopby'] = 'nullable|string|in:category,subcategory,brand,product';
+            $rules['category_id'] = 'nullable|exists:categories,id';
+        }
+
+        $this->validate($request, $rules, [
+            'editid.required' => 'Record ID is required.',
+            'editid.exists' => 'Selected record does not exist.',
+            'name.required' => 'Name is required.',
+            'name.max' => 'Name must not exceed 255 characters.',
+            'name_ar.max' => 'Arabic name must not exceed 255 characters.',
+            'redirect_type.required' => 'Redirect type is required.',
+            'shopby.required' => 'Shop by is required when redirect type is Product List.',
+            'shopby.in' => 'Invalid shop by value.',
+            'category_id.required' => 'Category is required when redirect type is Product List.',
+            'category_id.exists' => 'Selected category does not exist.',
+            'imgfile.image' => 'The file must be an image.',
+            'imgfile.mimes' => 'The image must be a file of type: jpeg, png, jpg, gif, svg, webp.',
+            'imgfile.max' => 'The image size must not exceed 2MB.',
+            'imgfile.dimensions' => 'The image dimensions must be between 100x100 and 4000x4000 pixels.',
         ]);
-
-
-
-        $imgurl    = '';
-
-        $path   = $request->file('imgfile');
-
-        if (!empty($path)) {
-
-            $store  = Storage::putFile('public/image', $path);
-
-            //$imgurl    = Storage::url($store);
-
-            //$imgurl = url('/').'/storage/app/'.$store;
-
-            $imgurl = config('app.imgurl').basename($store);
-
-        }
-
-        else{
-
-            $imgurl=$request->imgfile_val;
-
-        }
-
-
-
-        $redirect_type=$request->redirect_type;
-
-        if($redirect_type=='productlist'){
-
-            if($request->shopby=='category'){
-
-                $redirect_by='categoryId';
-
-            }
-
-            if($request->shopby=='subcategory'){
-
-                $redirect_by='subcategoryId';
-
-            }
-
-            if($request->shopby=='brand'){
-
-                $redirect_by='brandId';
-
-            }
-
-            if($request->shopby=='product'){
-
-                $redirect_by='productId';
-
-            }
-
-            
-
-        }
-
-        else{
-
-            $redirect_by=DB::table('banner_url')->where('base_url',$redirect_type)->first();
-
-            $redirect_by=$redirect_by->base_id;
-
-        }
-
-
 
         $data = Topcollection::find($request->editid);
 
@@ -378,29 +319,57 @@ class TopcollectionController extends Controller
             return redirect('/topcollection')->with('error', 'Top collection not found.');
         }
 
-        $data->name = $request->name;
+        try {
+            $imgurl = '';
 
-        $data->description = $request->description;
+            $path = $request->file('imgfile');
 
-        $data->name_ar = $request->name_ar;
+            if (!empty($path) && $path->isValid()) {
+                $store = Storage::putFile('public/image', $path);
+                $imgurl = config('app.imgurl').basename($store);
+            } else {
+                $imgurl = $request->imgfile_val ?? '';
+            }
 
-        $data->description_ar = $request->description_ar;
+            $redirect_type = $request->redirect_type;
+            $redirect_by = null;
 
-        $data->imageurl    = $imgurl;
+            if($redirect_type == 'productlist'){
+                if($request->shopby == 'category'){
+                    $redirect_by = 'categoryId';
+                } elseif($request->shopby == 'subcategory'){
+                    $redirect_by = 'subcategoryId';
+                } elseif($request->shopby == 'brand'){
+                    $redirect_by = 'brandId';
+                } elseif($request->shopby == 'product'){
+                    $redirect_by = 'productId';
+                }
+            } else {
+                $bannerUrl = DB::table('banner_url')->where('base_url', $redirect_type)->first();
+                if ($bannerUrl) {
+                    $redirect_by = $bannerUrl->base_id;
+                } else {
+                    return redirect()->back()->withInput()->with('error', 'Invalid redirect type selected.');
+                }
+            }
 
-        $data->shopby = $request->shopby;
+            $data->name = $request->name;
+            $data->description = $request->description;
+            $data->name_ar = $request->name_ar;
+            $data->description_ar = $request->description_ar;
+            $data->imageurl = $imgurl;
+            $data->shopby = $request->shopby;
+            $data->redirect_type = $redirect_type;
+            $data->redirect_by = $redirect_by;
+            $data->category_id = $request->category_id;
+            $data->updated_by = Auth::user()->id;
+            $data->save();
 
-        $data->redirect_type = $redirect_type;
-
-        $data->redirect_by = $redirect_by;
-
-        $data->category_id = $request->category_id;
-
-        $data->updated_by=Auth::user()->id;
-
-        $data->save();
-
-        return redirect('/topcollection');
+            return redirect('/topcollection')->with('success', 'Top banner updated successfully.');
+        } catch (\Exception $e) {
+            \Log::error('Top banner update failed: ' . $e->getMessage());
+            return redirect()->back()->withInput()->with('error', 'Failed to update top banner. Please try again.');
+        }
 
     }
 
@@ -421,14 +390,21 @@ class TopcollectionController extends Controller
     public function destroy(Topcollection $topcollection,$id)
 
     {
-
         $data = Topcollection::find($id);
 
-        $data->delete_status = 1;
+        if (empty($data)) {
+            return redirect('/topcollection')->with('error', 'Top banner not found.');
+        }
 
-        $data->save();
+        try {
+            $data->delete_status = 1;
+            $data->save();
 
-        return redirect('/topcollection');
+            return redirect('/topcollection')->with('success', 'Top banner deleted successfully.');
+        } catch (\Exception $e) {
+            \Log::error('Top banner deletion failed: ' . $e->getMessage());
+            return redirect('/topcollection')->with('error', 'Failed to delete top banner. Please try again.');
+        }
 
     }
 

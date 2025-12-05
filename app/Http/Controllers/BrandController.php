@@ -42,13 +42,15 @@ class BrandController extends Controller
 
 
 
-    public function index()
+    public function index(Request $request)
 
     {
 
         $title = "Brands";
 
-        $indexes = Brand::active()->get();
+        $indexes = Brand::active()
+            ->orderByDesc('created_at')
+            ->get();
 
         return view('brand.index',compact('title','indexes'));  
 
@@ -94,11 +96,11 @@ class BrandController extends Controller
 
     {
         $this->validate($request, [
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:255|unique:brands,name,NULL,id,delete_status,0',
             'name_ar' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'description_ar' => 'nullable|string',
-            'imgfile' => 'required|image|mimes:jpeg,png,jpg,gif,svg',
+            'imgfile' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
         $imgurl    = '';
@@ -144,7 +146,7 @@ class BrandController extends Controller
 
 
 
-        return redirect('/brand');
+        return redirect('/brand')->with('success', 'Brand created successfully.');
 
     }
 
@@ -217,11 +219,11 @@ class BrandController extends Controller
     {
         $this->validate($request, [
             'editid' => 'required|exists:brands,id',
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:255|unique:brands,name,' . $request->editid . ',id,delete_status,0',
             'name_ar' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'description_ar' => 'nullable|string',
-            'imgfile' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg',
+            'imgfile' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'imgfile_val' => 'nullable|string',
         ]);
 
@@ -258,7 +260,7 @@ class BrandController extends Controller
 
         $data->save();
 
-        return redirect('/brand');
+        return redirect('/brand')->with('success', 'Brand updated successfully.');
 
     }
 
@@ -282,11 +284,15 @@ class BrandController extends Controller
 
         $data = Brand::find($id);
 
-        $data->delete_status = 1;
+        if (!$data) {
+            return redirect('/brand')->with('error', 'Brand not found.');
+        }
 
+        $data->delete_status = 1;
+        $data->updated_by = Auth::user()->id;
         $data->save();
 
-        return redirect('/brand');
+        return redirect('/brand')->with('success', 'Brand deleted successfully.');
 
     }
 
