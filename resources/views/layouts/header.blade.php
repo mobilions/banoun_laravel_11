@@ -58,11 +58,14 @@
 <div class="dropdown d-inline-block">
     <button type="button" class="btn header-item waves-effect"
     data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-        En
+        <span id="current-lang">En</span>
     </button>
     <div class="dropdown-menu dropdown-menu-end">
         <a href="javascript:void(0);" class="dropdown-item notify-item language" data-lang="en">
             <span class="align-middle">English</span>
+        </a>
+        <a href="javascript:void(0);" class="dropdown-item notify-item language" data-lang="ar">
+            <span class="align-middle">العربية (Arabic)</span>
         </a>
     </div>
 </div>
