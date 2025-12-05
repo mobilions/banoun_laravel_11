@@ -5,86 +5,68 @@
 <script src="{{asset('/assets')}}/libs/node-waves/waves.min.js"></script>
 <script src="{{asset('/assets')}}/js/app.js"></script>
 <script>
-// Fix handlers - ensure they work even if app.js has errors
+// Enhance app.js handlers - fix language switching and ensure Bootstrap dropdowns work
 (function() {
-    function initHandlers() {
-        // Wait for jQuery
-        if (typeof jQuery === 'undefined' || typeof window.$ === 'undefined') {
-            setTimeout(initHandlers, 100);
+    function enhanceAppJS() {
+        if (typeof jQuery === 'undefined') {
+            setTimeout(enhanceAppJS, 50);
             return;
         }
         
-        var $ = window.jQuery || window.$;
+        var $ = jQuery;
         
-        // Wait for DOM and all scripts to be ready
-        $(window).on('load', function() {
-            console.log('Initializing custom handlers...');
+        $(document).ready(function() {
+            // Override language handler to work with our setup and support Arabic
+            $(document).off('click', '.language').on('click', '.language', function(e) {
+                e.preventDefault();
+                var lang = $(this).attr('data-lang');
+                var $currentLangSpan = $('#current-lang');
+                
+                // Update current language display
+                if ($currentLangSpan.length) {
+                    $currentLangSpan.text(lang === 'ar' ? 'Ar' : 'En');
+                }
+                
+                // Update HTML lang attribute
+                $('html').attr('lang', lang);
+                
+                // Update direction for Arabic
+                if (lang === 'ar') {
+                    $('html').attr('dir', 'rtl');
+                } else {
+                    $('html').removeAttr('dir');
+                }
+                
+                // Store in localStorage
+                localStorage.setItem('language', lang);
+                
+                // Try to load translation JSON if it exists (app.js behavior)
+                if (lang !== 'ar') {
+                    $.getJSON('assets/lang/' + lang + '.json').done(function(data) {
+                        $('html').attr('lang', lang);
+                        $.each(data, function(key, value) {
+                            if (key === 'head') {
+                                $(document).attr('title', value.title);
+                            }
+                            $('[key="' + key + '"]').text(value);
+                        });
+                    }).fail(function() {
+                        // JSON file doesn't exist, that's okay
+                    });
+                }
+                
+                // Close dropdown
+                var $dropdown = $(this).closest('.dropdown');
+                var $dropdownBtn = $dropdown.find('button[data-bs-toggle="dropdown"]');
+                if ($dropdownBtn.length && typeof bootstrap !== 'undefined' && bootstrap.Dropdown) {
+                    var dropdownInstance = bootstrap.Dropdown.getInstance($dropdownBtn[0]);
+                    if (dropdownInstance) {
+                        dropdownInstance.hide();
+                    }
+                }
+            });
             
-            // Sidebar toggle - use direct click handler
-            var $menuBtn = $('#vertical-menu-btn');
-            if ($menuBtn.length) {
-                $menuBtn.off('click.custom').on('click.custom', function(e) {
-                    e.preventDefault();
-                    e.stopImmediatePropagation();
-                    console.log('Menu button clicked');
-                    $('body').toggleClass('sidebar-enable');
-                    if ($(window).width() >= 992) {
-                        $('body').toggleClass('vertical-collpsed');
-                    } else {
-                        $('body').removeClass('vertical-collpsed');
-                    }
-                    return false;
-                });
-                console.log('Menu button handler attached');
-            } else {
-                console.log('Menu button not found');
-            }
-
-            // Language switching handler
-            var $langLinks = $('.language[data-lang]');
-            if ($langLinks.length) {
-                $langLinks.off('click.custom').on('click.custom', function(e) {
-                    e.preventDefault();
-                    e.stopImmediatePropagation();
-                    var lang = $(this).attr('data-lang');
-                    console.log('Language changed to:', lang);
-                    var $currentLangSpan = $('#current-lang');
-                    
-                    // Update current language display
-                    if ($currentLangSpan.length) {
-                        $currentLangSpan.text(lang === 'ar' ? 'Ar' : 'En');
-                    }
-                    
-                    // Update HTML lang attribute
-                    $('html').attr('lang', lang);
-                    
-                    // Update direction for Arabic
-                    if (lang === 'ar') {
-                        $('html').attr('dir', 'rtl');
-                    } else {
-                        $('html').removeAttr('dir');
-                    }
-                    
-                    // Store in localStorage
-                    localStorage.setItem('language', lang);
-                    
-                    // Close dropdown
-                    var $dropdown = $(this).closest('.dropdown');
-                    var $dropdownBtn = $dropdown.find('button[data-bs-toggle="dropdown"]');
-                    if ($dropdownBtn.length && typeof bootstrap !== 'undefined' && bootstrap.Dropdown) {
-                        var dropdownInstance = bootstrap.Dropdown.getInstance($dropdownBtn[0]);
-                        if (dropdownInstance) {
-                            dropdownInstance.hide();
-                        }
-                    }
-                    return false;
-                });
-                console.log('Language handler attached to', $langLinks.length, 'links');
-            } else {
-                console.log('Language links not found');
-            }
-
-            // Load saved language preference
+            // Load saved language preference on page load
             var savedLang = localStorage.getItem('language');
             var $currentLangSpan = $('#current-lang');
             if (savedLang && $currentLangSpan.length) {
@@ -94,8 +76,8 @@
                     $('html').attr('dir', 'rtl');
                 }
             }
-
-            // Initialize Bootstrap dropdowns
+            
+            // Ensure Bootstrap dropdowns are initialized (app.js should do this, but ensure it)
             if (typeof bootstrap !== 'undefined' && bootstrap.Dropdown) {
                 $('[data-bs-toggle="dropdown"]').each(function() {
                     var existingInstance = bootstrap.Dropdown.getInstance(this);
@@ -103,48 +85,17 @@
                         new bootstrap.Dropdown(this);
                     }
                 });
-                console.log('Bootstrap dropdowns initialized');
-            } else {
-                console.log('Bootstrap not available');
             }
-        });
-        
-        // Also try on document ready as backup
-        $(document).ready(function() {
-            // Sidebar toggle backup
-            $('#vertical-menu-btn').off('click.backup').on('click.backup', function(e) {
-                e.preventDefault();
-                e.stopImmediatePropagation();
-                $('body').toggleClass('sidebar-enable');
-                if ($(window).width() >= 992) {
-                    $('body').toggleClass('vertical-collpsed');
-                }
-                return false;
-            });
-            
-            // Language switching backup
-            $('.language[data-lang]').off('click.backup').on('click.backup', function(e) {
-                e.preventDefault();
-                e.stopImmediatePropagation();
-                var lang = $(this).attr('data-lang');
-                $('#current-lang').text(lang === 'ar' ? 'Ar' : 'En');
-                $('html').attr('lang', lang);
-                if (lang === 'ar') {
-                    $('html').attr('dir', 'rtl');
-                } else {
-                    $('html').removeAttr('dir');
-                }
-                localStorage.setItem('language', lang);
-                return false;
-            });
         });
     }
     
-    // Start initialization
+    // Wait for app.js to load first, then enhance
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initHandlers);
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(enhanceAppJS, 100);
+        });
     } else {
-        initHandlers();
+        setTimeout(enhanceAppJS, 100);
     }
 })();
 </script>
