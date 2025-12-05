@@ -175,7 +175,8 @@ $('.changechecksearch').on('change', function() {
         var payload = {
             product_id: $checkbox.data("productid"),
             field: $checkbox.data("searchname"),
-            value: isChecked ? 1 : 0
+            value: isChecked ? 1 : 0,
+            _token: $('meta[name="csrf-token"]').attr('content')
         };
 
         $checkbox.data('processing', true).prop('disabled', true);
@@ -184,6 +185,9 @@ $('.changechecksearch').on('change', function() {
         $.ajax({
             url: "{{url('/updateproductsearch')}}",
             method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
             data: payload,
             success: function () {
                 $row.addClass('row-flash-success');
