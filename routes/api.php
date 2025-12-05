@@ -19,12 +19,6 @@ Route::middleware('throttle:5,10')->group(function () {
 Route::post('updatepassword', [ApiAuthController::class, 'updatepassword']);
 Route::post('changepassword', [ApiAuthController::class, 'changepassword']);
 
-Route::post('sendphoneotp', [ApiAuthController::class, 'sendphoneotp'])->middleware('throttle:5,10');
-Route::post('updatephone', [ApiAuthController::class, 'updatephone'])->middleware('throttle:5,10');
-
-Route::get('getuser', [ApiAuthController::class, 'getuser']);
-Route::post('updatename', [ApiAuthController::class, 'updatename']);
-
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
@@ -32,8 +26,21 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::middleware('auth:api')->group(function () {
     Route::post('logout', [ApiAuthController::class, 'logout']);
     Route::get('carousals', [ApiAuthController::class, 'carousals']);
+    
+    Route::post('sendphoneotp', [ApiAuthController::class, 'sendphoneotp'])->middleware('throttle:5,10');
+    Route::post('updatephone', [ApiAuthController::class, 'updatephone'])->middleware('throttle:5,10');
+    
+    Route::post('sendemailotp', [ApiAuthController::class, 'sendemailotp'])->middleware('throttle:5,10');
+    Route::post('updateemail', [ApiAuthController::class, 'updateemail'])->middleware('throttle:5,10');
+    
+    Route::get('getuser', [ApiAuthController::class, 'getuser']);
+    Route::post('updatename', [ApiAuthController::class, 'updatename']);
+    
+    Route::post('/addresses', [HomepageController::class, 'addresses']);
+    Route::post('/kids', [UserpageController::class, 'kids']);
 });
 
+Route::get('/homepage', [HomepageController::class, 'homepage']);
 Route::get('/category', [HomepageController::class, 'index']);
 Route::get('/categorylist', [HomepageController::class, 'categorylist']);
 Route::get('/productlist', [HomepageController::class, 'productlist']);
@@ -46,5 +53,3 @@ Route::get('/companydetails', [HomepageController::class, 'settings']);
 Route::get('/faqs', [HomepageController::class, 'faqs']);
 Route::get('/aboutus', [HomepageController::class, 'aboutus']);
 Route::get('/searchcount', [HomepageController::class, 'searchcount']);
-
-Route::post('/kids', [UserpageController::class, 'kids']);

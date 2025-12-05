@@ -28,6 +28,8 @@ use App\Models\usbanner;
 
 use App\Models\Setting;
 use App\Models\Brand;
+use App\Models\UserAddress;
+use App\Models\ProductImage;
 
 
 
@@ -41,7 +43,7 @@ class HomepageController extends BaseController
 
     {
 
-        $category = Category::all();
+        $category = \App\Models\Category::all();
 
         //print_r($category); exit();
 
@@ -125,6 +127,56 @@ class HomepageController extends BaseController
 
     }
 
+    public function homepage(){
+        $topbanners = Topcollection::select('imageurl', 'type', 'categoryId')->where('delete_status','0')->take(4)->get();
+        $categories = Category::select('id as categoryId', 'name', 'description', 'imageurl')->where('delete_status','0')->take(4)->get();
+        $designers = Brand::select('id as brandId', 'imageurl', 'name')->where('delete_status','0')->take(4)->get();
+        $new_arrivals = Product::select('id as productId', 'name', 'price', 'price_offer', 'category_id as categoryId', 'subcategory_id as subcategoryId', 'brand_id as brandId')->where('delete_status','0')->take(8)->get();
+
+        $new_arrivals = $new_arrivals->map(function($item){
+            $Productimage = ProductImage::where("product_id", $item->productId)->where("delete_status", "0")->first();
+            $item->wishlistId = 0;
+            $item->brandName = "";
+            $item->categoryName = "";
+            $item->subcategoryName = "";
+            $item->is_wishlisted = 0;
+            $item->sizeid = 0;
+            $item->qty = 0;
+            $item->sizeName = "";
+            $item->imageurl = !empty($Productimage) ? $Productimage->imageurl : "";
+
+            return $item;
+        });
+
+        $trending = Product::select('id as productId', 'name', 'price', 'price_offer',  'category_id as categoryId', 'subcategory_id as subcategoryId', 'brand_id as brandId')->where('delete_status','0')->inRandomOrder()->limit(8)->get();
+
+        $trending = $trending->map(function($item){
+            $Productimage = ProductImage::where("product_id", $item->productId)->where("delete_status", "0")->first();
+            $item->wishlistId = 0;
+            $item->brandName = "";
+            $item->categoryName = "";
+            $item->subcategoryName = "";
+            $item->is_wishlisted = 0;
+            $item->sizeid = 0;
+            $item->qty = 0;
+            $item->sizeName = "";
+            $item->imageurl = !empty($Productimage) ? $Productimage->imageurl : "";
+
+            return $item;
+        });
+
+        $data["header"] = "Free delivery for all over above 15 KD";
+        $data["cart_count"] = 0;
+        $data["topbanners"] = $topbanners;
+        $data["categories"] = $categories;
+        $data["designers"] = $designers;
+        $data["new_arrivals"] = $new_arrivals;
+        $data["trending"] = $trending;
+
+        $message["success"] = "Home page detail get successfully.";
+        return $this->sendResponse($data, $message);
+    }
+
 
 
 
@@ -178,7 +230,8 @@ class HomepageController extends BaseController
         $Brand = $Brand->where('delete_status', '0')->get();
 
         if (!empty($Brand)) {
-            return $this->sendResponse($Brand, 'Brand Lists');
+            $message["success"] = 'Brand Lists';
+            return $this->sendResponse($Brand, $message);
         } else {
             return $this->sendError('No Brand Available', ['error'=>'Unauthorized']);
         }
@@ -227,10 +280,10 @@ class HomepageController extends BaseController
             $Product->search_count = $Product->search_count + 1;
             $Product->save();
         }
-
+        $message["success"] = "Search count updated!";
         return response()->json([
             "success"=>true,
-            "message"=>"Search count updated!",
+            "message"=>$message,
         ], 200);
     }
 
@@ -400,6 +453,65 @@ class HomepageController extends BaseController
 
         }
 
+    }
+
+    public function addresses(Request $request){
+
+        if($request->action == "create" || $request->action == "update"){
+            if($request->is_default == "1"){
+                UserAddress::where("user_id", auth("api")->user()->id)->update([
+                    "is_default" => 0
+                ]);
+            }
+
+            $UserAddressArr = [
+                "user_id" => auth("api")->user()->id,
+                "name" => $request->name,
+                "country_mobile" => $request->country_mobile,
+                "mobile" => $request->mobile,
+                "landline" => $request->landline,
+                "country_landline" => $request->country_landline,
+                "type" => $request->type,
+                "area_id" => $request->area_id,
+                "block" => $request->block,
+                "street" => $request->street,
+                "avenue" => $request->avenue,
+                "building" => $request->building,
+                "floor" => $request->floor,
+                "apartment" => $request->apartment,
+                "additional_info" => $request->additional_info,
+                "latitude" => $request->latitude,
+                "longitude" => $request->longitude,
+                "is_default" => $request->is_default,
+            ];
+
+            if($request->action == "create"){
+                UserAddress::create($UserAddressArr);
+            } else {
+                UserAddress::where("id", $request->addressId)->update($UserAddressArr);
+            }
+        }
+
+        if($request->action == "default"){
+            UserAddress::where("user_id", auth("api")->user()->id)->update([
+                "is_default" => 0
+            ]);
+            
+            UserAddress::where("id", $request->addressId)->update([
+                "is_default" => 1
+            ]);
+        }
+
+        if($request->action == "delete"){
+            UserAddress::where("id", $request->addressId)->update([
+                "delete_status" => 1
+            ]);
+        }
+
+        $UserAddresses = UserAddress::where("user_id", auth("api")->user()->id)->where("delete_status", "0")->get();
+        
+        $message['success'] = "Addresses list.";
+        return $this->sendResponse($UserAddresses, $message); 
     }
 
 }

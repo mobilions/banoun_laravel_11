@@ -42,42 +42,46 @@ class AuthController extends BaseController
 
     {
         $request->validated();
-
-        $emailTaken = User::where('email', $request->email)->where('is_verified', 1)->exists();
-        if ($emailTaken) {
-            return $this->sendError1(['email' => 'The email has already been taken.']);
+        if ($request->filled('email')) {
+            $emailTaken = User::where('email', $request->email)
+                ->where('is_verified', 1)
+                ->exists();
+        
+            if ($emailTaken) {
+                return $this->sendError1(['email' => 'The email has already been taken.']);
+            }
         }
-
+        
         $phoneTaken = User::where('phone', $request->phone)->where('is_verified', 1)->exists();
         if ($phoneTaken) {
             return $this->sendError1(['phone' => 'The phone number has already been taken.']);
         }
-
-        $usernotverified = User::where('email', $request->email)
-            ->orWhere('phone', $request->phone)
-            ->first();
-
+        
+        $usernotverified = User::where('phone', $request->phone)->first();
+        
         if (!empty($usernotverified) && !$usernotverified->is_verified) {
             $this->setOtpForUser($usernotverified);
-            return $this->sendResponse([
-                'userId' => $usernotverified->id,
-                'message' => 'OTP sent to your registered contact.'
-            ], 'OTP dispatched.');
+            $user = $this->getuser_data($usernotverified->id);
+            $message['success'] = 'OTP sent to your registered contact.';
+            
+            return $this->sendResponse($user, $message);
         }
-
-        $input = $request->only(['name', 'email', 'phone', 'country_code']);
+        $input = $request->only(['name', 'phone', 'country_code']);
+        if ($request->filled('email')) {
+            $input = $request->only(['name', 'email', 'phone', 'country_code']);
+        }
         $input['password'] = bcrypt(Str::random(32));
+
         $user = new User($input);
         $user->is_verified = 0;
         $user->save();
-
         $this->setOtpForUser($user);
 
-        return $this->sendResponse([
-            'userId' => $user->id,
-            'message' => 'OTP sent to your registered contact.'
-        ], 'Registration initiated.');
-
+        $user = $this->getuser_data($user->id);
+        $message['success'] = 'OTP sent to your registered contact.';
+        
+        return $this->sendResponse($user, $message);
+        
     }
 
 
@@ -93,25 +97,29 @@ class AuthController extends BaseController
             $user->otp = null;
             $user->save();
 
+            $success['otp'] =  $user->otp;
             $success['userId'] =  $user->id;
 
             $success['name'] =  $user->name;
 
             $success['phone'] =  $user->phone;
+            $success['imgfile'] =  $user->imgfile;
 
             $success['country_code'] =  $user->country_code;
 
             $success['email'] =  $user->email;
+            $success['credit_balance'] =  $user->credit_balance;
 
             $success['token'] =  $user->createToken('MyApp')->accessToken; 
 
-            return $this->sendResponse($success, 'OTP Verified successfully.');
+            $message['success'] = 'OTP Verified successfully.';
+            return $this->sendResponse($success, $message);
 
         } 
 
         else{ 
 
-            return $this->sendError('Incorrect Otp.', ['error'=>'Unauthorized']);
+            return $this->sendError(['otp'=>'Incorrect Otp.']);
 
         } 
 
@@ -123,28 +131,32 @@ class AuthController extends BaseController
 
     {
 
-        $user = User::where('id',$request->userId)->first();
+        $user = User::where('id', auth("api")->user()->id)->first();
 
-        if(!empty($user) && $this->otpMatches($user, $request->otp)){ 
+        if(!empty($user)){ 
 
             $user->password = bcrypt($request->password);
             $user->is_verified = 1;
             $user->otp = null;
             $user->save();
 
+            $success['otp'] =  $user->otp;
             $success['userId'] =  $user->id;
 
             $success['name'] =  $user->name;
+            $success['imgfile'] =  $user->imgfile;
 
             $success['phone'] =  $user->phone;
 
             $success['country_code'] =  $user->country_code;
 
             $success['email'] =  $user->email;
+            $success['credit_balance'] =  $user->credit_balance;
 
             $success['token'] =  $user->createToken('MyApp')->accessToken; 
 
-            return $this->sendResponse($success, 'Password Updated successfully.');
+            $message['success'] = 'Password Updated successfully.';
+            return $this->sendResponse($success, $message);
 
         } 
 
@@ -165,37 +177,25 @@ class AuthController extends BaseController
     {
 
         $validator = Validator::make($request->all(), [
-
-            'userId' => 'required',
-
+            'name' => 'required',
         ]);
 
-   
-
         if($validator->fails()){
-
-            return $this->sendError('userId is required.', $validator->errors());       
-
+            return $this->sendError($validator->errors());       
         }
 
 
+        User::where('id', auth("api")->user()->id)->update(['name'=>$request->name]);
 
-        User::where('id',$request->userId)->update(['name'=>$request->name]);
+        $this->updateuserchanges(auth("api")->user()->id,'name',$request->name);
 
-        $this->updateuserchanges($request->userId,'name',$request->name);
-
-        $success = $this->getuser($request->userId);
+        $success = $this->getuser_data(auth("api")->user()->id);
 
         if (!empty($success)) {
-
-            return $this->sendResponse($success, 'User register successfully.');
-
-        }
-
-        else{
-
-            return $this->sendError('User not found.', ['error'=>'Unauthorized']);
-
+            $message['success'] = 'User name updated successfully.';
+            return $this->sendResponse($success, $message);
+        }  else {
+            return $this->sendError(['error'=>'Unauthorized']);
         }
 
     }
@@ -206,7 +206,7 @@ class AuthController extends BaseController
 
     {
 
-        $userdetail = User::where('id',$request->userId)->first();
+        $userdetail = User::where('id', auth("api")->user()->id)->first();
 
         if (!empty($userdetail)) {
 
@@ -214,6 +214,7 @@ class AuthController extends BaseController
             $userdetail->save();
             $this->setOtpForUser($userdetail);
 
+            $success['otp'] =  $userdetail->otp;
             $success['userId'] =  $userdetail->id;
 
             $success['name'] =  $userdetail->name;
@@ -221,18 +222,20 @@ class AuthController extends BaseController
             $success['phone'] =  $userdetail->phone;
 
             $success['country_code'] =  $userdetail->country_code;
+            $success['imgfile'] =  $userdetail->imgfile;
 
             $success['email'] =  $userdetail->email;
+            $success['credit_balance'] =  $userdetail->credit_balance;
 
             $success['token'] =  $userdetail->createToken('MyApp')->accessToken; 
 
 
 
-            $this->updateuserchanges($request->userId,'phone',$request->new_phone,$status="0");
+            $this->updateuserchanges(auth("api")->user()->id,'phone',$request->new_phone,$status="0");
 
-            $success['message'] = 'OTP sent to your registered contact.';
+            $message['success'] = 'OTP sent to your registered contact.';
 
-            return $this->sendResponse($success, 'Otp sent successfully.');
+            return $this->sendResponse($success, $message);
 
         }
 
@@ -250,25 +253,28 @@ class AuthController extends BaseController
 
     {
 
-        $user = User::where('id',$request->userId)->first();
+        $user = User::where('id',auth("api")->user()->id)->first();
 
         if(!empty($user) && $this->otpMatches($user, $request->otp)){ 
 
+            $success['otp'] =  $user->otp;
             $success['userId'] =  $user->id;
 
             $success['name'] =  $user->name;
+            $success['imgfile'] =  $user->imgfile;
 
             $success['phone'] =  $user->phone;
 
             $success['country_code'] =  $user->country_code;
 
             $success['email'] =  $user->email;
+            $success['credit_balance'] =  $user->credit_balance;
 
             $success['token'] =  $user->createToken('MyApp')->accessToken; 
 
 
 
-            $lastphone = DB::table('user_changes')->where('user_id',$request->userId)->where('field','phone')->where('is_verified',0)->orderBy('id','desc')->first();
+            $lastphone = DB::table('user_changes')->where('user_id',auth("api")->user()->id)->where('field','phone')->where('is_verified',0)->orderBy('id','desc')->first();
 
             if (!empty($lastphone)) {
 
@@ -286,8 +292,106 @@ class AuthController extends BaseController
                 $user->otp = null;
                 $user->save();
             }
+            $message['success'] = 'Phone number updated successfully.';
+            return $this->sendResponse($success, $message);
 
-            return $this->sendResponse($success, 'Phone number updated successfully.');
+        } 
+
+        else{ 
+
+            return $this->sendError('Incorrect Otp.', ['error'=>'Unauthorized']);
+
+        }
+
+    }
+
+    public function sendemailotp(Request $request)
+    {
+        $userdetail = User::where('id', auth("api")->user()->id)->first();
+
+        if (!empty($userdetail)) {
+
+            $userdetail->is_verified = 0;
+            $userdetail->save();
+            $this->setOtpForUser($userdetail);
+
+            $success['otp'] =  $userdetail->otp;
+            $success['userId'] =  $userdetail->id;
+
+            $success['name'] =  $userdetail->name;
+
+            $success['phone'] =  $userdetail->phone;
+
+            $success['country_code'] =  $userdetail->country_code;
+            $success['imgfile'] =  $userdetail->imgfile;
+
+            $success['email'] =  $userdetail->email;
+            $success['credit_balance'] =  $userdetail->credit_balance;
+
+            $success['token'] =  $userdetail->createToken('MyApp')->accessToken; 
+
+
+
+            $this->updateuserchanges(auth("api")->user()->id,'email',$request->new_email,$status="0");
+
+            $message['success'] = 'OTP sent to your registered contact.';
+
+            return $this->sendResponse($success, $message);
+
+        }
+
+        else{ 
+
+            return $this->sendError('Email not found.', ['error'=>'Unauthorized']);
+
+        } 
+
+    }
+
+    public function updateemail(Request $request)
+    {
+
+        $user = User::where('id',auth("api")->user()->id)->first();
+
+        if(!empty($user) && $this->otpMatches($user, $request->otp)){ 
+
+            $success['otp'] =  $user->otp;
+            $success['userId'] =  $user->id;
+
+            $success['name'] =  $user->name;
+            $success['imgfile'] =  $user->imgfile;
+
+            $success['phone'] =  $user->phone;
+
+            $success['country_code'] =  $user->country_code;
+
+            $success['email'] =  $user->email;
+            $success['credit_balance'] =  $user->credit_balance;
+
+            $success['token'] =  $user->createToken('MyApp')->accessToken; 
+
+
+
+            $lastemail = DB::table('user_changes')->where('user_id',auth("api")->user()->id)->where('field','email')->where('is_verified',0)->orderBy('id','desc')->first();
+
+            if (!empty($lastemail)) {
+
+                $user->is_verified = 1;
+                $user->email = $lastemail->value;
+                $user->otp = null;
+                $user->save();
+
+                DB::table('user_changes')->where('id',$lastemail->id)->update(['is_verified'=>1]);
+
+                $success['email'] =  $lastemail->value;
+
+            } else {
+                $user->is_verified = 1;
+                $user->otp = null;
+                $user->save();
+            }
+            $message['success'] = 'Email address updated successfully.';
+            return $this->sendResponse($success, $message);
 
         } 
 
@@ -314,16 +418,26 @@ class AuthController extends BaseController
             $userdetail->is_verified = 0;
             $userdetail->save();
 
-            return $this->sendResponse([
-                'userId' => $userdetail->id,
-                'message' => 'OTP sent to your registered contact.'
-            ], 'OTP dispatched.');
+            
+            $success['otp'] =  $userdetail->otp;
+            $success['userId'] =  $userdetail->id;
+            $success['name'] =  $userdetail->name;
+            $success['imgfile'] =  $userdetail->imgfile;
+            $success['phone'] =  $userdetail->phone;
+            $success['country_code'] =  $userdetail->country_code;
+            $success['email'] =  $userdetail->email;
+            $success['credit_balance'] =  $userdetail->credit_balance;
+            $success['token'] =  $userdetail->createToken('MyApp')->accessToken; 
+
+            $message['success'] = 'OTP sent to your registered contact.';
+
+            return $this->sendResponse($success, $message);
 
         }
 
         else{ 
 
-            return $this->sendError('Phone number not found.', ['error'=>'Unauthorized']);
+            return $this->sendError(['error'=>'Unauthorized']);
 
         } 
 
@@ -337,7 +451,8 @@ class AuthController extends BaseController
 
         $validator = Validator::make($request->all(), [
 
-            'userId' => 'required',
+            'current_password' => 'required',
+            'new_password' => 'required',
 
         ]);
 
@@ -345,7 +460,7 @@ class AuthController extends BaseController
 
         if($validator->fails()){
 
-            return $this->sendError('userId is required.', $validator->errors());       
+            return $this->sendError($validator->errors());       
 
         }
 
@@ -359,27 +474,31 @@ class AuthController extends BaseController
 
 
 
-        $userdetail = User::where('id',$request->userId)->first();
+        $userdetail = User::where('id',auth("api")->user()->id)->first();
 
         if (!empty($userdetail) && password_verify($request->current_password,$userdetail->password)) {
 
+            $success['otp'] =  $userdetail->otp;
             $success['userId'] =  $userdetail->id;
 
             $success['name'] =  $userdetail->name;
+            $success['imgfile'] =  $userdetail->imgfile;
 
             $success['phone'] =  $userdetail->phone;
 
             $success['country_code'] =  $userdetail->country_code;
 
             $success['email'] =  $userdetail->email;
+            $success['credit_balance'] =  $userdetail->credit_balance;
 
             $success['token'] =  $userdetail->createToken('MyApp')->accessToken; 
 
             User::where('id',$userdetail->id)->update(['password'=>bcrypt($request->new_password)]);
 
             $this->updateuserchanges($userdetail->id,'password',bcrypt($request->new_password));
+            $message['success'] = 'Password Updated successfully.';
 
-            return $this->sendResponse($success, 'Password Updated successfully.');
+            return $this->sendResponse($success, $message);
 
         }
 
@@ -398,7 +517,7 @@ class AuthController extends BaseController
     {
         $request->validated();
 
-        $useremail = User::select('email','is_verified')->where(function($query) use ($request) {
+        $useremail = User::select('email','phone','is_verified')->where(function($query) use ($request) {
             $query->where('email',$request->username)
                   ->orWhere('phone',$request->username);
         })->first();
@@ -407,23 +526,23 @@ class AuthController extends BaseController
 
         if ($useremail->is_verified == 1) {
 
-            if(Auth::attempt(['email' => $useremail->email, 'password' => $request->password])){ 
+            if(Auth::attempt(['phone' => $useremail->phone, 'password' => $request->password])){ 
 
                 $user = Auth::user(); 
 
+                $success['otp'] =  $user->otp;
                 $success['userId'] =  $user->id;
-
                 $success['name'] =  $user->name;
-
+                $success['imgfile'] =  $user->imgfile;
                 $success['phone'] =  $user->phone;
-
                 $success['country_code'] =  $user->country_code;
-
                 $success['email'] =  $user->email;
-
+                $success['credit_balance'] =  $user->credit_balance;
                 $success['token'] =  $user->createToken('MyApp')->accessToken; 
 
-                return $this->sendResponse($success, 'User login successfully.');
+                $message['success'] = 'User login successfully.';
+
+                return $this->sendResponse($success, $message);
 
             }
 
@@ -439,7 +558,7 @@ class AuthController extends BaseController
 
         else{ 
 
-            return $this->sendError('Otp Not Verified.', ['error'=>'Unauthorized']);
+            return $this->sendError(['error'=>'Unauthorized']);
 
         } 
 
@@ -521,10 +640,11 @@ class AuthController extends BaseController
 
     protected function setOtpForUser(User $user): void
     {
-        $otp = $this->generateOtp();
-        $user->otp = Hash::make($otp);
+        // $otp = $this->generateOtp();
+        $otp = 123456;
+        $user->otp = $otp;
         $user->save();
-        $this->dispatchOtp($user, $otp);
+        // $this->dispatchOtp($user, $otp);
     }
 
     protected function otpMatches(User $user, $otp): bool
@@ -560,21 +680,32 @@ class AuthController extends BaseController
 
 
 
-    public function getuser($id) {
+    public function getuser(){
+        $id = auth("api")->user()->id;
+        $user = User::select("otp", "id as userId", "name", "imgfile", "phone", "country_code", "email", "credit_balance")->where("id", $id)->first();
 
+        $user['token'] =  $user->createToken('MyApp')->accessToken; 
+        $message["success"] = 'User profile get successfully.';
+        return $this->sendResponse($user, $message);
+    }
+
+    public function getuser_data($id) {
         $user = User::Find($id);
 
         if(!empty($user)){ 
 
+            $success['otp'] =  $user->otp;
             $success['userId'] =  $user->id;
 
             $success['name'] =  $user->name;
+            $success['imgfile'] =  $user->imgfile;
 
             $success['phone'] =  $user->phone;
 
             $success['country_code'] =  $user->country_code;
 
             $success['email'] =  $user->email;
+            $success['credit_balance'] =  $user->credit_balance;
 
             $success['token'] =  $user->createToken('MyApp')->accessToken; 
 
