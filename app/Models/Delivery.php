@@ -16,7 +16,7 @@ class Delivery extends Model
 {
     use SoftDeleteByStatus;
 
-	protected  $table="delivery_options";
+	protected  $table="deliveries";
 
 
 
