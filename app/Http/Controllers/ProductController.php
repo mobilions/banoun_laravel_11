@@ -8,7 +8,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 
-use App\Models\Productimage;
+use App\Models\ProductImage;
 
 use App\Models\Searchtag;
 
@@ -323,14 +323,14 @@ class ProductController extends Controller
 
             $product_id = $product->id;
 
-            $primaryImage = new Productimage; 
+            $primaryImage = new ProductImage; 
             $primaryImage->product_id = $product_id;
             $primaryImage->imageurl = $imgurl;
             $primaryImage->created_by = Auth::user()->id;
             $primaryImage->save();
 
             if(!empty($request->file('imgfile2')) && $imgurl2){
-                $secondImage = new Productimage; 
+                $secondImage = new ProductImage; 
                 $secondImage->product_id = $product_id;
                 $secondImage->imageurl = $imgurl2;
                 $secondImage->created_by = Auth::user()->id;
@@ -339,7 +339,7 @@ class ProductController extends Controller
             
 
             if(!empty($request->file('imgfile3')) && $imgurl3){
-                $thirdImage = new Productimage; 
+                $thirdImage = new ProductImage; 
                 $thirdImage->product_id = $product_id;
                 $thirdImage->imageurl = $imgurl3;
                 $thirdImage->created_by = Auth::user()->id;
@@ -434,7 +434,7 @@ class ProductController extends Controller
 
         $searchtags = Searchtag::active()->get();
 
-        $productvariantimages=Productimage::where('product_id',$id)
+        $productvariantimages=ProductImage::where('product_id',$id)
             ->where('delete_status','0')
             ->get()
             ->map(function ($image) {
@@ -662,7 +662,7 @@ class ProductController extends Controller
     try {
         \Log::info('Saving to database...');
         
-        $data = new Productimage; 
+        $data = new ProductImage; 
         $data->product_id = $request->product_id;
         $data->imageurl = $imgurl;
         $data->created_by = Auth::user()->id;
@@ -799,7 +799,7 @@ private function storeImageFile($file): ?string
 
     {
 
-        $data = Productimage::find($id);
+        $data = ProductImage::find($id);
 
         $data->delete_status = 1;
 
