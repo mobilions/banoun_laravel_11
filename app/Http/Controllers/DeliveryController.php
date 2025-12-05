@@ -96,7 +96,7 @@ class DeliveryController extends Controller
         $this->validate($request, [
             'name' => 'required|string|max:255',
             'name_ar' => 'nullable|string|max:255',
-            'imgfile' => 'nullable|image|mimes:svg|max:2048',
+            'imgfile' => 'nullable|image',
         ], [
             'name.required' => 'Info is required.',
             'name.max' => 'Info must not exceed 255 characters.',
