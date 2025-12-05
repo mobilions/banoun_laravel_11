@@ -4,6 +4,100 @@
 <script src="{{asset('/assets')}}/libs/simplebar/simplebar.min.js"></script>
 <script src="{{asset('/assets')}}/libs/node-waves/waves.min.js"></script>
 <script src="{{asset('/assets')}}/js/app.js"></script>
+<script>
+// Fix handlers - ensure they work even if app.js has errors
+(function() {
+    function initHandlers() {
+        if (typeof jQuery === 'undefined') {
+            setTimeout(initHandlers, 50);
+            return;
+        }
+        
+        var $ = jQuery;
+        
+        // Wait for DOM to be ready
+        $(document).ready(function() {
+            // Sidebar toggle - ensure it works
+            $(document).off('click', '#vertical-menu-btn').on('click', '#vertical-menu-btn', function(e) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                $('body').toggleClass('sidebar-enable');
+                if ($(window).width() >= 992) {
+                    $('body').toggleClass('vertical-collpsed');
+                } else {
+                    $('body').removeClass('vertical-collpsed');
+                }
+                return false;
+            });
+
+            // Language switching handler
+            $(document).off('click', '.language[data-lang]').on('click', '.language[data-lang]', function(e) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                var lang = $(this).attr('data-lang');
+                var $currentLangSpan = $('#current-lang');
+                
+                // Update current language display
+                if ($currentLangSpan.length) {
+                    $currentLangSpan.text(lang === 'ar' ? 'Ar' : 'En');
+                }
+                
+                // Update HTML lang attribute
+                $('html').attr('lang', lang);
+                
+                // Update direction for Arabic
+                if (lang === 'ar') {
+                    $('html').attr('dir', 'rtl');
+                } else {
+                    $('html').removeAttr('dir');
+                }
+                
+                // Store in localStorage
+                localStorage.setItem('language', lang);
+                
+                // Close dropdown
+                var $dropdown = $(this).closest('.dropdown');
+                var $dropdownBtn = $dropdown.find('button[data-bs-toggle="dropdown"]');
+                if ($dropdownBtn.length && typeof bootstrap !== 'undefined' && bootstrap.Dropdown) {
+                    var dropdownInstance = bootstrap.Dropdown.getInstance($dropdownBtn[0]);
+                    if (dropdownInstance) {
+                        dropdownInstance.hide();
+                    }
+                }
+                return false;
+            });
+
+            // Load saved language preference
+            var savedLang = localStorage.getItem('language');
+            var $currentLangSpan = $('#current-lang');
+            if (savedLang && $currentLangSpan.length) {
+                $currentLangSpan.text(savedLang === 'ar' ? 'Ar' : 'En');
+                $('html').attr('lang', savedLang);
+                if (savedLang === 'ar') {
+                    $('html').attr('dir', 'rtl');
+                }
+            }
+
+            // Initialize Bootstrap dropdowns
+            if (typeof bootstrap !== 'undefined' && bootstrap.Dropdown) {
+                $('[data-bs-toggle="dropdown"]').each(function() {
+                    var existingInstance = bootstrap.Dropdown.getInstance(this);
+                    if (!existingInstance) {
+                        new bootstrap.Dropdown(this);
+                    }
+                });
+            }
+        });
+    }
+    
+    // Start initialization
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initHandlers);
+    } else {
+        initHandlers();
+    }
+})();
+</script>
 {{-- Vite handles the application's JS (app.js) via @vite in the head. --}}
 <script>
 (function () {
@@ -113,115 +207,6 @@
         Array.prototype.forEach.call(forms, bindSearchForm);
     });
 })();
-</script>
-<script>
-// Ensure all handlers are properly initialized
-document.addEventListener('DOMContentLoaded', function() {
-    // Sidebar toggle handler (backup in case app.js doesn't load)
-    var verticalMenuBtn = document.getElementById('vertical-menu-btn');
-    if (verticalMenuBtn) {
-        verticalMenuBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            document.body.classList.toggle('sidebar-enable');
-            if (window.innerWidth >= 992) {
-                document.body.classList.toggle('vertical-collpsed');
-            } else {
-                document.body.classList.remove('vertical-collpsed');
-            }
-        });
-    }
-
-    // Fullscreen handler (backup)
-    var fullscreenBtns = document.querySelectorAll('[data-bs-toggle="fullscreen"]');
-    fullscreenBtns.forEach(function(btn) {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            document.body.classList.toggle('fullscreen-enable');
-            
-            if (!document.fullscreenElement && !document.mozFullScreenElement && !document.webkitFullscreenElement) {
-                if (document.documentElement.requestFullscreen) {
-                    document.documentElement.requestFullscreen();
-                } else if (document.documentElement.mozRequestFullScreen) {
-                    document.documentElement.mozRequestFullScreen();
-                } else if (document.documentElement.webkitRequestFullscreen) {
-                    document.documentElement.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
-                }
-            } else {
-                if (document.cancelFullScreen) {
-                    document.cancelFullScreen();
-                } else if (document.mozCancelFullScreen) {
-                    document.mozCancelFullScreen();
-                } else if (document.webkitCancelFullScreen) {
-                    document.webkitCancelFullScreen();
-                }
-            }
-        });
-    });
-
-    // Language switching handler
-    var languageLinks = document.querySelectorAll('.language[data-lang]');
-    var currentLangSpan = document.getElementById('current-lang');
-    
-    languageLinks.forEach(function(link) {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-            var lang = this.getAttribute('data-lang');
-            
-            // Update current language display
-            if (currentLangSpan) {
-                currentLangSpan.textContent = lang === 'ar' ? 'Ar' : 'En';
-            }
-            
-            // Update HTML lang attribute
-            document.documentElement.setAttribute('lang', lang);
-            
-            // Update direction for Arabic
-            if (lang === 'ar') {
-                document.documentElement.setAttribute('dir', 'rtl');
-            } else {
-                document.documentElement.removeAttribute('dir');
-            }
-            
-            // Store in localStorage
-            localStorage.setItem('language', lang);
-            
-            // Close dropdown
-            var dropdown = bootstrap.Dropdown.getInstance(document.querySelector('[data-bs-toggle="dropdown"]'));
-            if (dropdown) {
-                dropdown.hide();
-            }
-        });
-    });
-
-    // Load saved language preference
-    var savedLang = localStorage.getItem('language');
-    if (savedLang && currentLangSpan) {
-        currentLangSpan.textContent = savedLang === 'ar' ? 'Ar' : 'En';
-        document.documentElement.setAttribute('lang', savedLang);
-        if (savedLang === 'ar') {
-            document.documentElement.setAttribute('dir', 'rtl');
-        }
-    }
-
-    // Fullscreen change event handlers
-    function handleFullscreenChange() {
-        if (!document.fullscreenElement && !document.mozFullScreenElement && !document.webkitFullscreenElement) {
-            document.body.classList.remove('fullscreen-enable');
-        }
-    }
-    
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
-    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
-
-    // Initialize Bootstrap dropdowns
-    if (typeof bootstrap !== 'undefined' && bootstrap.Dropdown) {
-        var dropdownElementList = [].slice.call(document.querySelectorAll('[data-bs-toggle="dropdown"]'));
-        dropdownElementList.map(function (dropdownToggleEl) {
-            return new bootstrap.Dropdown(dropdownToggleEl);
-        });
-    }
-});
 </script>
 @yield('ScriptContent')
 @if ($errors->any())
