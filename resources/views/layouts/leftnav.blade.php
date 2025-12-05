@@ -34,11 +34,11 @@
 
                 <li> <a href="{{url('/customer')}}" class="waves-effect"><i class="bx bxs-user-detail"></i><span key="t-chat">Customer</span> </a> </li>
 
-                <li> <a href="{{url('/faq/terms')}}" class="waves-effect"><i class="bx bx-book-open"></i><span key="t-chat">Terms & Conditions</span> </a> </li>
+                <li> <a href="{{url('/terms')}}" class="waves-effect"><i class="bx bx-book-open"></i><span key="t-chat">Terms & Conditions</span> </a> </li>
 
-                <li> <a href="{{url('/faq/faq')}}" class="waves-effect"><i class="bx bx-book-open"></i><span key="t-chat">FAQ</span> </a> </li>
+                <li> <a href="{{url('/faq')}}" class="waves-effect"><i class="bx bx-book-open"></i><span key="t-chat">FAQ</span> </a> </li>
 
-                <li> <a href="{{url('/faq/about')}}" class="waves-effect"><i class="bx bx bx-copy-alt"></i><span key="t-chat">About us</span> </a> </li>
+                <li> <a href="{{url('/about')}}" class="waves-effect"><i class="bx bx bx-copy-alt"></i><span key="t-chat">About us</span> </a> </li>
 
                 <li> <a href="{{url('/delivery')}}" class="waves-effect"><i class="bx bx bx-cycling"></i><span key="t-chat">Delivery</span> </a> </li>
 
