@@ -465,7 +465,6 @@ class ProductController extends Controller
      */
 
     public function update(Request $request, Product $product)
-
     {
         $this->validate($request, [
             'editid' => 'required|exists:products,id',
@@ -581,16 +580,178 @@ class ProductController extends Controller
 
     }
 
-    private function storeImageFile($file): ?string
-    {
-        if (!$file) {
+    public function productvimage(Request $request)
+{    
+    \Log::info('=== PRODUCT IMAGE UPLOAD STARTED ===');
+    \Log::info('Request data:', $request->all());
+    \Log::info('Has file: ' . ($request->hasFile('imgfile') ? 'YES' : 'NO'));
+    
+    // Log request details
+    if ($request->hasFile('imgfile')) {
+        $file = $request->file('imgfile');
+        \Log::info('File details:', [
+            'original_name' => $file->getClientOriginalName(),
+            'mime_type' => $file->getMimeType(),
+            'size' => $file->getSize(),
+            'extension' => $file->getClientOriginalExtension(),
+            'is_valid' => $file->isValid(),
+            'error' => $file->getError(),
+            'temp_path' => $file->getRealPath(),
+        ]);
+    } else {
+        \Log::error('No file in request!');
+        return redirect()->back()->withErrors(['imgfile' => 'No file was uploaded']);
+    }
+
+    // Validate
+    try {
+        $this->validate($request, [
+            'imgfile' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'product_id' => 'required|exists:products,id',
+        ]);
+        \Log::info('Validation passed');
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        \Log::error('Validation failed:', $e->errors());
+        return redirect()->back()->withErrors($e->errors());
+    }
+
+    // Check storage directory
+    $storagePath = storage_path('app/public/image');
+    \Log::info('Storage path:', [
+        'path' => $storagePath,
+        'exists' => file_exists($storagePath),
+        'writable' => is_writable($storagePath),
+        'permissions' => file_exists($storagePath) ? substr(sprintf('%o', fileperms($storagePath)), -4) : 'N/A',
+    ]);
+
+    // Try to create directory if missing
+    if (!file_exists($storagePath)) {
+        \Log::warning('Storage directory does not exist, attempting to create...');
+        try {
+            mkdir($storagePath, 0775, true);
+            \Log::info('Directory created successfully');
+        } catch (\Exception $e) {
+            \Log::error('Failed to create directory: ' . $e->getMessage());
+        }
+    }
+
+    // Store file
+    try {
+        \Log::info('Attempting to store file...');
+        $imgurl = $this->storeImageFile($request->file('imgfile'));
+        
+        if (!$imgurl) {
+            \Log::error('storeImageFile returned null or empty');
+            return redirect()->back()->withErrors(['imgfile' => 'Failed to store image file']);
+        }
+        
+        \Log::info('File stored successfully at: ' . $imgurl);
+        
+    } catch (\Exception $e) {
+        \Log::error('Exception during file storage:', [
+            'message' => $e->getMessage(),
+            'code' => $e->getCode(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+            'trace' => $e->getTraceAsString(),
+        ]);
+        return redirect()->back()->withErrors(['imgfile' => 'Storage error: ' . $e->getMessage()]);
+    }
+
+    // Save to database
+    try {
+        \Log::info('Saving to database...');
+        
+        $data = new Productimage; 
+        $data->product_id = $request->product_id;
+        $data->imageurl = $imgurl;
+        $data->created_by = Auth::user()->id;
+        $data->save();
+        
+        \Log::info('Database record created with ID: ' . $data->id);
+        \Log::info('=== PRODUCT IMAGE UPLOAD COMPLETED SUCCESSFULLY ===');
+        
+        return redirect()->back()->with('success', 'Image uploaded successfully!');
+        
+    } catch (\Exception $e) {
+        \Log::error('Database save failed:', [
+            'message' => $e->getMessage(),
+            'code' => $e->getCode(),
+            'trace' => $e->getTraceAsString(),
+        ]);
+        
+        // Try to delete the uploaded file if DB save fails
+        if ($imgurl) {
+            try {
+                $cleanPath = str_replace('storage/', '', $imgurl);
+                Storage::disk('public')->delete($cleanPath);
+                \Log::info('Cleaned up uploaded file after DB failure');
+            } catch (\Exception $cleanupError) {
+                \Log::error('Failed to cleanup file: ' . $cleanupError->getMessage());
+            }
+        }
+        
+        return redirect()->back()->withErrors(['imgfile' => 'Database error: ' . $e->getMessage()]);
+    }
+}
+
+private function storeImageFile($file): ?string
+{
+    \Log::info('=== storeImageFile method called ===');
+    
+    if (!$file) {
+        \Log::error('File parameter is null');
+        return null;
+    }
+
+    \Log::info('File received:', [
+        'name' => $file->getClientOriginalName(),
+        'size' => $file->getSize(),
+        'valid' => $file->isValid(),
+    ]);
+
+    try {
+        // Check if public disk is configured
+        $diskConfig = config('filesystems.disks.public');
+        \Log::info('Public disk config:', $diskConfig);
+        
+        // Attempt to store
+        \Log::info('Calling file->store()...');
+        $storedPath = $file->store('image', 'public');
+        
+        \Log::info('file->store() returned: ' . ($storedPath ?: 'NULL'));
+        
+        if (!$storedPath) {
+            \Log::error('store() method returned empty value');
             return null;
         }
-
-        $storedPath = $file->store('image', 'public');
-
-        return 'storage/'.$storedPath;
+        
+        // Verify file was actually created
+        $fullPath = storage_path('app/public/' . $storedPath);
+        \Log::info('Checking if file exists at: ' . $fullPath);
+        \Log::info('File exists: ' . (file_exists($fullPath) ? 'YES' : 'NO'));
+        
+        if (file_exists($fullPath)) {
+            \Log::info('File size on disk: ' . filesize($fullPath) . ' bytes');
+            \Log::info('File permissions: ' . substr(sprintf('%o', fileperms($fullPath)), -4));
+        }
+        
+        $returnPath = 'storage/' . $storedPath;
+        \Log::info('Returning path: ' . $returnPath);
+        
+        return $returnPath;
+        
+    } catch (\Exception $e) {
+        \Log::error('Exception in storeImageFile:', [
+            'message' => $e->getMessage(),
+            'code' => $e->getCode(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+            'trace' => $e->getTraceAsString(),
+        ]);
+        return null;
     }
+}
 
     
     public function updatecartprices($product_id,$variant_id,$actualprice)
@@ -632,39 +793,6 @@ class ProductController extends Controller
         return redirect('/product')->with('success', 'Product deleted successfully.');
 
     }
-
-
-
-    public function productvimage(Request $request)
-
-    {    
-
-        
-
-        $this->validate($request, ['imgfile' => 'image|mimes:jpeg,png,jpg,gif,svg',]);
-
-
-
-        $imgurl    = $this->storeImageFile($request->file('imgfile')) ?? '';
-
-        
-
-        $data = new Productimage; 
-
-        $data->product_id = $request->product_id;
-
-        $data->imageurl    = $imgurl;
-
-        $data->created_by=Auth::user()->id;
-
-        $data->save();
-
-        
-
-        return redirect()->back();
-
-    }
-
 
 
      public function destroyproductvimage($id)
