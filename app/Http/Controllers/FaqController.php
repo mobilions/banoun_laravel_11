@@ -40,31 +40,31 @@ class FaqController extends Controller
 
 
 
-    public function index($val)
+    public function index(Request $request)
 
     {
-
-        if($val=='about'){
-
-            $title = "About Us";
-
-        }
-
-        if($val=='faq'){
-
-            $title = "FAQ";
-
-        }
-
-        if($val=='terms'){
-
-            $title = "Terms & Condtions";
-
-        }
-
+        // Get type from route name (terms, faq, about)
+        $routeName = $request->route()->getName();
+        $type = 'faq'; // default
         
+        if($routeName == 'terms'){
+            $type = 'terms';
+            $title = "Terms & Conditions";
+        } elseif($routeName == 'faq'){
+            $type = 'faq';
+            $title = "FAQ";
+        } elseif($routeName == 'about'){
+            $type = 'about';
+            $title = "About Us";
+        } else {
+            $title = "FAQ";
+        }
 
-        $indexes = Faq::where('delete_status','0')->where('type',$val)->get();
+        $indexes = Faq::where('delete_status','0')
+            ->where('type',$type)
+            ->orderByDesc('created_at')
+            ->get();
+        $val = $type; // Pass type as val to view
 
         return view('faq.index',compact('title','indexes','val'));  
 
@@ -82,27 +82,26 @@ class FaqController extends Controller
 
      */
 
-    public function create($val)
+    public function create(Request $request)
 
     {
-
-        if($val=='about'){
-
-            $title = "About Us";
-
-        }
-
-        if($val=='faq'){
-
+        // Get type from route name (terms, faq, about)
+        $routeName = $request->route()->getName();
+        $type = 'faq'; // default
+        
+        if($routeName == 'termscreate'){
+            $type = 'terms';
+            $title = "Terms & Conditions";
+        } elseif($routeName == 'faqcreate'){
+            $type = 'faq';
             $title = "FAQ";
-
+        } elseif($routeName == 'aboutcreate'){
+            $type = 'about';
+            $title = "About Us";
+        } else {
+            $title = "FAQ";
         }
-
-        if($val=='terms'){
-
-            $title = "Terms & Condtions";
-
-        }
+        $val = $type; // Pass type as val to view
 
         return view('faq.create',compact('title','val')); 
 
@@ -125,18 +124,29 @@ class FaqController extends Controller
     public function store(Request $request)
 
     {
+        // Get type from route name
+        $routeName = $request->route()->getName();
+        $type = 'faq'; // default
+        
+        if($routeName == 'termsstore'){
+            $type = 'terms';
+        } elseif($routeName == 'faqstore'){
+            $type = 'faq';
+        } elseif($routeName == 'aboutstore'){
+            $type = 'about';
+        }
+
         $this->validate($request, [
             'name' => 'required|string|max:255',
             'name_ar' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'description_ar' => 'nullable|string',
-            'type' => 'required|string|in:about,faq,terms',
         ], [
-            'name.required' => 'Name is required.',
-            'name.max' => 'Name must not exceed 255 characters.',
-            'name_ar.max' => 'Arabic name must not exceed 255 characters.',
-            'type.required' => 'Type is required.',
-            'type.in' => 'Invalid type selected.',
+            'name.required' => 'Title is required.',
+            'name.max' => 'Title must not exceed 255 characters.',
+            'name_ar.max' => 'Arabic title must not exceed 255 characters.',
+            'description.string' => 'Description must be a valid text.',
+            'description_ar.string' => 'Arabic description must be a valid text.',
         ]);
 
         try {
@@ -146,13 +156,15 @@ class FaqController extends Controller
             $data->content = $request->description;
             $data->title_ar = $request->name_ar;
             $data->content_ar = $request->description_ar;
-            $data->type = $request->type;
+            $data->type = $type;
             $data->delete_status = '0';
             $data->created_by = Auth::user()->id;
 
             $data->save();
 
-            return redirect('/faq/'.$request->type)->with('success', 'Record created successfully.');
+            // Redirect based on type
+            $redirectUrl = '/' . $type;
+            return redirect($redirectUrl)->with('success', 'Record created successfully.');
         } catch (\Exception $e) {
             \Log::error('FAQ creation failed: ' . $e->getMessage());
             return redirect()->back()->withInput()->with('error', 'Failed to create record. Please try again.');
@@ -199,27 +211,22 @@ class FaqController extends Controller
     public function edit(Faq $faq,$id)
 
     {
+        $log = Faq::where('id',$id)->where('delete_status','0')->first();
 
-        $log = Faq::where('id',$id)->first();
+        if (empty($log)) {
+            return redirect()->back()->with('error', 'Record not found.');
+        }
 
         $val = $log->type;
 
         if($val=='about'){
-
             $title = "About Us";
-
-        }
-
-        if($val=='faq'){
-
+        } elseif($val=='faq'){
             $title = "FAQ";
-
-        }
-
-        if($val=='terms'){
-
-            $title = "Terms & Condtions";
-
+        } elseif($val=='terms'){
+            $title = "Terms & Conditions";
+        } else {
+            $title = "FAQ";
         }
 
         return view('faq.edit',compact('title','log'));  
@@ -246,27 +253,31 @@ class FaqController extends Controller
 
     {
         $this->validate($request, [
-            'editid' => 'required|exists:faqs,id',
+            'editid' => 'required|exists:qa_details,id',
             'name' => 'required|string|max:255',
             'name_ar' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'description_ar' => 'nullable|string',
-            'type' => 'required|string|in:about,faq,terms',
         ], [
             'editid.required' => 'Record ID is required.',
             'editid.exists' => 'Selected record does not exist.',
-            'name.required' => 'Name is required.',
-            'name.max' => 'Name must not exceed 255 characters.',
-            'name_ar.max' => 'Arabic name must not exceed 255 characters.',
-            'type.required' => 'Type is required.',
-            'type.in' => 'Invalid type selected.',
+            'name.required' => 'Title is required.',
+            'name.max' => 'Title must not exceed 255 characters.',
+            'name_ar.max' => 'Arabic title must not exceed 255 characters.',
+            'description.string' => 'Description must be a valid text.',
+            'description_ar.string' => 'Arabic description must be a valid text.',
         ]);
 
-        $data = Faq::find($request->editid);
+        $data = Faq::where('id', $request->editid)
+            ->where('delete_status', '0')
+            ->first();
 
         if (empty($data)) { 
-            return redirect('/faq/'.$request->type)->with('error', 'Record not found.');
+            $type = 'faq';
+            return redirect('/' . $type)->with('error', 'Record not found or has been deleted.');
         }
+
+        $type = $data->type;
 
         try {
             $data->title = $request->name;
@@ -277,7 +288,9 @@ class FaqController extends Controller
 
             $data->save();
 
-            return redirect('/faq/'.$request->type)->with('success', 'Record updated successfully.');
+            // Redirect based on type from the record
+            $redirectUrl = '/' . $data->type;
+            return redirect($redirectUrl)->with('success', 'Record updated successfully.');
         } catch (\Exception $e) {
             \Log::error('FAQ update failed: ' . $e->getMessage());
             return redirect()->back()->withInput()->with('error', 'Failed to update record. Please try again.');
@@ -299,23 +312,29 @@ class FaqController extends Controller
 
      */
 
-    public function destroy(Faq $faq,$id,$val)
+    public function destroy(Faq $faq, $id)
 
     {
-        $data = Faq::find($id);
+        $data = Faq::where('id', $id)
+            ->where('delete_status', '0')
+            ->first();
 
         if (empty($data)) {
-            return redirect('/faq/'.$val)->with('error', 'Record not found.');
+            $type = 'faq';
+            return redirect('/' . $type)->with('error', 'Record not found or already deleted.');
         }
+
+        $type = $data->type;
 
         try {
             $data->delete_status = 1;
+            $data->updated_by = Auth::user()->id;
             $data->save();
 
-            return redirect('/faq/'.$val)->with('success', 'Record deleted successfully.');
+            return redirect('/' . $type)->with('success', 'Record deleted successfully.');
         } catch (\Exception $e) {
             \Log::error('FAQ deletion failed: ' . $e->getMessage());
-            return redirect('/faq/'.$val)->with('error', 'Failed to delete record. Please try again.');
+            return redirect('/' . $type)->with('error', 'Failed to delete record. Please try again.');
         }
 
     }

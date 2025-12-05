@@ -48,7 +48,7 @@
 
             <div class="col-sm-12 pt-3">
 
-                <form  action="{{url('/faq/update')}}" method="post" enctype="multipart/form-data">
+                <form  action="{{url('/' . $log->type . '/update')}}" method="post" enctype="multipart/form-data">
 
                 {{csrf_field()}}  
 
@@ -58,13 +58,11 @@
 
                         <div>
 
-                            <label>Name <span class="text-danger">*</span></label>
+                            <label>Title <span class="text-danger">*</span></label>
 
                             <input class="form-control @error('name') is-invalid @enderror" value="{{ old('name', $log->title) }}" type="text" name="name" id="name" required="">
 
                             @error('name') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
-
-                            <input type="hidden" name="type" value="{{$log->type}}">
 
                             <input type="hidden" name="editid" value="{{$log->id}}">
 
@@ -76,7 +74,7 @@
 
                         <div>
 
-                            <label>Name in arabic</label>
+                            <label>Title in Arabic</label>
 
                             <input class="form-control @error('name_ar') is-invalid @enderror" value="{{ old('name_ar', $log->title_ar) }}" type="text" name="name_ar" id="name_ar">
 
@@ -118,7 +116,7 @@
 
                         <button type="submit" class="btn btn-primary waves-effect waves-light me-2">Update</button>
 
-                        <a href="{{url('/faq')}}/{{$log->type}}" class="btn btn-secondary waves-effect waves-light resetbtn">Cancel</a>
+                        <a href="{{url('/' . $log->type)}}" class="btn btn-secondary waves-effect waves-light resetbtn">Cancel</a>
 
                     </div>
 

@@ -48,7 +48,7 @@
 
             <div class="col-sm-12 pt-3">
 
-                <form  action="{{url('/faq/store')}}" method="post" enctype="multipart/form-data">
+                <form  action="{{url('/' . $val . '/store')}}" method="post" enctype="multipart/form-data">
 
                 {{csrf_field()}}  
 
@@ -58,13 +58,11 @@
 
                         <div>
 
-                            <label>Name <span class="text-danger">*</span></label>
+                            <label>Title <span class="text-danger">*</span></label>
 
                             <input class="form-control @error('name') is-invalid @enderror" type="text" name="name" id="name" value="{{ old('name') }}" required="">
 
                             @error('name') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
-
-                            <input type="hidden" name="type" value="{{$val}}">
 
                         </div>
 
@@ -74,7 +72,7 @@
 
                         <div>
 
-                            <label>Name in arabic</label>
+                            <label>Title in Arabic</label>
 
                             <input class="form-control @error('name_ar') is-invalid @enderror" type="text" name="name_ar" id="name_ar" value="{{ old('name_ar') }}">
 
@@ -116,7 +114,7 @@
 
                         <button type="submit" class="btn btn-primary waves-effect waves-light me-2">Create</button>
 
-                        <!-- <a href="{{url('/faq')}}/faq" class="btn btn-secondary waves-effect waves-light resetbtn">Cancel</a> -->
+                        <a href="{{url('/' . $val)}}" class="btn btn-secondary waves-effect waves-light resetbtn">Cancel</a>
 
                     </div>
 

@@ -184,13 +184,34 @@ Route::prefix('customer')->group(function () {
     Route::post('/{id}/delete', [CustomerController::class, 'destroy']);
 });
 
+// Terms & Conditions Routes
+Route::prefix('terms')->group(function () {
+    Route::get('/', [FaqController::class, 'index'])->name('terms');
+    Route::get('/create', [FaqController::class, 'create'])->name('termscreate');
+    Route::post('/store', [FaqController::class, 'store'])->name('termsstore');
+    Route::get('/{id}/edit', [FaqController::class, 'edit'])->name('termsedit');
+    Route::post('/update', [FaqController::class, 'update'])->name('termsupdate');
+    Route::post('/{id}/delete', [FaqController::class, 'destroy'])->name('termsdelete');
+});
+
+// FAQ Routes
 Route::prefix('faq')->group(function () {
-    Route::get('/{val}', [FaqController::class, 'index'])->name('variant');
-    Route::get('/create/{val}', [FaqController::class, 'create'])->name('variantcreate');
-    Route::post('/store', [FaqController::class, 'store']);
-    Route::get('/{id}/edit', [FaqController::class, 'edit']);
-    Route::post('/update', [FaqController::class, 'update']);
-    Route::post('/{id}/{val}/delete', [FaqController::class, 'destroy']);
+    Route::get('/', [FaqController::class, 'index'])->name('faq');
+    Route::get('/create', [FaqController::class, 'create'])->name('faqcreate');
+    Route::post('/store', [FaqController::class, 'store'])->name('faqstore');
+    Route::get('/{id}/edit', [FaqController::class, 'edit'])->name('faqedit');
+    Route::post('/update', [FaqController::class, 'update'])->name('faqupdate');
+    Route::post('/{id}/delete', [FaqController::class, 'destroy'])->name('faqdelete');
+});
+
+// About Us Routes
+Route::prefix('about')->group(function () {
+    Route::get('/', [FaqController::class, 'index'])->name('about');
+    Route::get('/create', [FaqController::class, 'create'])->name('aboutcreate');
+    Route::post('/store', [FaqController::class, 'store'])->name('aboutstore');
+    Route::get('/{id}/edit', [FaqController::class, 'edit'])->name('aboutedit');
+    Route::post('/update', [FaqController::class, 'update'])->name('aboutupdate');
+    Route::post('/{id}/delete', [FaqController::class, 'destroy'])->name('aboutdelete');
 });
 
 Route::prefix('searchtag')->group(function () {

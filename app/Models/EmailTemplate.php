@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class EmailTemplate extends Model
+class Emailtemplate extends Model
 {
     
     protected $fillable = [
