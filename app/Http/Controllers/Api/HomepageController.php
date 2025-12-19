@@ -325,7 +325,7 @@ class HomepageController extends BaseController
             ->where('variants_sub.delete_status', '0')
             ->get();
 
-        $data['ProductSize'] = $ProductSize;
+        $data['product_size'] = $ProductSize;
 
         $message["success"] = 'Product size list get successfully.';
         return $this->sendResponse($data, $message);
