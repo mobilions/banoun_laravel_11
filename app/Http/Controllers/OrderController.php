@@ -1,7 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 use App\Models\Cart;
-use App\Models\Cartmaster;
+use App\Models\CartMaster;
 use App\Models\Orderlog;
 use App\Models\Emailtemplate;
 use Illuminate\Http\Request;
@@ -34,7 +34,7 @@ class OrderController extends Controller
         
         $todate1 = date('Y-m-d', strtotime("+1 day", strtotime($todate)));
 
-        $indexes = Cartmaster::with(['user'])
+        $indexes = CartMaster::with(['user'])
             ->whereBetween('created_at',[$fromdate, $todate1])
             ->orderByDesc('created_at')
             ->get();
@@ -60,7 +60,7 @@ class OrderController extends Controller
     public function view($id)
     {
         $title = "View Order";
-        $order = Cartmaster::with(['user'])->where('id',$id)->firstOrFail();
+        $order = CartMaster::with(['user'])->where('id',$id)->firstOrFail();
         $this->authorizeOrderAccess($order);
         $orderlist = Cart::with(['product','variant'])->where('master_id',$id)->get();
         $order_tracks = Orderlog::with(['status'])->where('cartmaster_id',$id)->orderByDesc('created_at')->get();
@@ -81,7 +81,7 @@ class OrderController extends Controller
             abort(403, 'Unauthorized.');
         }
 
-        $order = Cartmaster::with('user')->findOrFail($id);
+        $order = CartMaster::with('user')->findOrFail($id);
         $user = $order->user;
 
         if (!$user || !$user->email) {
@@ -135,7 +135,7 @@ class OrderController extends Controller
 
     }
 
-    protected function authorizeOrderAccess(Cartmaster $order)
+    protected function authorizeOrderAccess(CartMaster $order)
     {
         $user = Auth::user();
         if (!$user) {

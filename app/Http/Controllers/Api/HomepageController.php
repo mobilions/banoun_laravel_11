@@ -325,7 +325,7 @@ class HomepageController extends BaseController
             ->where('variants_sub.delete_status', '0')
             ->get();
 
-        $data['product_size'] = $ProductSize;
+        $data['productsize'] = $ProductSize;
 
         $message["success"] = 'Product size list get successfully.';
         return $this->sendResponse($data, $message);
@@ -401,6 +401,9 @@ class HomepageController extends BaseController
 
         }
 
+        if($id != ""){
+            $subcategory = $subcategory->where('category_id', $id);
+        }
         $subcategory = $subcategory->where('delete_status', '0')->get();
 
 
