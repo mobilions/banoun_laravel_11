@@ -103,7 +103,6 @@ class UserpageController extends BaseController
             $imgfile    = '';
 
             $path   = $request->file('imgfile');
-
             if (!empty($path)) {
 
                 $store  = Storage::putFile('public/image', $path);

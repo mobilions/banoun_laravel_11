@@ -13,7 +13,6 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Api\BaseController as BaseController;
 
 use App\Models\User;
-use App\Models\Carousal;
 
 use Illuminate\Support\Facades\Auth;
 
@@ -32,6 +31,8 @@ use App\Http\Requests\Auth\SendPhoneOtpRequest;
 use App\Http\Requests\Auth\UpdatePhoneRequest;
 use App\Http\Requests\Auth\ForgotPasswordRequest;
 
+use Illuminate\Support\Facades\Storage;
+
 
 
 class AuthController extends BaseController
@@ -48,13 +49,13 @@ class AuthController extends BaseController
                 ->exists();
         
             if ($emailTaken) {
-                return $this->sendError1(['email' => 'The email has already been taken.']);
+                return $this->sendError(['email' => 'The email has already been taken.']);
             }
         }
         
         $phoneTaken = User::where('phone', $request->phone)->where('is_verified', 1)->exists();
         if ($phoneTaken) {
-            return $this->sendError1(['phone' => 'The phone number has already been taken.']);
+            return $this->sendError(['phone' => 'The phone number has already been taken.']);
         }
         
         $usernotverified = User::where('phone', $request->phone)->first();
@@ -127,9 +128,16 @@ class AuthController extends BaseController
 
 
 
-    public function updatepassword(UpdatePasswordRequest $request)
+    public function updatepassword(Request $request)
 
     {
+        $validator = Validator::make($request->all(), [
+            'password' => 'required|string|min:6',
+        ]);
+
+        if($validator->fails()){
+            return $this->sendError($validator->errors());       
+        }
 
         $user = User::where('id', auth("api")->user()->id)->first();
 
@@ -152,8 +160,8 @@ class AuthController extends BaseController
 
             $success['email'] =  $user->email;
             $success['credit_balance'] =  $user->credit_balance;
-
-            $success['token'] =  $user->createToken('MyApp')->accessToken; 
+            
+            $success['token'] =  request()->bearerToken();
 
             $message['success'] = 'Password Updated successfully.';
             return $this->sendResponse($success, $message);
@@ -162,7 +170,7 @@ class AuthController extends BaseController
 
         else{ 
 
-            return $this->sendError('Incorrect Otp.', ['error'=>'Unauthorized']);
+            return $this->sendError(['error'=>'Incorrect Otp.']);
 
         } 
 
@@ -202,10 +210,15 @@ class AuthController extends BaseController
 
 
 
-    public function sendphoneotp(SendPhoneOtpRequest $request)
-
+    public function sendphoneotp(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'new_phone' => 'required|string|max:20',
+        ]);
 
+        if($validator->fails()){
+            return $this->sendError($validator->errors());       
+        }
         $userdetail = User::where('id', auth("api")->user()->id)->first();
 
         if (!empty($userdetail)) {
@@ -227,7 +240,7 @@ class AuthController extends BaseController
             $success['email'] =  $userdetail->email;
             $success['credit_balance'] =  $userdetail->credit_balance;
 
-            $success['token'] =  $userdetail->createToken('MyApp')->accessToken; 
+            $success['token'] =  request()->bearerToken(); 
 
 
 
@@ -241,18 +254,21 @@ class AuthController extends BaseController
 
         else{ 
 
-            return $this->sendError('Phone number not found.', ['error'=>'Unauthorized']);
+            return $this->sendError(['error'=>'Phone number not found.']);
 
         } 
 
     }
 
-
-
-    public function updatephone(UpdatePhoneRequest $request)
-
+    public function updatephone(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'otp' => 'required|digits_between:5,6',
+        ]);
 
+        if($validator->fails()){
+            return $this->sendError($validator->errors());       
+        }
         $user = User::where('id',auth("api")->user()->id)->first();
 
         if(!empty($user) && $this->otpMatches($user, $request->otp)){ 
@@ -270,11 +286,11 @@ class AuthController extends BaseController
             $success['email'] =  $user->email;
             $success['credit_balance'] =  $user->credit_balance;
 
-            $success['token'] =  $user->createToken('MyApp')->accessToken; 
+            $success['token'] =  request()->bearerToken();
 
 
 
-            $lastphone = DB::table('user_changes')->where('user_id',auth("api")->user()->id)->where('field','phone')->where('is_verified',0)->orderBy('id','desc')->first();
+            $lastphone = DB::table('user_changes')->where('user_id',$user->id)->where('field','phone')->where('is_verified',0)->orderBy('id','desc')->first();
 
             if (!empty($lastphone)) {
 
@@ -299,7 +315,7 @@ class AuthController extends BaseController
 
         else{ 
 
-            return $this->sendError('Incorrect Otp.', ['error'=>'Unauthorized']);
+            return $this->sendError(['error'=>'Incorrect Otp.']);
 
         }
 
@@ -328,11 +344,11 @@ class AuthController extends BaseController
             $success['email'] =  $userdetail->email;
             $success['credit_balance'] =  $userdetail->credit_balance;
 
-            $success['token'] =  $userdetail->createToken('MyApp')->accessToken; 
+            $success['token'] =  request()->bearerToken(); 
 
 
 
-            $this->updateuserchanges(auth("api")->user()->id,'email',$request->new_email,$status="0");
+            $this->updateuserchanges($userdetail->id,'email',$request->new_email,$status="0");
 
             $message['success'] = 'OTP sent to your registered contact.';
 
@@ -342,7 +358,7 @@ class AuthController extends BaseController
 
         else{ 
 
-            return $this->sendError('Email not found.', ['error'=>'Unauthorized']);
+            return $this->sendError(['error'=>'Email not found.']);
 
         } 
 
@@ -368,11 +384,11 @@ class AuthController extends BaseController
             $success['email'] =  $user->email;
             $success['credit_balance'] =  $user->credit_balance;
 
-            $success['token'] =  $user->createToken('MyApp')->accessToken; 
+            $success['token'] =  request()->bearerToken(); 
 
 
 
-            $lastemail = DB::table('user_changes')->where('user_id',auth("api")->user()->id)->where('field','email')->where('is_verified',0)->orderBy('id','desc')->first();
+            $lastemail = DB::table('user_changes')->where('user_id',$user->id)->where('field','email')->where('is_verified',0)->orderBy('id','desc')->first();
 
             if (!empty($lastemail)) {
 
@@ -397,7 +413,7 @@ class AuthController extends BaseController
 
         else{ 
 
-            return $this->sendError('Incorrect Otp.', ['error'=>'Unauthorized']);
+            return $this->sendError(['error'=>'Incorrect Otp.']);
 
         }
 
@@ -427,7 +443,7 @@ class AuthController extends BaseController
             $success['country_code'] =  $userdetail->country_code;
             $success['email'] =  $userdetail->email;
             $success['credit_balance'] =  $userdetail->credit_balance;
-            $success['token'] =  $userdetail->createToken('MyApp')->accessToken; 
+            $success['token'] =  request()->bearerToken(); 
 
             $message['success'] = 'OTP sent to your registered contact.';
 
@@ -491,7 +507,7 @@ class AuthController extends BaseController
             $success['email'] =  $userdetail->email;
             $success['credit_balance'] =  $userdetail->credit_balance;
 
-            $success['token'] =  $userdetail->createToken('MyApp')->accessToken; 
+            $success['token'] =  request()->bearerToken(); 
 
             User::where('id',$userdetail->id)->update(['password'=>bcrypt($request->new_password)]);
 
@@ -504,7 +520,7 @@ class AuthController extends BaseController
 
         else{ 
 
-            return $this->sendError('Current Password is Incorrect.', ['error'=>'Unauthorized']);
+            return $this->sendError(['error'=>'Current Password is Incorrect.']);
 
         } 
 
@@ -520,7 +536,7 @@ class AuthController extends BaseController
         $useremail = User::select('email','phone','is_verified')->where(function($query) use ($request) {
             $query->where('email',$request->username)
                   ->orWhere('phone',$request->username);
-        })->first();
+        })->where("delete_status", "0")->first();
 
         if (!empty($useremail)) {
 
@@ -543,41 +559,21 @@ class AuthController extends BaseController
                 $message['success'] = 'User login successfully.';
 
                 return $this->sendResponse($success, $message);
-
-            }
-
-            else{ 
-
+            } else { 
                 $message['password'] = 'Password Incorrect.';
-
-                return $this->sendError1($message);
-
+                return $this->sendError($message);
             } 
-
-        }
-
-        else{ 
-
+        } else { 
             return $this->sendError(['error'=>'Unauthorized']);
-
         } 
 
-        } 
-
-        else{ 
-
+        } else { 
             $message['username'] = 'Username Incorrect.';
-
-            return $this->sendError1($message);
-
+            return $this->sendError($message);
         } 
-
     }
 
-
-
     public function logout(Request $request)
-
     {
         $user = $request->user();
 
@@ -585,10 +581,58 @@ class AuthController extends BaseController
             $user->token()->revoke();
         }
 
-        return $this->sendResponse([], 'Logout successfully');
-
+        $message['success'] = 'Logout successfully';
+        return $this->sendResponse([], $message);
     }
 
+    public function deleteuser(Request $request)
+    {
+        $user = $request->user();
+
+        User::where("id", $user->id)->update([
+            "delete_status" => "1",
+            "email" => null,
+            "phone" => null,
+        ]);
+        
+        $message['success'] = 'User deleted successfully';
+        return $this->sendResponse([], $message);
+    }
+
+    public function updateimage(Request $request){
+
+        $validator = Validator::make($request->all(), [
+            'imgfile' => 'required|image|mimes:jpeg,png,jpg,gif,svg',
+        ]);
+
+        if($validator->fails()){
+            return $this->sendError($validator->errors());       
+        }
+
+        $user = User::where('id', auth("api")->user()->id)->first();
+        
+        $path   = $request->file('imgfile');
+       
+        if (!empty($path)) {
+            $store  = Storage::putFile('public/image', $path);
+            $imgfile = config('app.imgurl').basename($store);
+            $user->imgfile = $imgfile;
+            $user->save();
+        }
+
+        $success['otp'] =  $user->otp;
+        $success['userId'] =  $user->id;
+        $success['name'] =  $user->name;
+        $success['imgfile'] =  $user->imgfile;
+        $success['phone'] =  $user->phone;
+        $success['country_code'] =  $user->country_code;
+        $success['email'] =  $user->email;
+        $success['credit_balance'] =  $user->credit_balance;
+        $success['token'] =  request()->bearerToken();
+
+        $message['success'] = 'Profile image updated successfully';
+        return $this->sendResponse($user, $message);
+    }
 
 
 
@@ -601,13 +645,13 @@ class AuthController extends BaseController
 
         if (!empty($_GET['lang']) && $_GET['lang'] == 'ar') {            
 
-            $category = Carousal::select('name_ar as name','description_ar as description','imageurl');
+            $category = \App\Carousal::select('name_ar as name','description_ar as description','imageurl');
 
         }
 
         else{
 
-            $category = Carousal::select('name','description','imageurl');
+            $category = \App\Carousal::select('name','description','imageurl');
 
         }
 
@@ -641,7 +685,7 @@ class AuthController extends BaseController
     protected function setOtpForUser(User $user): void
     {
         // $otp = $this->generateOtp();
-        $otp = 123456;
+        $otp = 12345;
         $user->otp = $otp;
         $user->save();
         // $this->dispatchOtp($user, $otp);
@@ -678,13 +722,11 @@ class AuthController extends BaseController
         }
     }
 
-
-
     public function getuser(){
         $id = auth("api")->user()->id;
         $user = User::select("otp", "id as userId", "name", "imgfile", "phone", "country_code", "email", "credit_balance")->where("id", $id)->first();
 
-        $user['token'] =  $user->createToken('MyApp')->accessToken; 
+        $user['token'] = request()->bearerToken();
         $message["success"] = 'User profile get successfully.';
         return $this->sendResponse($user, $message);
     }
