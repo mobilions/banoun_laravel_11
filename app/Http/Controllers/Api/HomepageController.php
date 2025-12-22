@@ -322,8 +322,11 @@ class HomepageController extends BaseController
             )
             ->leftJoin('variants_sub', 'variants_sub.id', '=', 'productvariants.size_id')
             ->where('productvariants.delete_status', '0')
-            ->where('variants_sub.delete_status', '0')
-            ->get();
+            ->where('variants_sub.delete_status', '0');
+            if($request->productId != ""){
+                $ProductSize = $ProductSize->where("productvariants.product_id", $request->productId);    
+            }
+            $ProductSize = $ProductSize->get();
 
         $data['productsize'] = $ProductSize;
 
