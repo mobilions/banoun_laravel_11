@@ -2,7 +2,7 @@
 namespace App\Http\Controllers;
 use App\Models\Cart;
 use App\Models\Cartmaster;
-use App\Models\Orderlog;
+use App\Models\OrderLog;
 use App\Models\Stock;
 use App\Models\Product;
 use App\Models\Productvariant;

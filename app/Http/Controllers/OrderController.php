@@ -2,7 +2,7 @@
 namespace App\Http\Controllers;
 use App\Models\Cart;
 use App\Models\CartMaster;
-use App\Models\Orderlog;
+use App\Models\OrderLog;
 use App\Models\Emailtemplate;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -63,7 +63,7 @@ class OrderController extends Controller
         $order = CartMaster::with(['user'])->where('id',$id)->firstOrFail();
         $this->authorizeOrderAccess($order);
         $orderlist = Cart::with(['product','variant'])->where('master_id',$id)->get();
-        $order_tracks = Orderlog::with(['status'])->where('cartmaster_id',$id)->orderByDesc('created_at')->get();
+        $order_tracks = OrderLog::with(['status'])->where('cartmaster_id',$id)->orderByDesc('created_at')->get();
         return view('order.view',compact('title','order','orderlist','order_tracks'));  
     }
 
@@ -92,7 +92,7 @@ class OrderController extends Controller
         $order->updated_by = Auth::user()->id;
         $order->save();
 
-        $orderLog = new Orderlog; 
+        $orderLog = new OrderLog; 
         $orderLog->cartmaster_id = $id;
         $orderLog->status_id = $val;
         $orderLog->created_by = Auth::user()->id;

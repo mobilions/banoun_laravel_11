@@ -67,4 +67,13 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Coupon::class, 'coupon_users');
     }
+    
+    public static function findUserVal($id, $field = 'name')
+    {
+        $status = self::where('id', $id)->first();
+        if (!$status) {
+            return '';
+        }
+        return $status->$field ?? '';
+    }
 }

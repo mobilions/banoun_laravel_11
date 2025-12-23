@@ -52,7 +52,7 @@ class Cartmaster extends Model
 
     public function orderLogs()
     {
-        return $this->hasMany(Orderlog::class, 'cartmaster_id');
+        return $this->hasMany(OrderLog::class, 'cartmaster_id');
     }
 
     public function orderStatus()
