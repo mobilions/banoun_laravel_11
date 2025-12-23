@@ -24,7 +24,7 @@ use App\Models\usbanner;
 use App\Models\Setting;
 use App\Models\Brand;
 use App\Models\UserAddress;
-use App\Models\Productimage;
+use App\Models\ProductImage;
 use App\Models\Area;
 use App\Models\VariantsSub;
 use App\Models\Productvariant;
@@ -154,7 +154,7 @@ class HomepageController extends BaseController
             ->get();
 
         $product = $product->map(function($item){
-            $Productimage = Productimage::where("product_id", $item->productId)->where("delete_status", "0")->first();
+            $Productimage = ProductImage::where("product_id", $item->productId)->where("delete_status", "0")->first();
             $item->wishlistId = 0;
             $item->is_wishlisted = 0;
             $item->sizeid = 0;
@@ -206,8 +206,8 @@ class HomepageController extends BaseController
         $similar_products = [];
         $images = [];
         if(!empty($product)){
-            $Productimage = Productimage::where("product_id", $product->productId)->where("delete_status", "0")->first();
-            $images = Productimage::where("product_id", $product->productId)->where("delete_status", "0")->pluck("imageurl")->toArray();
+            $Productimage = ProductImage::where("product_id", $product->productId)->where("delete_status", "0")->first();
+            $images = ProductImage::where("product_id", $product->productId)->where("delete_status", "0")->pluck("imageurl")->toArray();
             $product->wishlistId = 0;
             $product->is_wishlisted = 0;
             $product->sizeid = 0;
@@ -235,7 +235,7 @@ class HomepageController extends BaseController
             ->get();
             
             $similar_products = $similar_products->map(function($item){
-                $Productimage = Productimage::where("product_id", $item->productId)->where("delete_status", "0")->first();
+                $Productimage = ProductImage::where("product_id", $item->productId)->where("delete_status", "0")->first();
                 $item->wishlistId = 0;
                 $item->is_wishlisted = 0;
                 $item->sizeid = 0;
@@ -295,7 +295,7 @@ class HomepageController extends BaseController
             ->get();
 
         $product = $product->map(function($item){
-            $Productimage = Productimage::where("product_id", $item->productId)->where("delete_status", "0")->first();
+            $Productimage = ProductImage::where("product_id", $item->productId)->where("delete_status", "0")->first();
             $item->wishlistId = 0;
             $item->is_wishlisted = 0;
             $item->sizeid = 0;
@@ -342,7 +342,7 @@ class HomepageController extends BaseController
         $new_arrivals = Product::select('id as productId', 'name', 'price', 'price_offer', 'category_id as categoryId', 'subcategory_id as subcategoryId', 'brand_id as brandId')->where('delete_status','0')->take(8)->get();
 
         $new_arrivals = $new_arrivals->map(function($item){
-            $Productimage = Productimage::where("product_id", $item->productId)->where("delete_status", "0")->first();
+            $Productimage = ProductImage::where("product_id", $item->productId)->where("delete_status", "0")->first();
             $item->wishlistId = 0;
             $item->brandName = "";
             $item->categoryName = "";
@@ -359,7 +359,7 @@ class HomepageController extends BaseController
         $trending = Product::select('id as productId', 'name', 'price', 'price_offer',  'category_id as categoryId', 'subcategory_id as subcategoryId', 'brand_id as brandId')->where('delete_status','0')->inRandomOrder()->limit(8)->get();
 
         $trending = $trending->map(function($item){
-            $Productimage = Productimage::where("product_id", $item->productId)->where("delete_status", "0")->first();
+            $Productimage = ProductImage::where("product_id", $item->productId)->where("delete_status", "0")->first();
             $item->wishlistId = 0;
             $item->brandName = "";
             $item->categoryName = "";
@@ -1062,7 +1062,7 @@ class HomepageController extends BaseController
         $totalqty = 0;
         $cart_count = 0;
         $carts = $carts->map(function($item) use (&$total, &$subtotal, &$tax, &$delivery, &$discount, &$grandtotal, &$totalqty, &$cart_count) {
-            $Productimage = Productimage::where("product_id", $item->productId)->where("delete_status", "0")->first();
+            $Productimage = ProductImage::where("product_id", $item->productId)->where("delete_status", "0")->first();
             
             $item->available_quantity = ($item->available_quantity == null || $item->available_quantity == "") ? "0" : $item->available_quantity;
             $item->imageurl = !empty($Productimage) ? $Productimage->imageurl : "";
@@ -1138,7 +1138,7 @@ class HomepageController extends BaseController
         ->get();
 
         $Wishlists = $Wishlists->map(function($item){
-            $Productimage = Productimage::where("product_id", $item->productId)->where("delete_status", "0")->first();
+            $Productimage = ProductImage::where("product_id", $item->productId)->where("delete_status", "0")->first();
             
             $item->imageurl = !empty($Productimage) ? $Productimage->imageurl : "";
             $item->is_wishlisted = 1;
@@ -1333,7 +1333,7 @@ class HomepageController extends BaseController
             ->get();
 
             $carts = $carts->map(function($item) {
-                $Productimage = Productimage::where("product_id", $item->productId)->where("delete_status", "0")->first();
+                $Productimage = ProductImage::where("product_id", $item->productId)->where("delete_status", "0")->first();
                 $item->imageurl = !empty($Productimage) ? $Productimage->imageurl : "";
                 return $item;
             });
@@ -1408,7 +1408,7 @@ class HomepageController extends BaseController
             ->get();
 
             $carts = $carts->map(function($item) {
-                $Productimage = Productimage::where("product_id", $item->productId)->where("delete_status", "0")->first();
+                $Productimage = ProductImage::where("product_id", $item->productId)->where("delete_status", "0")->first();
                 $item->imageurl = !empty($Productimage) ? $Productimage->imageurl : "";
                 return $item;
             });
