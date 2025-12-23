@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Emailtemplate;
+use App\Models\EmailTemplate;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -23,7 +23,7 @@ class EmailtemplateController extends Controller
     public function index()
     {
         $title = "Email Template";
-        $indexes = Emailtemplate::where('delete_status','0')->get();
+        $indexes = EmailTemplate::where('delete_status','0')->get();
         return view('emailtemplate.index',compact('title','indexes'));  
     }
 
@@ -56,7 +56,7 @@ class EmailtemplateController extends Controller
         ]);
 
         try {
-            $data = new Emailtemplate; 
+            $data = new EmailTemplate; 
             $data->name = $request->name;
             $data->message = $request->message;
             $data->message_ar = $request->message_ar;
@@ -76,7 +76,7 @@ class EmailtemplateController extends Controller
      * @param  \App\Brand  $emailtemplate
      * @return \Illuminate\Http\Response
      */
-    public function show(Emailtemplate $emailtemplate)
+    public function show(EmailTemplate $emailtemplate)
     {
         
     }
@@ -87,10 +87,10 @@ class EmailtemplateController extends Controller
      * @param  \App\Brand  $emailtemplate
      * @return \Illuminate\Http\Response
      */
-    public function edit(Emailtemplate $emailtemplate,$id)
+    public function edit(EmailTemplate $emailtemplate,$id)
     {
         $title = "Email Template";
-        $log = Emailtemplate::where('id',$id)->first();
+        $log = EmailTemplate::where('id',$id)->first();
         return view('emailtemplate.edit',compact('title','log'));  
     }
 
@@ -101,10 +101,10 @@ class EmailtemplateController extends Controller
      * @param  \App\Brand  $emailtemplate
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Emailtemplate $emailtemplate)
+    public function update(Request $request, EmailTemplate $emailtemplate)
     {
         $this->validate($request, [
-            'editid' => 'required|exists:emailtemplates,id',
+            'editid' => 'required|exists:email_templates,id',
             'name' => 'required|string|max:255',
             'message' => 'nullable|string',
             'message_ar' => 'nullable|string',
@@ -115,7 +115,7 @@ class EmailtemplateController extends Controller
             'name.max' => 'Subject must not exceed 255 characters.',
         ]);
 
-        $data = Emailtemplate::find($request->editid);
+        $data = EmailTemplate::find($request->editid);
         if (empty($data)) { 
             return redirect('/emailtemplate')->with('error', 'Email template not found.');
         }
@@ -139,9 +139,9 @@ class EmailtemplateController extends Controller
      * @param  \App\Brand  $emailtemplate
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Emailtemplate $emailtemplate,$id)
+    public function destroy(EmailTemplate $emailtemplate,$id)
     {
-        $data = Emailtemplate::find($id);
+        $data = EmailTemplate::find($id);
         
         if (empty($data)) {
             return redirect('/emailtemplate')->with('error', 'Email template not found.');
