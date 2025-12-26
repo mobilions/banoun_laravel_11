@@ -419,6 +419,7 @@ class HomepageController extends BaseController
 
         // Apply category filter ONLY if value exists
         if ($id != "") {
+            echo $id;
             $subcategory = $subcategory->where('category_id', $id);
         }
 
