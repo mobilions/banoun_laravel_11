@@ -417,10 +417,9 @@ class HomepageController extends BaseController
             );
         }
 
-        // Apply category filter ONLY if value exists
+        echo $id;
         if ($id != "") {
-            echo $id;
-            $subcategory = $subcategory->where('category_id', $id);
+            $subcategory = $subcategory->where('categoryId', $id);
         }
 
         // Always apply delete filter
