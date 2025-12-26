@@ -39,7 +39,8 @@ Route::middleware('auth:api')->group(function () {
     Route::post('updatename', [ApiAuthController::class, 'updatename']);
     
     Route::post('/addresses', [HomepageController::class, 'addresses']);
-    Route::post('/cartlists', [HomepageController::class, 'addtocart']);
+    Route::post('/addtocart', [HomepageController::class, 'addtocart']);
+    Route::post('/cartlists', [HomepageController::class, 'cartlists']);
     Route::post('/updatecart', [HomepageController::class, 'updatecart']);
     Route::post('/checkcoupon', [HomepageController::class, 'checkcoupon']);
     Route::post('/removecoupon', [HomepageController::class, 'removecoupon']);
