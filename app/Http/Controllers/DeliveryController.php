@@ -200,7 +200,7 @@ class DeliveryController extends Controller
 
     {
         $this->validate($request, [
-            'editid' => 'required|exists:deliveries,id',
+            'editid' => 'required|exists:delivery_options,id',
             'name' => 'required|string|max:255',
             'name_ar' => 'nullable|string|max:255',
             'imgfile' => 'nullable|image',
