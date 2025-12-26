@@ -391,10 +391,8 @@ class HomepageController extends BaseController
 
 
     public function subcategories(Request $request)
-
     {
-
-        $id = $request->input('categoryid');
+        $id   = $request->input('categoryid');
         $lang = $request->input('lang');
 
         $subcategory = Subcategory::query();
@@ -417,28 +415,20 @@ class HomepageController extends BaseController
             );
         }
 
-        echo $id;
-        if ($id != "") {
-            $subcategory = $subcategory->where('categoryId', $id);
+        // ✅ Correct column name
+        if (!empty($id)) {
+            $subcategory->where('category_id', $id);
         }
 
-        // Always apply delete filter
         $subcategory = $subcategory
             ->where('delete_status', 0)
             ->get();
 
-        if (!empty($subcategory)) {
-            $message["success"] = 'SubCategory Lists';
-            return $this->sendResponse($subcategory, $message);
-
-        } 
-
-        else {
-
-            return $this->sendError(['error'=>'No SubCategory Available']);
-
+        if ($subcategory->isNotEmpty()) {
+            return $this->sendResponse($subcategory, ['success' => 'SubCategory Lists']);
         }
 
+        return $this->sendError(['error' => 'No SubCategory Available']);
     }
 
     public function brandlist()
