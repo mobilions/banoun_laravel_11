@@ -395,7 +395,6 @@ class HomepageController extends BaseController
     {
 
         $id = $request->categoryid;
-        echo $id;
         if (!empty($_GET['lang']) && $_GET['lang'] == 'ar') {            
 
             $subcategory = Subcategory::select('id as subcategoryId','name_ar as name','description_ar as description','imageurl','category_id as categoryId');
