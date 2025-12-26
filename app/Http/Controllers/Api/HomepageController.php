@@ -394,25 +394,38 @@ class HomepageController extends BaseController
 
     {
 
-        $id = $request->categoryid;
-        if (!empty($_GET['lang']) && $_GET['lang'] == 'ar') {            
+        $id = $request->input('categoryid');
+        $lang = $request->input('lang');
 
-            $subcategory = Subcategory::select('id as subcategoryId','name_ar as name','description_ar as description','imageurl','category_id as categoryId');
+        $subcategory = Subcategory::query();
 
+        if ($lang === 'ar') {
+            $subcategory->select(
+                'id as subcategoryId',
+                'name_ar as name',
+                'description_ar as description',
+                'imageurl',
+                'category_id as categoryId'
+            );
+        } else {
+            $subcategory->select(
+                'id as subcategoryId',
+                'name',
+                'description',
+                'imageurl',
+                'category_id as categoryId'
+            );
         }
 
-        else{
-
-            $subcategory = Subcategory::select('id as subcategoryId','name','description','imageurl','category_id as categoryId');
-
+        // Apply category filter ONLY if value exists
+        if (!empty($id)) {
+            $subcategory->where('category_id', $id);
         }
 
-        if($id != ""){
-            $subcategory = $subcategory->where('category_id', $id);
-        }
-        $subcategory = $subcategory->where('delete_status', '0')->get();
-
-
+        // Always apply delete filter
+        $subcategory = $subcategory
+            ->where('delete_status', 0)
+            ->get();
 
         if (!empty($subcategory)) {
             $message["success"] = 'SubCategory Lists';
