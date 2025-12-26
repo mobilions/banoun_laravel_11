@@ -393,8 +393,7 @@ class HomepageController extends BaseController
     public function subcategories(Request $request)
     {
         $id   = request()->get("categoryId");
-        echo $id;
-        $lang = $request->input('lang');
+        $lang = request()->get("lang");
 
         $subcategory = Subcategory::query();
 
