@@ -28,4 +28,12 @@ class Banner extends Model
     {
         return $this->belongsTo(Order::class);
     }
+    
+    public function getImageurlAttribute($value){
+        return $value != "" ? asset($value) : "";
+    }
+    
+    public function getImageSmAttribute($value){
+        return $value != "" ? asset($value) : "";
+    }
 }

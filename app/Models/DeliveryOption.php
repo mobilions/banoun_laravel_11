@@ -23,4 +23,7 @@ class DeliveryOption extends Model
         'delete_status' => 'integer'
     ];
 
+    public function getImageurlAttribute($value){
+        return $value != "" ? asset($value) : "";
+    }
 }

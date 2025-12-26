@@ -20,7 +20,7 @@ use App\Models\Product;
 use App\Models\Subcategory;
 use App\Models\Banner;
 use App\Models\Topcollection;
-use App\Models\usbanner;
+use App\Models\Usbanner;
 use App\Models\Setting;
 use App\Models\Brand;
 use App\Models\UserAddress;
@@ -34,6 +34,8 @@ use App\Models\CartMaster;
 use App\Models\Wishlist;
 use App\Models\SizeChart;
 use App\Models\DeliveryOption;
+use App\Models\UserKid;
+use App\Models\User;
 
 
 
@@ -267,6 +269,7 @@ class HomepageController extends BaseController
 
     public function topsearches(Request $request)
     {
+
         $lang = $request->lang ?? 'en';
 
         if ($lang === 'ar') {
@@ -336,6 +339,79 @@ class HomepageController extends BaseController
 
 
     public function homepage(){
+        
+        $Brands = Brand::where("delete_status", "0")->get();
+        foreach($Brands as $Brand){
+            $imageurl = str_replace("http://157.245.110.229/", "", $Brand->imageurl);
+            $Brand->imageurl = $imageurl;
+            $Brand->save();
+        }
+      
+        $Categorys = Category::where("delete_status", "0")->get();
+        foreach($Categorys as $Category){
+            $imageurl = str_replace("http://157.245.110.229/", "", $Category->imageurl);
+            $Category->imageurl = $imageurl;
+            $Category->save();
+        }
+      
+        $ProductImages = ProductImage::where("delete_status", "0")->get();
+        foreach($ProductImages as $ProductImage){
+            $imageurl = str_replace("http://157.245.110.229/", "", $ProductImage->imageurl);
+            $ProductImage->imageurl = $imageurl;
+            $ProductImage->save();
+        }
+      
+        $Productvariants = Productvariant::where("delete_status", "0")->get();
+        foreach($Productvariants as $Productvariant){
+            $imageurl = str_replace("http://157.245.110.229/", "", $Productvariant->imageurl);
+            $Productvariant->imageurl = $imageurl;
+            $Productvariant->save();
+        }
+      
+        $Topcollections = Topcollection::where("delete_status", "0")->get();
+        foreach($Topcollections as $Topcollection){
+            $imageurl = str_replace("http://157.245.110.229/", "", $Topcollection->imageurl);
+            $Topcollection->imageurl = $imageurl;
+            $Topcollection->save();
+        }
+      
+        $Usbanners = Usbanner::where("delete_status", "0")->get();
+        foreach($Usbanners as $Usbanner){
+            $imageurl = str_replace("http://157.245.110.229/", "", $Usbanner->imageurl);
+            $Usbanner->imageurl = $imageurl;
+            $Usbanner->save();
+        }
+      
+        $UserKid = UserKid::where("delete_status", "0")->get();
+        foreach($UserKids as $UserKid){
+            $imgfile = str_replace("http://157.245.110.229/", "", $UserKid->imgfile);
+            $UserKid->imgfile = $imgfile;
+            $UserKid->save();
+        }
+      
+        $User = User::where("delete_status", "0")->get();
+        foreach($Users as $User){
+            $imgfile = str_replace("http://157.245.110.229/", "", $User->imgfile);
+            $User->imgfile = $imgfile;
+            $User->save();
+        }
+      
+        $Products = Product::where("delete_status", "0")->get();
+        foreach($Products as $Product){
+            $imageurl = str_replace("http://157.245.110.229/", "", $Product->imageurl);
+            $Product->imageurl = $imageurl;
+            $Product->save();
+        }
+        
+        $Banners = Banner::where("delete_status", "0")->get();
+        foreach($Banners as $Banner){
+            $imageurl = str_replace("http://157.245.110.229/", "", $Banner->imageurl);
+            $image_sm = str_replace("http://157.245.110.229/", "", $Banner->image_sm);
+            $Banner->imageurl = $imageurl;
+            $Banner->image_sm = $image_sm;
+            $Banner->save();
+        }
+
         $topbanners = Topcollection::select('imageurl', 'type', 'category_id as categoryId')->where('delete_status','0')->take(4)->get();
         $categories = Category::select('id as categoryId', 'name', 'description', 'imageurl')->where('delete_status','0')->take(4)->get();
         $designers = Brand::select('id as brandId', 'imageurl', 'name')->where('delete_status','0')->take(4)->get();
@@ -543,9 +619,9 @@ class HomepageController extends BaseController
 
     {
 
-        if (usbanner::where('delete_status', '0')->exists()) {
+        if (Usbanner::where('delete_status', '0')->exists()) {
 
-            $category = usbanner::select('name','name_ar','description','description_ar','imageurl','shopby','category_id as categoryId')->where('delete_status', '0')->get()->toJson(JSON_PRETTY_PRINT);
+            $category = Usbanner::select('name','name_ar','description','description_ar','imageurl','shopby','category_id as categoryId')->where('delete_status', '0')->get()->toJson(JSON_PRETTY_PRINT);
 
             return response($category, 200);
 

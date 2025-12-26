@@ -118,4 +118,8 @@ class Productvariant extends Model
 		return $name;
 
 	}
+    
+    public function getImageurlAttribute($value){
+        return $value != "" ? asset($value) : "";
+    }
 }

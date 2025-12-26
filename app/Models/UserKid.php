@@ -33,4 +33,8 @@ class UserKid extends Model
     {
         return $this->belongsTo(User::class);
     }
+    
+    public function getImgfileAttribute($value){
+        return $value != "" ? asset($value) : "";
+    }
 }

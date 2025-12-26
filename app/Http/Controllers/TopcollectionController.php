@@ -151,8 +151,8 @@ class TopcollectionController extends Controller
             $path = $request->file('imgfile');
 
             if (!empty($path) && $path->isValid()) {
-                $store = Storage::putFile('public/image', $path);
-                $imgurl = config('app.imgurl').basename($store);
+                $storedPath  = $path->store('image', 'public');
+                $imgurl = 'storage/'.$storedPath;
             }
 
             $redirect_type = $request->redirect_type;
@@ -325,8 +325,8 @@ class TopcollectionController extends Controller
             $path = $request->file('imgfile');
 
             if (!empty($path) && $path->isValid()) {
-                $store = Storage::putFile('public/image', $path);
-                $imgurl = config('app.imgurl').basename($store);
+                $storedPath  = $path->store('image', 'public');
+                $imgurl = 'storage/'.$storedPath;
             } else {
                 $imgurl = $request->imgfile_val ?? '';
             }

@@ -14,7 +14,7 @@ use App\Models\Brand;
 
 use App\Models\Product;
 
-use App\Models\usbanner;
+use App\Models\Usbanner;
 
 use Illuminate\Http\Request;
 
@@ -56,7 +56,7 @@ class UsbannerController extends Controller
 
         $title = "Promotion Banner";
 
-        $indexes = usbanner::where('delete_status','0')->get();
+        $indexes = Usbanner::where('delete_status','0')->get();
 
         return view('usbanner.index',compact('title','indexes'));  
 
@@ -156,16 +156,16 @@ class UsbannerController extends Controller
             $path_sm = $request->file('imgfile_sm');
 
             if (!empty($path_sm) && $path_sm->isValid()) {
-                $store = Storage::putFile('public/image', $path_sm);
-                $imgurl_sm = config('app.imgurl').basename($store);
+                $storedPath  = $path_sm->store('image', 'public');
+                $imgurl_sm = 'storage/'.$storedPath;
             }
 
             $imgurl = '';
             $path = $request->file('imgfile');
 
             if (!empty($path) && $path->isValid()) {
-                $store = Storage::putFile('public/image', $path);
-                $imgurl = config('app.imgurl').basename($store);
+                $storedPath  = $path->store('image', 'public');
+                $imgurl = 'storage/'.$storedPath;
             }
 
             $redirect_type = $request->redirect_type;
@@ -190,7 +190,7 @@ class UsbannerController extends Controller
                 }
             }
 
-            $data = new usbanner; 
+            $data = new Usbanner; 
             $data->name = $request->name;
             $data->description = $request->description;
             $data->name_ar = $request->name_ar;
@@ -228,7 +228,7 @@ class UsbannerController extends Controller
 
      */
 
-    public function show(usbanner $usbanner)
+    public function show(Usbanner $usbanner)
 
     {
 
@@ -250,13 +250,13 @@ class UsbannerController extends Controller
 
      */
 
-    public function edit(usbanner $usbanner,$id)
+    public function edit(Usbanner $usbanner,$id)
 
     {
 
         $title = "Promotion Banner";
 
-        $log = usbanner::where('id',$id)->first();
+        $log = Usbanner::where('id',$id)->first();
 
         $categories = Category::where('delete_status','0')->get();
 
@@ -288,7 +288,7 @@ class UsbannerController extends Controller
 
      */
 
-    public function update(Request $request, usbanner $usbanner)
+    public function update(Request $request, Usbanner $usbanner)
 
     {
         $rules = [
@@ -335,7 +335,7 @@ class UsbannerController extends Controller
             'imgfile_sm.max' => 'The small image size must not exceed 2MB.',
         ]);
 
-        $data = usbanner::find($request->editid);
+        $data = Usbanner::find($request->editid);
 
         if (empty($data)) { 
             return redirect('/usbanner')->with('error', 'Promotion banner not found.');
@@ -346,8 +346,8 @@ class UsbannerController extends Controller
             $path_sm = $request->file('imgfile_sm');
 
             if (!empty($path_sm) && $path_sm->isValid()) {
-                $store = Storage::putFile('public/image', $path_sm);
-                $imgurl_sm = config('app.imgurl').basename($store);
+                $storedPath  = $path_sm->store('image', 'public');
+                $imgurl_sm = 'storage/'.$storedPath;
             } else {
                 $imgurl_sm = $request->imgfile_val_sm ?? '';
             }
@@ -356,8 +356,8 @@ class UsbannerController extends Controller
             $path = $request->file('imgfile');
 
             if (!empty($path) && $path->isValid()) {
-                $store = Storage::putFile('public/image', $path);
-                $imgurl = config('app.imgurl').basename($store);
+                $storedPath  = $path->store('image', 'public');
+                $imgurl = 'storage/'.$storedPath;
             } else {
                 $imgurl = $request->imgfile_val ?? '';
             }
@@ -420,10 +420,10 @@ class UsbannerController extends Controller
 
      */
 
-    public function destroy(usbanner $usbanner,$id)
+    public function destroy(Usbanner $usbanner,$id)
 
     {
-        $data = usbanner::find($id);
+        $data = Usbanner::find($id);
 
         if (empty($data)) {
             return redirect('/usbanner')->with('error', 'Promotion banner not found.');

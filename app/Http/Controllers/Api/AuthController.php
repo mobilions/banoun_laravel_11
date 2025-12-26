@@ -614,8 +614,8 @@ class AuthController extends BaseController
         $path   = $request->file('imgfile');
        
         if (!empty($path)) {
-            $store  = Storage::putFile('public/image', $path);
-            $imgfile = config('app.imgurl').basename($store);
+            $storedPath  = $path->store('image', 'public');
+            $imgfile = 'storage/'.$storedPath;
             $user->imgfile = $imgfile;
             $user->save();
         }

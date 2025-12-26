@@ -37,4 +37,8 @@ class ProductImage extends Model
     {
         return $this->belongsTo(Productvariant::class, 'variant_id');
     }
+    
+    public function getImageurlAttribute($value){
+        return $value != "" ? asset($value) : "";
+    }
 }

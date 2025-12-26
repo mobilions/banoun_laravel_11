@@ -76,4 +76,8 @@ class User extends Authenticatable
         }
         return $status->$field ?? '';
     }
+    
+    public function getImgfileAttribute($value){
+        return $value != "" ? asset($value) : "";
+    }
 }

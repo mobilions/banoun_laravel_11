@@ -107,28 +107,16 @@ class BannerController extends Controller
 
         if (!empty($path)) {
 
-            $store  = Storage::putFile('public/image', $path);
-
-            //$imgurl    = Storage::url($store);
-
-            //$imgurl = url('/').'/storage/app/'.$store;
-
-            $imgurl = config('app.imgurl').basename($store);
+            $storedPath  = $path->store('image', 'public');
+            $imgurl = 'storage/'.$storedPath;
 
         }
 
 
 
         if (!empty($path_sm)) {
-
-            $store  = Storage::putFile('public/image', $path_sm);
-
-            //$imgurl    = Storage::url($store);
-
-            //$imgurl = url('/').'/storage/app/'.$store;
-
-            $imgurl_sm = config('app.imgurl').basename($store);
-
+            $storedPath  = $path_sm->store('image', 'public');
+            $imgurl_sm = 'storage/'.$storedPath;
         }
 
         //echo "hi"; exit();
@@ -236,14 +224,8 @@ class BannerController extends Controller
         $path_sm   = $request->file('imgfile_sm');
 
         if (!empty($path)) {
-
-            $store  = Storage::putFile('public/image', $path);
-
-            //$imgurl    = Storage::url($store);
-
-            //$imgurl = url('/').'/storage/app/'.$store;
-
-            $imgurl = config('app.imgurl').basename($store);
+            $storedPath  = $path->store('image', 'public');
+            $imgurl = 'storage/'.$storedPath;
 
         }
 
@@ -256,14 +238,9 @@ class BannerController extends Controller
 
 
         if (!empty($path_sm)) {
-
-            $store  = Storage::putFile('public/image', $path_sm);
-
-            //$imgurl    = Storage::url($store);
-
-            //$imgurl = url('/').'/storage/app/'.$store;
-
-            $imgurl_sm = config('app.imgurl').basename($store);
+            
+            $storedPath  = $path_sm->store('image', 'public');
+            $imgurl_sm = 'storage/'.$storedPath;
 
         }
 

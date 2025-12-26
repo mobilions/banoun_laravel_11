@@ -60,4 +60,8 @@ class Usbanner extends Model
             ->where($whereColumn, $value)
             ->value($targetColumn);
     }
+    
+    public function getImageurlAttribute($value){
+        return $value != "" ? asset($value) : "";
+    }
 }
