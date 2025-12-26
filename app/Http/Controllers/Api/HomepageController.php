@@ -390,11 +390,11 @@ class HomepageController extends BaseController
     }
 
 
-    public function subcategories($id=0)
+    public function subcategories(Request $request)
 
     {
 
-        if (!empty($_GET['categoryid'])) { $id=$_GET['categoryid']; }
+        $id = $request->categoryid;
         echo $id;
         if (!empty($_GET['lang']) && $_GET['lang'] == 'ar') {            
 
