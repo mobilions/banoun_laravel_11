@@ -34,4 +34,8 @@ class Carousal extends Model
     {
         return $this->belongsTo(Category::class);
     }
+    
+    public function getImageurlAttribute($value){
+        return $value != "" ? asset($value) : "";
+    }
 }

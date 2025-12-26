@@ -121,8 +121,8 @@ class CarousalController extends Controller
             $path = $request->file('imgfile');
 
             if (!empty($path) && $path->isValid()) {
-                $store = Storage::putFile('public/image', $path);
-                $imgurl = config('app.imgurl').basename($store);
+                $storedPath = $path->store('image', 'public');
+                $imgurl = 'storage/'.$storedPath;
             }
 
             $data = new Carousal; 
@@ -242,8 +242,8 @@ class CarousalController extends Controller
             $path = $request->file('imgfile');
 
             if (!empty($path) && $path->isValid()) {
-                $store = Storage::putFile('public/image', $path);
-                $imgurl = config('app.imgurl').basename($store);
+                $storedPath = $path->store('image', 'public');
+                $imgurl = 'storage/'.$storedPath;
             } else {
                 $imgurl = $request->imgfile_val ?? '';
             }

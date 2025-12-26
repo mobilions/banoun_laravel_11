@@ -66,7 +66,20 @@ tr.selected {
                         <td class="text-wrap" style="white-space: normal; word-break: break-word; max-width: 420px;" data-export="{{$index->description}}">
                             {{$index->description}}<br>{{$index->description_ar}}
                         </td>
-                        <td class="text-center export-ignore">—</td>
+                        <td class="text-center  export-ignore">
+                            @php
+                                $brandImage = $index->imageurl
+                                    ? (Str::startsWith($index->imageurl, ['http://', 'https://', '//'])
+                                        ? $index->imageurl
+                                        : asset($index->imageurl))
+                                    : null;
+                            @endphp
+                            @if($brandImage)
+                                    <img src="{{$brandImage}}" width="80" alt="{{$log->name}}" title="{{$log->name}}">
+                            @else
+                                    <span class="text-muted">No image</span>
+                            @endif
+                        </td>
                             <td>
                                 <span class="badge {{ (int)$index->delete_status === 0 ? 'bg-success' : 'bg-secondary' }}">
                                     {{ (int)$index->delete_status === 0 ? 'Active' : 'Deleted' }}
