@@ -418,8 +418,8 @@ class HomepageController extends BaseController
         }
 
         // Apply category filter ONLY if value exists
-        if (!empty($id)) {
-            $subcategory->where('category_id', $id);
+        if ($id != "") {
+            $subcategory = $subcategory->where('category_id', $id);
         }
 
         // Always apply delete filter
