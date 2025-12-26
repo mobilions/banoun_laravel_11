@@ -75,7 +75,7 @@ tr.selected {
                                     : null;
                             @endphp
                             @if($brandImage)
-                                    <img src="{{$brandImage}}" width="80" alt="{{$log->name}}" title="{{$log->name}}">
+                                    <img src="{{$brandImage}}" width="80" alt="{{$index->name}}" title="{{$index->name}}">
                             @else
                                     <span class="text-muted">No image</span>
                             @endif
