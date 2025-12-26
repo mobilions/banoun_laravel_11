@@ -382,14 +382,14 @@ class HomepageController extends BaseController
             $Usbanner->save();
         }
       
-        $UserKid = UserKid::where("delete_status", "0")->get();
+        $UserKids = UserKid::where("delete_status", "0")->get();
         foreach($UserKids as $UserKid){
             $imgfile = str_replace("http://157.245.110.229/", "", $UserKid->imgfile);
             $UserKid->imgfile = $imgfile;
             $UserKid->save();
         }
       
-        $User = User::where("delete_status", "0")->get();
+        $Users = User::where("delete_status", "0")->get();
         foreach($Users as $User){
             $imgfile = str_replace("http://157.245.110.229/", "", $User->imgfile);
             $User->imgfile = $imgfile;
