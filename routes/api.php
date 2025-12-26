@@ -63,7 +63,7 @@ Route::get('/arealist', [HomepageController::class, 'arealist']);
 Route::get('/homepage', [HomepageController::class, 'homepage']);
 Route::get('/category', [HomepageController::class, 'index']);
 Route::get('/categorylist', [HomepageController::class, 'categorylist']);
-Route::get('/productlist', [HomepageController::class, 'productlist']);
+Route::post('/productlist', [HomepageController::class, 'productlist']);
 Route::post('/productdetails', [HomepageController::class, 'productdetails']);
 Route::post('/search', [HomepageController::class, 'topsearches']);
 Route::post('/topsearches', [HomepageController::class, 'topsearches']);
