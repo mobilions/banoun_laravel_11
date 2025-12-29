@@ -36,6 +36,7 @@ use App\Models\SizeChart;
 use App\Models\DeliveryOption;
 use App\Models\UserKid;
 use App\Models\User;
+use App\Models\Coupon;
 
 
 
@@ -1102,6 +1103,18 @@ class HomepageController extends BaseController
                 "totalqty" => $totalqty,
             ]);
         } else {
+            if($CartMaster->coupon_code != ""){
+                $Coupon = Coupon::where("coupon_code", $CartMaster->coupon_code)->where("delete_status", "0")->first();
+                if(!empty($Coupon)){
+                    if($Coupon->price_type == "Price"){
+                        $total = $total - $Coupon->coupon_val;
+                        $grandtotal = $grandtotal - $Coupon->coupon_val;
+                    } else if($Coupon->price_type == "Percentage"){
+                        $total = ($total / 100) * (100 - $Coupon->coupon_val);
+                        $grandtotal = ($grandtotal / 100) * (100 - $Coupon->coupon_val);
+                    }
+                }
+            }
             CartMaster::where("id", $CartMaster->id)->update([
                 "total" => $total,
                 "subtotal" => $subtotal,
