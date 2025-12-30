@@ -1285,11 +1285,19 @@ class HomepageController extends BaseController
             "is_checkouted" => 1,
             "created_at" => date("Y-m-d H:i:s"),
         ]);
-
-        Cart::where("user_id", $userId)->where("delete_status", "0")->update([
-            "delete_status" => "1",
-            "master_id" => $CartMaster->id
-        ]);
+        
+        $Carts = Cart::where("user_id", $userId)->where("delete_status", "0")->get();
+        foreach($Carts as $Cart){
+            $Productvariant = Productvariant::where("product_id", $Cart->product_id)->where("size_id", $Cart->size_id)->where("delete_status", "0")->first();
+            if(!empty($Productvariant)){
+                $Productvariant->available_quantity = $Productvariant->available_quantity - $Cart->qty;
+                $Productvariant->save();
+            }
+            $Cart->update([
+                "delete_status" => "1",
+                "master_id" => $CartMaster->id
+            ]);
+        }
 
         $data['order'] = [
             "orderId" => $CartMaster->id,
