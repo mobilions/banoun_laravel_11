@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\SoftDeleteByStatus;
 
-class SearchTag extends Model
+class Searchtag extends Model
 {
     use SoftDeleteByStatus;
 
