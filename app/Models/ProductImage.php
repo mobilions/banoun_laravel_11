@@ -35,6 +35,7 @@ class ProductImage extends Model
     
     public function variant()
     {
+        
         return $this->belongsTo(Productvariant::class, 'variant_id');
     }
     
