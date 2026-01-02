@@ -280,7 +280,7 @@ Route::prefix('emailtemplate')->group(function () {
     Route::post('/{id}/delete', [EmailtemplateController::class, 'destroy']);
 });
 
-Route::match(['get', 'post'], '/reports/orders', [ReportController::class, 'order'])->name('order');
+Route::match(['get', 'post'], '/reports/orders', [ReportController::class, 'order']);
 Route::get('/reports/stocklogs', [ReportController::class, 'stock']);
 
 Route::get('/clearcache', function () {
