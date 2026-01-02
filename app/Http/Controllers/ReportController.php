@@ -34,7 +34,7 @@ class ReportController extends Controller
         }
         $todate1 = date('Y-m-d', strtotime("+1 day", strtotime($todate)));
 
-        $indexes = Cartmaster::whereBetween('created_at',[$fromdate, $todate1])->get();
+        $indexes = CartMaster::whereBetween('created_at',[$fromdate, $todate1])->get();
 
         return view('report.order',compact('title','indexes','fromdate','todate'));  
     }
