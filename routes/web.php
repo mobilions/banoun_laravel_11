@@ -56,8 +56,8 @@ Route::post('email/resend', [App\Http\Controllers\Auth\VerificationController::c
 Route::get('password/confirm', [App\Http\Controllers\Auth\ConfirmPasswordController::class, 'showConfirmForm'])->name('password.confirm');
 Route::post('password/confirm', [App\Http\Controllers\Auth\ConfirmPasswordController::class, 'confirm']);
 
-Route::get('/', [HomeController::class, 'index'])->name('admin');
-Route::get('/home', [HomeController::class, 'index'])->name('admin');
+Route::get('/', [HomeController::class, 'index']);
+Route::get('/home', [HomeController::class, 'index']);
 Route::get('/admin', [HomeController::class, 'index'])->name('admin');
 
 Route::prefix('category')->group(function () {
