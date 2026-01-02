@@ -14,7 +14,7 @@ use App\Models\Userkids;
 
 use App\Models\UserAddress;
 
-use App\Models\Cartmaster;
+use App\Models\CartMaster;
 
 use Illuminate\Http\Request;
 
