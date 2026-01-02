@@ -281,7 +281,7 @@ Route::prefix('emailtemplate')->group(function () {
 });
 
 Route::match(['get', 'post'], '/reports/orders', [ReportController::class, 'order'])->name('order');
-Route::get('/reports/stocklogs', [ReportController::class, 'stock'])->name('order');
+Route::get('/reports/stocklogs', [ReportController::class, 'stock']);
 
 Route::get('/clearcache', function () {
     Artisan::call('cache:clear');
