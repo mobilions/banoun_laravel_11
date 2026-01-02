@@ -149,8 +149,11 @@ class UserpageController extends BaseController
 
             $kidId = DB::table('user_kids')->where('id',$request->kidId)->update(['delete_status'=>'1']);
 
-            $msg = 'Kid Details Deleted';
+            $kids = DB::table('user_kids')->select('user_id as userId','id as kidId','name','gender','dob','imgfile')->where('user_id',auth("api")->user()->id)->where('delete_status','0')->get();
 
+            $msg = 'Kid Details Deleted';
+            $massage['success'] = $msg;
+            return $this->sendResponse($kids, $massage);
         }
 
 
