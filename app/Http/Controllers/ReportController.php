@@ -1,7 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 use App\Models\Cart;
-use App\Models\Cartmaster;
+use App\Models\CartMaster;
 use App\Models\OrderLog;
 use App\Models\Stock;
 use App\Models\Product;
