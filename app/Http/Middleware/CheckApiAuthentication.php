@@ -17,6 +17,9 @@ class CheckApiAuthentication
     public function handle(Request $request, Closure $next): Response
     {
         // Check if the user is authenticated using the 'api' guard
+        echo "<pre>";
+        print_r(auth("api")->user());
+        exit;
         if (Auth::guard('api')->check()) {
             return $next($request);
         }
