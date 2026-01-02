@@ -22,8 +22,17 @@ class Cartmaster extends Model
         'paymentstatus',
         'orderstatus',
         'comments',
+        'is_checkouted',
         'created_by',
-        'updated_by'
+        'updated_by',
+        'referenceId',
+        'TranID',
+        'is_giftwrap',
+        'giftwrap_price',
+        'PaymentID',
+        'TrackID',
+        'orderstatus',
+        
     ];
 
     protected $casts = [

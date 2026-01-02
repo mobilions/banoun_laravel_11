@@ -28,7 +28,7 @@ tr.selected {background-color:#adf7a9  ! important;}
     <div class="col-md-12">
         <div class="card">
             <div class="card-body">
-                @if($order->orderstatus=='1')
+                <!-- @if($order->orderstatus=='1')
                     <form action="{{route('order.status.update', [$order->id, 2])}}" method="post" class="d-inline float-end me-3">
                         @csrf
                         <button type="submit" class="btn btn-warning btn-sm waves-effect waves-light" onclick="return confirm('Mark order as Out for Delivery?');">
@@ -62,7 +62,7 @@ tr.selected {background-color:#adf7a9  ! important;}
                             <i class="bx bx-block font-size-14 align-middle me-2"></i> Cancel Order
                         </button>
                     </form><br><br>
-                @endif
+                @endif -->
 
 
                     <div class="row">

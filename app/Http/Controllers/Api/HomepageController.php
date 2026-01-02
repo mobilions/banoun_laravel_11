@@ -754,9 +754,9 @@ class HomepageController extends BaseController
         if (empty($product)) {
             return $this->sendError(["error" => "Product not found"]);
         }
-
+          
         $size = Productvariant::where('product_id', $request->productId)
-            ->where('id', $request->sizeid)
+            ->where('size_id', $request->sizeid)
             ->first();
 
         if (empty($size)) {
@@ -813,7 +813,7 @@ class HomepageController extends BaseController
         }
 
         $size = Productvariant::where('product_id', $cart->product_id)
-            ->where('id', $cart->size_id)
+            ->where('size_id', $cart->size_id)
             ->first();
 
         if ($size->available_quantity < $request->qty) {
@@ -1271,6 +1271,7 @@ class HomepageController extends BaseController
         }
 
         $userId = auth()->id();
+        
         $CartMaster = CartMaster::where("id", $request->orderId)->first();
         if(empty($CartMaster)){
             return $this->sendError(["error" => "Cart is empty."]);

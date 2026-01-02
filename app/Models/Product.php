@@ -109,8 +109,7 @@ class Product extends Model
     {
         return $this->hasMany(Wishlist::class);
     }
-    
-    // Accessors for comma-separated values (backward compatibility)
+
     public function getColorsArrayAttribute()
     {
         return $this->colors ? explode(',', $this->colors) : [];

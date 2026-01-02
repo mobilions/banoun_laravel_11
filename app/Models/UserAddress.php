@@ -44,13 +44,12 @@ class UserAddress extends Model
         'delete_status' => 'integer'
     ];
 
-    // Relationships
     public function user()
     {
         return $this->belongsTo(User::class);
     }
-    public function area()
+    public function userarea()
     {
-        return $this->belongsTo(Area::class);
+        return $this->belongsTo(Area::class, 'area_id');
     }
 }

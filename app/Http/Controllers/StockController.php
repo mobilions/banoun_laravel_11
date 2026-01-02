@@ -113,6 +113,7 @@ class StockController extends Controller
         DB::transaction(function () use ($data, $request) {
             $data->quantity = $request->quantity;
             $data->updated_by=Auth::user()->id;
+            $data->process = StockProcess::UPDATE;
             $data->save();
 
             $variant = Productvariant::lockForUpdate()->find($data->variant_id);
@@ -198,22 +199,65 @@ class StockController extends Controller
         return view('stock.stocklist',compact('title','indexes'));
 
     }
-
-
-
+    // public function stocklog()
+    // {
+    //     $title = "Stock List";
+    //     $indexes = Productvariant::join('products', 'productvariants.product_id', '=', 'products.id')->addSelect('products.name as product','products.name_ar as products_ar','products.category_id','products.subcategory_id','products.brand_id','productvariants.*')->get();       
+        
+    //     return view('stock.stocklog',compact('title','indexes'));
+    // }
     public function stocklog()
-
     {
-
         $title = "Stock List";
+        // $indexes = Productvariant::query()
+        //             ->with([
+        //                 'product.category', 
+        //                 'product.brand', 
+        //                 'product.subcategory', 
+        //                 'sizeVariant', 
+        //                 'colorVariant'
+        //             ])
+        //             ->addSelect([
+        //                 'productvariants.*',
+        //                 'stocks_sum_quantity' => Stock::selectRaw('COALESCE(SUM(quantity), 0)')
+        //                     ->whereColumn('stocks.variant_id', 'productvariants.id')
+        //                     ->whereColumn('stocks.product_id', 'productvariants.product_id')
+        //                     ->where('process', 'Add')
+        //             ])
+        //             ->havingRaw('stocks_sum_quantity > 0')
+        //             ->get();
+        // Enable query logging
+        $indexes = Productvariant::query()
+                    ->with([
+                        'product.category', 
+                        'product.brand', 
+                        'product.subcategory', 
+                        'sizeVariant', 
+                        'colorVariant'
+                    ])
+                    ->addSelect([
+                        'productvariants.*',
+                        'stocks_sum_quantity' => Stock::selectRaw('COALESCE(SUM(quantity), 0)')
+                            ->whereColumn('stocks.variant_id', 'productvariants.id')
+                            ->whereColumn('stocks.product_id', 'productvariants.product_id')
+                            //->where('process', 'Add')
+                    ])
+                    ->havingRaw('stocks_sum_quantity > 0')
+                    ->get();
 
-        $indexes = Productvariant::join('products', 'productvariants.product_id', '=', 'products.id')->addSelect('products.name as product','products.name_ar as products_ar','products.category_id','products.subcategory_id','products.brand_id','productvariants.*')->get();
-
-        return view('stock.stocklog',compact('title','indexes'));
-
+        return view('stock.stocklog', compact('title', 'indexes'));
     }
 
-
+    public function getStockDetails($variantId)
+    {
+        $stocks = Stock::where('variant_id', $variantId)
+            ->where('process', 'Add')
+            ->with('variant.product')
+            //->groupBy(['product_id','variant_id'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+        return response()->json($stocks);
+    }
 
     public function destroy($id)
     {
