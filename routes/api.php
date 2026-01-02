@@ -25,7 +25,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 
-Route::middleware(['auth:api', 'CheckApiAuthentication'])->group(function () {
+Route::middleware(['CheckApiAuthentication'])->group(function () {
     Route::post('logout', [ApiAuthController::class, 'logout']);
     Route::get('deleteuser', [ApiAuthController::class, 'deleteuser']);
     Route::post('updateimage', [ApiAuthController::class, 'updateimage']);
