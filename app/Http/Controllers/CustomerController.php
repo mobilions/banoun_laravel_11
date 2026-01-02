@@ -74,7 +74,7 @@ class CustomerController extends Controller
 
         $userAddress=UserAddress::where('user_id',$id)->get();
 
-        $cartMasters=Cartmaster::where('user_id',$id)->get();
+        $cartMasters=CartMaster::where('user_id',$id)->get();
 
         $wishlists=Wishlist::where('created_by',$id)->where('delete_status',0)->get();
 
