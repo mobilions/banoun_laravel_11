@@ -14,7 +14,7 @@ use App\Models\Userkids;
 
 use App\Models\UserAddress;
 
-use App\Models\Cartmaster;
+use App\Models\CartMaster;
 
 use Illuminate\Http\Request;
 
@@ -73,7 +73,7 @@ class CustomerController extends Controller
         $kids = Userkids::where('user_id',$id)->get();
 
         $userAddress=UserAddress::with('userarea')->where('user_id',$id)->get();
-        $cartMasters=Cartmaster::where('user_id',$id)->get();
+        $cartMasters=CartMaster::where('user_id',$id)->get();
 
         $wishlists=Wishlist::where('created_by',$id)->where('delete_status',0)->get();
 
