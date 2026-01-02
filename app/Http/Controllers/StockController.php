@@ -55,7 +55,7 @@ class StockController extends Controller
         $indexes = Stock::where('variant_id',$variant_id)->orderByDesc('created_at')->get();
 
         $addstock = Stock::where('variant_id',$variant_id)
-            ->where('process',StockProcess::ADD)
+            //->where('process',StockProcess::ADD)
             ->orderByDesc('created_at')
             ->get();
 
@@ -209,24 +209,6 @@ class StockController extends Controller
     public function stocklog()
     {
         $title = "Stock List";
-        // $indexes = Productvariant::query()
-        //             ->with([
-        //                 'product.category', 
-        //                 'product.brand', 
-        //                 'product.subcategory', 
-        //                 'sizeVariant', 
-        //                 'colorVariant'
-        //             ])
-        //             ->addSelect([
-        //                 'productvariants.*',
-        //                 'stocks_sum_quantity' => Stock::selectRaw('COALESCE(SUM(quantity), 0)')
-        //                     ->whereColumn('stocks.variant_id', 'productvariants.id')
-        //                     ->whereColumn('stocks.product_id', 'productvariants.product_id')
-        //                     ->where('process', 'Add')
-        //             ])
-        //             ->havingRaw('stocks_sum_quantity > 0')
-        //             ->get();
-        // Enable query logging
         $indexes = Productvariant::query()
                     ->with([
                         'product.category', 
@@ -240,10 +222,10 @@ class StockController extends Controller
                         'stocks_sum_quantity' => Stock::selectRaw('COALESCE(SUM(quantity), 0)')
                             ->whereColumn('stocks.variant_id', 'productvariants.id')
                             ->whereColumn('stocks.product_id', 'productvariants.product_id')
-                            //->where('process', 'Add')
                     ])
                     ->havingRaw('stocks_sum_quantity > 0')
                     ->get();
+                    
 
         return view('stock.stocklog', compact('title', 'indexes'));
     }
@@ -251,9 +233,7 @@ class StockController extends Controller
     public function getStockDetails($variantId)
     {
         $stocks = Stock::where('variant_id', $variantId)
-            ->where('process', 'Add')
-            ->with('variant.product')
-            //->groupBy(['product_id','variant_id'])
+           ->with('variant.product')
             ->orderBy('created_at', 'desc')
             ->get();
         return response()->json($stocks);
