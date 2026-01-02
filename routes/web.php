@@ -56,8 +56,8 @@ Route::post('email/resend', [App\Http\Controllers\Auth\VerificationController::c
 Route::get('password/confirm', [App\Http\Controllers\Auth\ConfirmPasswordController::class, 'showConfirmForm'])->name('password.confirm');
 Route::post('password/confirm', [App\Http\Controllers\Auth\ConfirmPasswordController::class, 'confirm']);
 
-Route::get('/', [HomeController::class, 'index'])->name('admin');
-Route::get('/home', [HomeController::class, 'index'])->name('admin');
+Route::get('/', [HomeController::class, 'index']);
+Route::get('/home', [HomeController::class, 'index']);
 Route::get('/admin', [HomeController::class, 'index'])->name('admin');
 
 Route::prefix('category')->group(function () {
@@ -280,8 +280,8 @@ Route::prefix('emailtemplate')->group(function () {
     Route::post('/{id}/delete', [EmailtemplateController::class, 'destroy']);
 });
 
-Route::match(['get', 'post'], '/reports/orders', [ReportController::class, 'order'])->name('order');
-Route::get('/reports/stocklogs', [ReportController::class, 'stock'])->name('order');
+Route::match(['get', 'post'], '/reports/orders', [ReportController::class, 'order']);
+Route::get('/reports/stocklogs', [ReportController::class, 'stock']);
 
 Route::get('/clearcache', function () {
     Artisan::call('cache:clear');
