@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\HomepageController;
 use App\Http\Controllers\Api\UserpageController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Middleware\CheckApiAuthentication;
 
 // Route::middleware('throttle:3,1')->group(function () {
     Route::post('login', [ApiAuthController::class, 'login']);
