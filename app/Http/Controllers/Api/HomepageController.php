@@ -61,11 +61,9 @@ class HomepageController extends BaseController
 
 
 
-    public function categorylist($limit="5")
+    public function categorylist()
 
     {
-
-        if (!empty($_GET['limit'])) { $limit=$_GET['limit']; }
 
         if (!empty($_GET['lang']) && $_GET['lang'] == 'ar') {            
 
@@ -79,7 +77,7 @@ class HomepageController extends BaseController
 
         }
 
-        $category = $category->where('delete_status', '0')->limit($limit)->get();
+        $category = $category->where('delete_status', '0')->get();
 
 
 
