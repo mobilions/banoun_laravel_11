@@ -190,7 +190,7 @@ tr.selected {background-color:#adf7a9  ! important;}
 
                                     <td>{{$index->name}}</td>
 
-                                    <td>{{$index->type}}</td>
+                                    <td>{{$index->gender}}</td>
 
                                     <td>{{date('Y-m-d',strtotime($index->dob))}}</td>
 
@@ -231,7 +231,7 @@ tr.selected {background-color:#adf7a9  ! important;}
                                         <td>{{$address->country_mobile}} {{$address->mobile}}</td>
                                         <td>{{$address->country_landline}} {{$address->landline}}</td>
                                         <td>{{$address->type}}</td>
-                                        <td>{{$address->area}}</td>
+                                        <td>{{$address->userarea->name}}</td>
                                         <td>{{$address->block}}</td>
                                         <td>{{$address->street}}</td>
                                         <td>{{$address->avenue}}</td>

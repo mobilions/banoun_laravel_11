@@ -54,7 +54,6 @@ class Productvariant extends Model
         return $this->belongsTo(Variantsub::class, 'color_id');
     }
     
-    // Backward compatibility aliases
     public function size()
     {
         return $this->sizeVariant();
@@ -65,7 +64,6 @@ class Productvariant extends Model
         return $this->colorVariant();
     }
     
-    // Has Many Relationships
     public function stock()
     {
         return $this->hasMany(Stock::class, 'variant_id');
@@ -79,6 +77,11 @@ class Productvariant extends Model
     public function images()
     {
         return $this->hasMany(ProductImage::class, 'variant_id');
+    }
+
+    public function stocks()
+    {
+        return $this->hasMany(Stock::class, 'variant_id');
     }
 
     public static function FindName($id){

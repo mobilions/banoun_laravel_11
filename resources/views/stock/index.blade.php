@@ -102,7 +102,7 @@ tr.selected {background-color:#adf7a9  ! important;}
 
 <button type="button" class="btn btn-secondary waves-effect" data-bs-dismiss="modal">Close</button>
 
-<button type="submit" class="btn btn-primary waves-effect waves-light">Submit</button>
+<button type="submit" class="btn btn-primary waves-effect waves-light">Update</button>
 
 </div>
 
@@ -112,7 +112,30 @@ tr.selected {background-color:#adf7a9  ! important;}
 
 </div><!-- /.modal-dialog -->
 
-</div><!-- /.modal -->
+</div>
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this stock entry?</p>
+                <p><strong>Quantity: <span id="deleteQuantity"></span></strong></p>
+                <p class="text-danger">This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteForm" method="POST" action="">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 
 <div class="row">
 
@@ -150,7 +173,7 @@ tr.selected {background-color:#adf7a9  ! important;}
 
                             <div class="col-lg-12 mt-3 mb-3">
 
-                                <center><button type="submit" class="btn btn-primary waves-effect waves-light me-2">Update</button></center>
+                                <center><button type="submit" class="btn btn-primary waves-effect waves-light me-2">Add</button></center>
 
                             </div>
 
@@ -173,56 +196,47 @@ tr.selected {background-color:#adf7a9  ! important;}
             <div class="card-body">
 
                 <table id="datatable-buttons" class="table table-bordered dt-responsive nowrap w-100">
-
                     <thead>
-
                         <tr>
-
                             <th>#</th>
-
                             <th>Quantity</th>
-
                             <th>Date Added</th>
-
                             <th>Status</th>
-
                             <th class="export-ignore">Action</th>
-
                         </tr>
-
                     </thead>           
-
                     <tbody>
-
                         @foreach ($addstock as $index)
-
                         <tr>
-
                             <td>{{$index->id}}</td>
-
                             <td>{{$index->quantity}}</td>
-
-                            <td>{{date('d-m-Y',strtotime($index->created_at))}}</td>
-
+                            <td>{{date('d-m-Y', strtotime($index->created_at))}}</td>
                             <td><span class="{{$index->status_badge_class}}">{{ucfirst($index->status_text)}}</span></td>
-
-                            
-
                             <td class="export-ignore">
                                 @if($index->status == 0)
-                                <button type="button" class="btn btn-success btn-sm waves-effect waves-light me-3 editbtn" data-id="{{$index->id}}" data-quantity="{{$index->quantity}}"  data-bs-toggle="modal" data-bs-target="#myModal"><i class="mdi mdi-pencil ms-1"></i></button>
+                                    <button type="button" 
+                                            class="btn btn-success btn-sm waves-effect waves-light me-2 editbtn" 
+                                            data-id="{{$index->id}}" 
+                                            data-quantity="{{$index->quantity}}" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#myModal">
+                                        <i class="mdi mdi-pencil"></i>
+                                    </button>
+                                    
+                                    <button type="button" 
+                                            class="btn btn-danger btn-sm waves-effect waves-light deletebtn" 
+                                            data-id="{{$index->id}}" 
+                                            data-quantity="{{$index->quantity}}">
+                                        <i class="mdi mdi-delete"></i>
+                                    </button>
                                 @else
-                                <span class="text-muted">—</span>
+                                    <span class="text-muted">—</span>
                                 @endif
                             </td>
-
-                            
-
                         </tr>
-
                         @endforeach
-
                     </tbody>
+                    
 
                 </table>
 
@@ -345,10 +359,19 @@ tr.selected {background-color:#adf7a9  ! important;}
         initTable("#datatable-buttons", "#datatable-buttons_wrapper .col-md-6:eq(0)");
         initTable("#datatable-buttons1", "#datatable-buttons1_wrapper .col-md-6:eq(0)");
         $(".dataTables_length select").addClass("form-select form-select-sm");
-
         $('.editbtn').click(function() {
             var id = $(this).data("id"); $("#editid").val(id);
             var quantity = $(this).data("quantity"); $("#quantityedit").val(quantity);
+        });
+
+        $('.deletebtn').on('click', function() {
+            var stockId = $(this).data('id');
+            var quantity = $(this).data('quantity');
+            $('#deleteQuantity').text(quantity);
+            var deleteUrl = '{{ route("stock.destroy", ":id") }}';
+            deleteUrl = deleteUrl.replace(':id', stockId);
+            $('#deleteForm').attr('action', deleteUrl);
+            $('#deleteModal').modal('show');
         });
     });
 })(jQuery);

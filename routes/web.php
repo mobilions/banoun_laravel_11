@@ -59,6 +59,7 @@ Route::post('password/confirm', [App\Http\Controllers\Auth\ConfirmPasswordContro
 Route::get('/', [HomeController::class, 'index']);
 Route::get('/home', [HomeController::class, 'index']);
 Route::get('/admin', [HomeController::class, 'index'])->name('admin');
+Route::get('/details/{variantId}', [StockController::class, 'getStockDetails'])->name('stock.details')->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
 
 Route::prefix('category')->group(function () {
     Route::get('/', [CategoryController::class, 'index'])->name('category');
@@ -241,6 +242,7 @@ Route::prefix('stock')->group(function () {
     Route::get('/{variant_id}/{product_id}', [StockController::class, 'index'])->name('stock.variant');
     Route::post('/store', [StockController::class, 'store'])->name('stock.store');
     Route::post('/update', [StockController::class, 'update'])->name('stock.update');
+    Route::post('/destroy', [StockController::class, 'destroy'])->name('stock.destroy');
     Route::get('/{id}/approve', [StockController::class, 'stcokapprove'])->name('stock.approve');
     Route::delete('/entry/{id}', [StockController::class, 'destroy'])->name('stock.destroy');
 });
