@@ -209,11 +209,22 @@ class HomepageController extends BaseController
         if(!empty($product)){
             $Productimage = ProductImage::where("product_id", $product->productId)->where("delete_status", "0")->first();
             $images = ProductImage::where("product_id", $product->productId)->where("delete_status", "0")->pluck("imageurl")->toArray();
+            $size_id = 0;
+            $qty = 0;
+            $sizeName = "";
+            $ProductTemp = Product::where("id", $product->productId)->first();
+            if($ProductTemp->size != ""){
+                $size_id = trim(explode(',', $ProductTemp->size)[0]);
+                $VariantsSub = VariantsSub::where("id", $size_id)->frist();
+                $Productvariant = Productvariant::where("size_id", $size_id)->where("product_id", $ProductTemp->productId)->frist();
+                $sizeName = !empty($VariantsSub) ? $VariantsSub->color_val : "";
+                $qty = !empty($Productvariant) ? $Productvariant->available_quantity : 0;
+            }
             $product->wishlistId = 0;
             $product->is_wishlisted = 0;
-            $product->sizeid = 0;
-            $product->qty = 0;
-            $product->sizeName = "";
+            $product->sizeid = $size_id;
+            $product->qty = $qty;
+            $product->sizeName = $sizeName;
             $product->imageurl = !empty($Productimage) ? $Productimage->imageurl : "";
             
             $similar_products = Product::select(
@@ -237,11 +248,24 @@ class HomepageController extends BaseController
             
             $similar_products = $similar_products->map(function($item){
                 $Productimage = ProductImage::where("product_id", $item->productId)->where("delete_status", "0")->first();
+
+                $size_id = 0;
+                $qty = 0;
+                $sizeName = "";
+                $ProductTemp = Product::where("id", $item->productId)->first();
+                if($ProductTemp->size != ""){
+                    $size_id = trim(explode(',', $ProductTemp->size)[0]);
+                    $VariantsSub = VariantsSub::where("id", $size_id)->frist();
+                    $Productvariant = Productvariant::where("size_id", $size_id)->where("product_id", $ProductTemp->productId)->frist();
+                    $sizeName = !empty($VariantsSub) ? $VariantsSub->color_val : "";
+                    $qty = !empty($Productvariant) ? $Productvariant->available_quantity : 0;
+                }
+                
                 $item->wishlistId = 0;
                 $item->is_wishlisted = 0;
-                $item->sizeid = 0;
-                $item->qty = 0;
-                $item->sizeName = "";
+                $item->sizeid = $size_id;
+                $item->qty = $qty;
+                $item->sizeName = $sizeName;
                 $item->imageurl = !empty($Productimage) ? $Productimage->imageurl : "";
 
                 return $item;
@@ -752,9 +776,9 @@ class HomepageController extends BaseController
         if (empty($product)) {
             return $this->sendError(["error" => "Product not found"]);
         }
-          
+
         $size = Productvariant::where('product_id', $request->productId)
-            ->where('size_id', $request->sizeid)
+            ->where('id', $request->sizeid)
             ->first();
 
         if (empty($size)) {
@@ -811,7 +835,7 @@ class HomepageController extends BaseController
         }
 
         $size = Productvariant::where('product_id', $cart->product_id)
-            ->where('size_id', $cart->size_id)
+            ->where('id', $cart->size_id)
             ->first();
 
         if ($size->available_quantity < $request->qty) {
@@ -1269,7 +1293,6 @@ class HomepageController extends BaseController
         }
 
         $userId = auth()->id();
-        
         $CartMaster = CartMaster::where("id", $request->orderId)->first();
         if(empty($CartMaster)){
             return $this->sendError(["error" => "Cart is empty."]);
