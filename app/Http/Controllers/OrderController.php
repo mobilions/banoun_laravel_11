@@ -51,12 +51,7 @@ class OrderController extends Controller
         $title = "Users";
         return view('user.create',compact('title')); 
     }
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
+    
     public function view($id)
     {
         $title = "View Order";

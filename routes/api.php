@@ -12,6 +12,7 @@ use App\Http\Middleware\CheckApiAuthentication;
     Route::post('register', [ApiAuthController::class, 'register']);
 // });
 
+
 // Route::middleware('throttle:5,10')->group(function () {
     Route::post('verifyotp', [ApiAuthController::class, 'verifyotp']);
     Route::post('forgotpassword', [ApiAuthController::class, 'forgotpassword']);
