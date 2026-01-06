@@ -215,8 +215,8 @@ class HomepageController extends BaseController
             $ProductTemp = Product::where("id", $product->productId)->first();
             if($ProductTemp->size != ""){
                 $size_id = trim(explode(',', $ProductTemp->size)[0]);
-                $VariantsSub = VariantsSub::where("id", $size_id)->frist();
-                $Productvariant = Productvariant::where("size_id", $size_id)->where("product_id", $ProductTemp->productId)->frist();
+                $VariantsSub = VariantsSub::where("id", $size_id)->first();
+                $Productvariant = Productvariant::where("size_id", $size_id)->where("product_id", $ProductTemp->productId)->first();
                 $sizeName = !empty($VariantsSub) ? $VariantsSub->color_val : "";
                 $qty = !empty($Productvariant) ? $Productvariant->available_quantity : 0;
             }
@@ -255,8 +255,8 @@ class HomepageController extends BaseController
                 $ProductTemp = Product::where("id", $item->productId)->first();
                 if($ProductTemp->size != ""){
                     $size_id = trim(explode(',', $ProductTemp->size)[0]);
-                    $VariantsSub = VariantsSub::where("id", $size_id)->frist();
-                    $Productvariant = Productvariant::where("size_id", $size_id)->where("product_id", $ProductTemp->productId)->frist();
+                    $VariantsSub = VariantsSub::where("id", $size_id)->first();
+                    $Productvariant = Productvariant::where("size_id", $size_id)->where("product_id", $ProductTemp->productId)->first();
                     $sizeName = !empty($VariantsSub) ? $VariantsSub->color_val : "";
                     $qty = !empty($Productvariant) ? $Productvariant->available_quantity : 0;
                 }
