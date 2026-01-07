@@ -100,8 +100,8 @@ class HomepageController extends BaseController
     public function productlist(Request $request)
 
     {
-        $colors = VariantsSub::select("id as colorId", "name", "color_val as code")->where("delete_status", "0")->get();
-        $sizes = VariantsSub::select("id as sizeId", "name", "color_val as age")->where("delete_status", "0")->get();
+        $colors = VariantsSub::select("id as colorId", "name", "color_val as code")->where("delete_status", "0")->where("variant_id", "2")->get();
+        $sizes = VariantsSub::select("id as sizeId", "name", "color_val as age")->where("delete_status", "0")->where("variant_id", "1")->get();
 
         $limit = !empty($request->limit) ? (int)$request->limit : 10;
         $page  = !empty($request->page)  ? (int)$request->page  : 1;
