@@ -770,7 +770,7 @@ class HomepageController extends BaseController
             return $this->sendError($validator->errors());
         }
 
-        $userId = auth()->id();
+        $userId = auth("api")->id();
         $product = Product::where("id", $request->productId)->first();
 
         if (empty($product)) {
@@ -827,7 +827,7 @@ class HomepageController extends BaseController
             return $this->sendError($validator->errors());
         }
 
-        $userId = auth()->id();
+        $userId = auth("api")->id();
         $cart = Cart::where("id", $request->cartId)->first();
 
         if (empty($cart)) {
@@ -852,7 +852,7 @@ class HomepageController extends BaseController
     }
 
     public function cartlists(){
-        $userId = auth()->id();
+        $userId = auth("api")->id();
         $cartData = $this->getCartSummary($userId);
 
         $message['success'] = "Cart list get successfully.";
@@ -868,12 +868,12 @@ class HomepageController extends BaseController
             return $this->sendError($validator->errors());
         }
         
-        $userId = auth()->id();
+        $userId = auth("api")->id();
         $CartMaster = CartMaster::where("user_id", $userId)->where("is_checkouted", "0")->where("is_deleted", "0")->first();
         if(empty($CartMaster)){
             return $this->sendError(["error" => "Cart is empty."]);
         }
-        $CartMaster->update([
+        CartMaster::where("user_id", $userId)->where("is_checkouted", "0")->where("is_deleted", "0")->update([
             "coupon_code" => $request->couponId
         ]);
 
@@ -887,7 +887,7 @@ class HomepageController extends BaseController
     }
 
     public function removecoupon(Request $request){
-        $userId = auth()->id();
+        $userId = auth("api")->id();
         $CartMaster = CartMaster::where("user_id", $userId)->where("is_checkouted", "0")->where("is_deleted", "0")->first();
         if(empty($CartMaster)){
             return $this->sendError(["error" => "Cart is empty."]);
@@ -914,7 +914,7 @@ class HomepageController extends BaseController
             return $this->sendError($validator->errors());
         }
 
-        $userId = auth()->id();
+        $userId = auth("api")->id();
         $Cart = Cart::where("id", $request->cartId)->first();
         if($request->action == "movetowishlist" && !empty($Cart)){
             Wishlist::create([
@@ -944,7 +944,7 @@ class HomepageController extends BaseController
             return $this->sendError($validator->errors());
         }
 
-        $userId = auth()->id();
+        $userId = auth("api")->id();
         $Wishlist = Wishlist::where("id", $request->wishlistId)->first();
         if(empty($Wishlist)){
             return $this->sendError(["error" => "Wishlist not found."]);
@@ -976,7 +976,7 @@ class HomepageController extends BaseController
     }
 
     public function movealltobag(Request $request){
-        $userId = auth()->id();
+        $userId = auth("api")->id();
         $Wishlists = Wishlist::where("created_by", $userId)->where("delete_status", "0")->get();
         foreach($Wishlists as $Wishlist){
             $Product = Product::where("id", $Wishlist->product_id)->first();
@@ -1005,7 +1005,7 @@ class HomepageController extends BaseController
 
     public function wishlists(Request $request){
 
-        $userId = auth()->id();
+        $userId = auth("api")->id();
         $message_res = "Wishlist get successfully.";
         if($request->action == "add"){
             Wishlist::create([
@@ -1026,7 +1026,7 @@ class HomepageController extends BaseController
     }
     
     public function updatewishlist(Request $request){
-        $userId = auth()->id();
+        $userId = auth("api")->id();
         Wishlist::where("product_id", $request->productId)->where("created_by", $userId)->where("delete_status", "0")->update(["size_id" => $request->sizeid, "qty" => $request->qty]);
         $message_res = "Wishlist updated successfully.";
         
@@ -1045,7 +1045,7 @@ class HomepageController extends BaseController
             return $this->sendError($validator->errors());
         }
 
-        $userId = auth()->id();
+        $userId = auth("api")->id();
         $CartMaster = CartMaster::where("user_id", $userId)->where("is_checkouted", "0")->where("is_deleted", "0")->first();
         if(empty($CartMaster)){
             return $this->sendError(["error" => "Cart is empty."]);
@@ -1111,7 +1111,6 @@ class HomepageController extends BaseController
         
         $total = $subtotal + $tax - $discount;
         $grandtotal = $total + $delivery;
-
         $CartMaster = CartMaster::where("user_id", $userId)->where("is_checkouted", "0")->where("is_deleted", "0")->first();
         if(empty($CartMaster)){
             CartMaster::create([
@@ -1202,7 +1201,7 @@ class HomepageController extends BaseController
             return $this->sendError($validator->errors());
         }
 
-        $userId = auth()->id();
+        $userId = auth("api")->id();
         $CartMaster = CartMaster::where("user_id", $userId)->where("is_checkouted", "0")->where("is_deleted", "0")->first();
         if(empty($CartMaster)){
             return $this->sendError(["error" => "Cart is empty."]);
@@ -1244,7 +1243,7 @@ class HomepageController extends BaseController
             return $this->sendError($validator->errors());
         }
 
-        $userId = auth()->id();
+        $userId = auth("api")->id();
         $CartMaster = CartMaster::where("user_id", $userId)->where("is_checkouted", "0")->where("is_deleted", "0")->first();
         if(empty($CartMaster)){
             return $this->sendError(["error" => "Cart is empty."]);
@@ -1293,7 +1292,7 @@ class HomepageController extends BaseController
             return $this->sendError($validator->errors());
         }
 
-        $userId = auth()->id();
+        $userId = auth("api")->id();
         $CartMaster = CartMaster::where("id", $request->orderId)->first();
         if(empty($CartMaster)){
             return $this->sendError(["error" => "Cart is empty."]);
@@ -1335,7 +1334,7 @@ class HomepageController extends BaseController
 
     public function myorders(Request $request){
         
-        $userId = auth()->id();
+        $userId = auth("api")->id();
         $page  = request()->get('page', 1);
         $limit = request()->get('limit', 10);
         $offset = ($page - 1) * $limit;
