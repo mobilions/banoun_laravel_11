@@ -141,7 +141,7 @@ class HomepageController extends BaseController
             if ($request->keyword != "") {
                 $product = $product->where("products.name", "like", "%" . $request->keyword . "%");
             }
-            if($request->brandId != ""){
+            if($request->brandId != "0" && $request->brandId != ""){
                 $product = $product->where("products.brand_id", $request->brandId);
             }
             if($request->categoryId != ""){
