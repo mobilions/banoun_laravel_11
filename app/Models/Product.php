@@ -136,11 +136,11 @@ class Product extends Model
         return $value != "" ? asset($value) : "";
     }
     
-    public function getDescriptioneAttribute($value){
+    public function getDescriptionAttribute($value){
         return $value != null ? $value : "";
     }
     
-    public function getDescriptioneArAttribute($value){
+    public function getDescriptionArAttribute($value){
         return $value != null ? $value : "";
     }
 }
