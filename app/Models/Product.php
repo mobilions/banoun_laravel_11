@@ -135,4 +135,12 @@ class Product extends Model
     public function getImageurlAttribute($value){
         return $value != "" ? asset($value) : "";
     }
+    
+    public function getDescriptioneAttribute($value){
+        return $value != null ? $value : "";
+    }
+    
+    public function getDescriptioneArAttribute($value){
+        return $value != null ? $value : "";
+    }
 }
