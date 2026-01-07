@@ -75,24 +75,3 @@
 
 </div>
 @endsection
-@section('ScriptContent')
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const toggleBtn = document.getElementById('password-addon');
-    const passwordInput = document.getElementById('password');
-    const icon = toggleBtn ? toggleBtn.querySelector('i') : null;
-
-    if (!toggleBtn || !passwordInput || !icon) {
-        return;
-    }
-
-    toggleBtn.addEventListener('click', function () {
-        const isHidden = passwordInput.getAttribute('type') === 'password';
-        passwordInput.setAttribute('type', isHidden ? 'text' : 'password');
-
-        icon.classList.toggle('mdi-eye-outline', !isHidden);
-        icon.classList.toggle('mdi-eye-off-outline', isHidden);
-    });
-});
-</script>
-@endsection
