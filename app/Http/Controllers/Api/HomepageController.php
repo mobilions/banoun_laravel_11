@@ -1095,8 +1095,9 @@ class HomepageController extends BaseController
             
             $item->available_quantity = ($item->available_quantity == null || $item->available_quantity == "") ? "0" : $item->available_quantity;
             $item->imageurl = !empty($Productimage) ? $Productimage->imageurl : "";
+            $item->sizeName = $item->sizeName != null ? $item->sizeName : "";
 
-            $itemTotal = $item->price * $item->qty;
+            $itemTotal = $item->price_offer * $item->qty;
             $subtotal += $itemTotal;
             $totalqty += $item->qty;
 

@@ -48,6 +48,18 @@ class Cartmaster extends Model
         'updated_by' => 'integer'
     ];
 
+    public function getCouponCodeAttribute($value){
+        return $value != null ? $value : "";
+    }
+
+    public function getGiftwrapPriceAttribute($value){
+        return $value != null ? $value : "";
+    }
+
+    public function getPromoPriceAttribute($value){
+        return $value != null ? $value : "";
+    }
+
     // Relationships
     public function user()
     {
