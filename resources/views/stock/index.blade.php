@@ -201,7 +201,7 @@ tr.selected {background-color:#adf7a9  ! important;}
                             <th>#</th>
                             <th>Quantity</th>
                             <th>Date Added</th>
-                            <th>Status</th>
+                            <!-- <th>Status</th> -->
                             <th class="export-ignore">Action</th>
                         </tr>
                     </thead>           
@@ -211,7 +211,7 @@ tr.selected {background-color:#adf7a9  ! important;}
                             <td>{{$index->id}}</td>
                             <td>{{$index->quantity}}</td>
                             <td>{{date('d-m-Y', strtotime($index->created_at))}}</td>
-                            <td><span class="{{$index->status_badge_class}}">{{ucfirst($index->status_text)}}</span></td>
+                            <!-- <td><span class="{{$index->status_badge_class}}">{{ucfirst($index->status_text)}}</span></td> -->
                             <td class="export-ignore">
                                 @if($index->status == 0)
                                     <button type="button" 
