@@ -28,6 +28,15 @@ class VariantsSub extends Model
         'delete_status' => 'integer'
     ];
 
+    
+    public function getNameAttribute($value){
+        return $value != null ? $value : "";
+    }
+    
+    public function getColorValAttribute($value){
+        return $value != null ? $value : "";
+    }
+
     // Relationships
     public function variant()
     {

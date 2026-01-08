@@ -587,9 +587,9 @@ class AuthController extends BaseController
 
     public function deleteuser(Request $request)
     {
-        $user = $request->user();
+        $userId = auth("api")->id();
 
-        User::where("id", $user->id)->update([
+        User::where("id", $userId)->update([
             "delete_status" => "1",
             "email" => null,
             "phone" => null,
