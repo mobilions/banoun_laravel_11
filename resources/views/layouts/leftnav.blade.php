@@ -12,7 +12,11 @@
 
                 <li> <a href="{{url('/stocklog')}}" class="waves-effect"><i class="bx bx-store"></i><span key="t-chat">Stock</span> </a> </li>
 
-                <li class="menu-title" key="t-menu">Menu</li>
+                <li> <a href="{{url('/product')}}" class="waves-effect"><i class="bx bx-store"></i><span key="t-chat">Products</span> </a> </li>
+
+                <li> <a href="{{url('/customer')}}" class="waves-effect"><i class="bx bxs-user-detail"></i><span key="t-chat">Customer</span> </a> </li>
+
+                <!-- <li class="menu-title" key="t-menu">Menu</li> -->
 
                 <li> <a href="{{url('/brand')}}" class="waves-effect"><i class="bx bx-globe-alt"></i><span key="t-chat">Brands</span> </a> </li>
 
@@ -26,13 +30,11 @@
 
                 <li> <a href="{{url('/searchtag')}}" class="waves-effect"><i class="bx bx-search"></i><span key="t-chat">Search Tag</span> </a> </li>
 
-                <li> <a href="{{url('/product')}}" class="waves-effect"><i class="bx bx-store"></i><span key="t-chat">Products</span> </a> </li>
+                
 
                 <li> <a href="{{url('/settings')}}" class="waves-effect"><i class="bx bx-cog"></i><span key="t-chat">Settings</span> </a> </li>
 
                 <li> <a href="{{url('/users')}}" class="waves-effect"><i class="bx bx-user-circle"></i><span key="t-chat">Users</span> </a> </li>
-
-                <li> <a href="{{url('/customer')}}" class="waves-effect"><i class="bx bxs-user-detail"></i><span key="t-chat">Customer</span> </a> </li>
 
                 <li> <a href="{{url('/terms')}}" class="waves-effect"><i class="bx bx-book-open"></i><span key="t-chat">Terms & Conditions</span> </a> </li>
 
@@ -58,11 +60,11 @@
 
                 <li> <a href="{{url('/pagecontent')}}" class="waves-effect"><i class="bx bx-book-open"></i><span key="t-chat">Page Content</span> </a> </li>
 
-                <li class="menu-title" key="t-menu">Reports</li>
+                <!-- <li class="menu-title" key="t-menu">Reports</li>
 
                 <li> <a href="{{url('/reports/orders')}}" class="waves-effect"><i class="bx bxs-file"></i><span key="t-chat">Orders</span> </a> </li>
 
-                <li> <a href="{{url('/reports/stocklogs')}}" class="waves-effect"><i class="bx bx-store"></i><span key="t-chat">Stock</span> </a> </li>
+                <li> <a href="{{url('/reports/stocklogs')}}" class="waves-effect"><i class="bx bx-store"></i><span key="t-chat">Stock</span> </a> </li> -->
             </ul>
 
         </div>

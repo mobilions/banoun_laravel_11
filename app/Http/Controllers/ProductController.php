@@ -144,7 +144,12 @@ class ProductController extends Controller
     {
         $title = "Product";
 
-        $categories = \App\Models\Category::active()->get();
+        // $categories = \App\Models\Category::active()->get();
+        $categories = \App\Models\Category::active()
+                        ->whereHas('subcategories', function($query) {
+                            $query->active();
+                        })
+                        ->get();
 
         $subcategories = \App\Models\Subcategory::active()->get();
 
@@ -199,7 +204,7 @@ class ProductController extends Controller
             'more_info' => 'nullable|string',
             'more_info_ar' => 'nullable|string',
             'price' => 'required|numeric|min:0',
-            'price_offer' => 'required|numeric|min:0',
+            'price_offer' => 'required|numeric|min:0|lte:price',
             'percentage_discount' => 'required|numeric|min:0|max:100',
             'color_id' => 'required|array|min:1',
             'color_id.*' => 'exists:variants_sub,id',
@@ -210,6 +215,8 @@ class ProductController extends Controller
             'imgfile' => ['required','image','mimes:jpeg,png,jpg,gif,svg,webp','max:2048','dimensions:min_width=100,min_height=100,max_width=4000,max_height=4000'],
             'imgfile2' => ['nullable','image','mimes:jpeg,png,jpg,gif,svg,webp','max:2048','dimensions:min_width=100,min_height=100,max_width=4000,max_height=4000'],
             'imgfile3' => ['nullable','image','mimes:jpeg,png,jpg,gif,svg,webp','max:2048','dimensions:min_width=100,min_height=100,max_width=4000,max_height=4000'],
+        ], [
+            'price_offer.lte' => 'Offer price cannot be greater than the regular price.',
         ]);
 
 
@@ -404,7 +411,12 @@ class ProductController extends Controller
             return redirect('/product')->with('error', 'Product not found.');
         }
 
-        $categories = \App\Models\Category::active()->get();
+        //$categories = \App\Models\Category::active()->get();
+        $categories = \App\Models\Category::active()
+                        ->whereHas('subcategories', function($query) {
+                            $query->active();
+                        })
+                        ->get();
 
         $subcategories = \App\Models\Subcategory::active()->get();
 
@@ -478,7 +490,7 @@ class ProductController extends Controller
             'more_info' => 'nullable|string',
             'more_info_ar' => 'nullable|string',
             'price' => 'required|numeric|min:0',
-            'price_offer' => 'required|numeric|min:0',
+            'price_offer' => 'required|numeric|min:0|lte:price',
             'percentage_discount' => 'required|numeric|min:0|max:100',
             'color_id' => 'required|array|min:1',
             'color_id.*' => 'exists:variants_sub,id',
@@ -489,6 +501,8 @@ class ProductController extends Controller
             'imgfile' => ['nullable','image','mimes:jpeg,png,jpg,gif,svg,webp','max:2048','dimensions:min_width=100,min_height=100,max_width=4000,max_height=4000'],
             'imgfile2' => ['nullable','image','mimes:jpeg,png,jpg,gif,svg,webp','max:2048','dimensions:min_width=100,min_height=100,max_width=4000,max_height=4000'],
             'imgfile3' => ['nullable','image','mimes:jpeg,png,jpg,gif,svg,webp','max:2048','dimensions:min_width=100,min_height=100,max_width=4000,max_height=4000'],
+        ], [
+            'price_offer.lte' => 'Offer price cannot be greater than the regular price.',
         ]);
 
         $is_newarrival=0;

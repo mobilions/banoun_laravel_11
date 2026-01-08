@@ -30,6 +30,54 @@ tr.selected {background-color:#adf7a9 !important;}
     <div class="col-md-12">
         <div class="card">
             <div class="card-body">
+                <!-- Filters -->
+                <form method="GET" action="{{url('/stocklog')}}" class="mb-3">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label>Search Product</label>
+                            <input type="text" name="search" class="form-control" placeholder="Search by product name..." value="{{ request('search') }}">
+                        </div>
+                        <div class="col-md-2">
+                            <label>Category</label>
+                            <select name="category_id" class="form-select">
+                                <option value="">All Categories</option>
+                                @foreach($categories ?? [] as $cat)
+                                    <option value="{{ $cat->id }}" {{ request('category_id') == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label>Brand</label>
+                            <select name="brand_id" class="form-select">
+                                <option value="">All Brands</option>
+                                @foreach($brands ?? [] as $brand)
+                                    <option value="{{ $brand->id }}" {{ request('brand_id') == $brand->id ? 'selected' : '' }}>{{ $brand->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label>SubCategory</label>
+                            <select name="subcategory_id" class="form-select">
+                                <option value="">All SubCategories</option>
+                                @foreach($subcategories ?? [] as $subcat)
+                                    <option value="{{ $subcat->id }}" {{ request('subcategory_id') == $subcat->id ? 'selected' : '' }}>{{ $subcat->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label>Min Quantity</label>
+                            <input type="number" name="min_quantity" class="form-control" placeholder="Min" value="{{ request('min_quantity') }}" min="0">
+                        </div>
+                        <div class="col-md-2">
+                            <label>Max Quantity</label>
+                            <input type="number" name="max_quantity" class="form-control" placeholder="Max" value="{{ request('max_quantity') }}" min="0">
+                        </div>
+                        <div class="col-md-1 mt-4">
+                            <button type="submit" class="btn btn-primary waves-effect waves-light w-100">Filter</button>
+                        </div>
+                    </div>
+                </form>
+
                 <table id="datatable-buttons" class="table table-bordered dt-responsive">
                     <thead>
                         <tr>
@@ -45,22 +93,22 @@ tr.selected {background-color:#adf7a9 !important;}
                     </thead>
                     <tbody>
                         <?php $x = 1; ?>
-                        @foreach ($indexes as $index)
+                        @forelse ($indexes as $index)
                         <tr class="expandable-row" data-variant-id="{{$index->id}}" data-product-id="{{$index->product_id}}">
-                            <td>{{$x++}}</td>
-                            <td>{{$index->product->category->name ?? 'N/A'}}</td>
-                            <td>{{$index->product->brand->name ?? 'N/A'}}</td>
-                            <td>{{$index->product->subcategory->name ?? 'N/A'}}</td>
-                            <td>{{$index->product->name ?? 'N/A'}}</td>
-                            <td>
+                            <td data-export="{{$x}}">{{$x++}}</td>
+                            <td data-export="{{$index->product->category->name ?? 'N/A'}}">{{$index->product->category->name ?? 'N/A'}}</td>
+                            <td data-export="{{$index->product->brand->name ?? 'N/A'}}">{{$index->product->brand->name ?? 'N/A'}}</td>
+                            <td data-export="{{$index->product->subcategory->name ?? 'N/A'}}">{{$index->product->subcategory->name ?? 'N/A'}}</td>
+                            <td data-export="{{$index->product->name ?? 'N/A'}}">{{$index->product->name ?? 'N/A'}}</td>
+                            <td data-export="{{($index->sizeVariant ? 'Size: ' . $index->sizeVariant->name : '') . ($index->colorVariant ? ($index->sizeVariant ? ', ' : '') . 'Color: ' . $index->colorVariant->name : '')}}">
                                 @if($index->sizeVariant)
                                     Size: {{$index->sizeVariant->name}}
                                 @endif
                                 @if($index->colorVariant)
-                                    , Color: {{$index->colorVariant->name}}
+                                    @if($index->sizeVariant), @endif Color: {{$index->colorVariant->name}}
                                 @endif
                             </td>
-                            <td><strong>{{$index->stocks_sum_quantity ?? 0}}</strong></td>
+                            <td data-export="{{$index->stocks_sum_quantity ?? 0}}"><strong>{{$index->stocks_sum_quantity ?? 0}}</strong></td>
                             <td class="export-ignore">
                                 <button class="btn btn-outline-primary btn-sm view-details" data-variant-id="{{$index->id}}">
                                     <i class="mdi mdi-eye"></i> View Log
@@ -69,7 +117,11 @@ tr.selected {background-color:#adf7a9 !important;}
                             </td>
                         </tr>
                        
-                        @endforeach
+                        @empty
+                        <tr>
+                            <td colspan="8" class="text-center">No stock records found.</td>
+                        </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
@@ -94,12 +146,6 @@ tr.selected {background-color:#adf7a9 !important;}
 
 <script>
 (function ($) {
-    var exportButtons = [
-        { extend: "copy", exportOptions: { columns: ":visible:not(.export-ignore)" } },
-        { extend: "excel", exportOptions: { columns: ":visible:not(.export-ignore)" } },
-        { extend: "pdf", exportOptions: { columns: ":visible:not(.export-ignore)" } }
-    ];
-
     $(document).ready(function () {
         // Remove all detail rows before initializing DataTable
         $('.stock-details-row').remove();
@@ -107,10 +153,65 @@ tr.selected {background-color:#adf7a9 !important;}
         var table = $("#datatable-buttons").DataTable({
             pageLength: 20,
             lengthMenu: [[20, 50, 100, -1], [20, 50, 100, "All"]],
-            buttons: exportButtons,
+            buttons: [
+                { 
+                    extend: "copy", 
+                    exportOptions: { 
+                        columns: ":visible:not(.export-ignore)",
+                        format: {
+                            body: function (data, row, column, node) {
+                                var exportData = $(node).attr('data-export');
+                                return exportData !== undefined ? exportData : data.replace(/<[^>]*>/g, '').trim();
+                            }
+                        }
+                    } 
+                },
+                { 
+                    extend: "excel", 
+                    filename: "StockLog_Export",
+                    exportOptions: { 
+                        columns: ":visible:not(.export-ignore)",
+                        format: {
+                            body: function (data, row, column, node) {
+                                var exportData = $(node).attr('data-export');
+                                return exportData !== undefined ? exportData : data.replace(/<[^>]*>/g, '').trim();
+                            }
+                        }
+                    },
+                    customize: function(xlsx) {
+                        var sheet = xlsx.xl.worksheets['sheet1.xml'];
+                        $('row', sheet).each(function() {
+                            var cell = $(this).find('c[is="1"]');
+                            if (cell.length) {
+                                $(this).find('c').attr('s', '1');
+                            }
+                        });
+                    }
+                },
+                { 
+                    extend: "pdf", 
+                    filename: "StockLog_Export",
+                    exportOptions: { 
+                        columns: ":visible:not(.export-ignore)",
+                        format: {
+                            body: function (data, row, column, node) {
+                                var exportData = $(node).attr('data-export');
+                                var text = exportData !== undefined ? exportData : data.replace(/<[^>]*>/g, '').trim();
+                                return text.replace(/\n/g, ' ').substring(0, 200);
+                            }
+                        }
+                    },
+                    customize: function(doc) {
+                        doc.defaultStyle.fontSize = 8;
+                        doc.styles.tableHeader.fontSize = 9;
+                        doc.pageMargins = [10, 10, 10, 10];
+                        doc.content[1].table.widths = ['8%', '15%', '15%', '15%', '20%', '17%', '10%'];
+                    }
+                }
+            ],
             responsive: false,
             columnDefs: [
-                { targets: 'export-ignore', orderable: false, searchable: false }
+                { targets: 'export-ignore', orderable: false, searchable: false, exportable: false }
             ]
         });
         

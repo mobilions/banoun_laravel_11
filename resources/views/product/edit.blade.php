@@ -188,7 +188,7 @@
 
                                             <select class="form-control" name="subcategory_id" id="subcategory_id" required="">
 
-                                                <option value="">Select</option>
+                                                 <option value="" selected disabled>Select</option>
 
                                                  @foreach($subcategories as $sub)
 
@@ -280,7 +280,7 @@
 
                                             <label>Discount % <span class="text-danger">*</span></label>
 
-                                            <input class="form-control" type="text" name="percentage_discount" id="percentage_discount" value="0" value="{{$log->percentage_discount}}" required="">
+                                            <input class="form-control" type="text" name="percentage_discount" id="percentage_discount" value="{{$log->percentage_discount}}" required="">
 
                                             <input class="form-control" value="{{$log->imageurl}}"  name="imgfile_val" id="imgfile_val" type="hidden">
 

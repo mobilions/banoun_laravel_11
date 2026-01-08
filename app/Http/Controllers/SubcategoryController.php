@@ -110,6 +110,11 @@ class SubcategoryController extends Controller
             'description' => 'nullable|string',
             'description_ar' => 'nullable|string',
             'imgfile' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        ], [
+            'imgfile.required' => 'Image file is required.',
+            'imgfile.image' => 'Image file must be an image.',
+            'imgfile.mimes' => 'Image file must be a file of type: jpeg, png, jpg, gif, svg.',
+            'imgfile.max' => 'Image file size must not exceed 2MB.',
         ]);
 
         $category_id=$request->category_id;
@@ -241,6 +246,10 @@ class SubcategoryController extends Controller
             'description_ar' => 'nullable|string',
             'imgfile' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'imgfile_val' => 'nullable|string',
+        ], [
+            'imgfile.image' => 'Image file must be an image.',
+            'imgfile.mimes' => 'Image file must be a file of type: jpeg, png, jpg, gif, svg.',
+            'imgfile.max' => 'Image file size must not exceed 2MB.',
         ]);
 
         $imgurl    = '';

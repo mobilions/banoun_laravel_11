@@ -48,13 +48,46 @@ class CustomerController extends Controller
 
 
 
-    public function index()
+    public function index(Request $request)
 
     {
 
         $title = "Customer";
 
-        $indexes = User::active()->where('role','user')->where('is_verified',1)->get();
+        $this->validate($request, [
+            'search' => 'nullable|string|max:255',
+            'is_verified' => 'nullable',
+            'min_credit' => 'nullable|numeric|min:0',
+            'max_credit' => 'nullable|numeric|min:0',
+        ]);
+
+        $query = User::active()->where('role','user');
+
+        if ($request->filled('is_verified')) {
+            if ($request->is_verified !== '') {
+                $query->where('is_verified', (int)$request->is_verified);
+            }
+        } else {
+            $query->where('is_verified', 1);
+        }
+
+        if ($request->has('search') && $request->search) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('phone', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->has('min_credit') && $request->min_credit) {
+            $query->where('credit_balance', '>=', $request->min_credit);
+        }
+        if ($request->has('max_credit') && $request->max_credit) {
+            $query->where('credit_balance', '<=', $request->max_credit);
+        }
+
+        $indexes = $query->orderByDesc('created_at')->get();
 
         return view('customer.index',compact('title','indexes'));  
 

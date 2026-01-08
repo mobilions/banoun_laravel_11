@@ -252,7 +252,7 @@
 
                             <select class="form-control" name="subcategory_id" id="subcategory_id" required="">
 
-                                <option value="">Select</option>
+                                 <option value="" selected disabled>Select</option>
 
                                  @foreach($subcategories as $sub)
 
@@ -456,7 +456,7 @@
 
                         </div>
 
-                    @error('imgfile') <span class="font-size-12 ms-1 text-danger">{{ $message }}</strong> </span> @enderror
+                    <!-- @error('imgfile') <span class="font-size-12 ms-1 text-danger">{{ $message }}</strong> </span> @enderror -->
 
                     </div>  
 
@@ -472,7 +472,7 @@
 
                         </div>
 
-                    @error('imgfile2') <span class="font-size-12 ms-1 text-danger">{{ $message }}</strong> </span> @enderror
+                    <!-- @error('imgfile2') <span class="font-size-12 ms-1 text-danger">{{ $message }}</strong> </span> @enderror -->
 
                     </div>  
 
@@ -488,7 +488,7 @@
 
                         </div>
 
-                    @error('imgfile3') <span class="font-size-12 ms-1 text-danger">{{ $message }}</strong> </span> @enderror
+                    <!-- @error('imgfile3') <span class="font-size-12 ms-1 text-danger">{{ $message }}</strong> </span> @enderror -->
 
                     </div>  
 

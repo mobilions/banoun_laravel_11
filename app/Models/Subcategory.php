@@ -35,6 +35,12 @@ class Subcategory extends Model
         return $this->belongsTo(Category::class);
     }
 
+    public function scopeActive($query)
+    {
+        return $query->where('delete_status', 0);
+    }
+
+
     public static function FindName($id){
 
         $log = Subcategory::select('name','name_ar')->where('id',$id)->first();
