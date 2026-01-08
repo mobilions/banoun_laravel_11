@@ -28,7 +28,7 @@ tr.selected {background-color:#adf7a9  ! important;}
 
         <div class="page-title-box d-sm-flex align-items-center justify-content-between">
 
-            <h4 class="mb-sm-0 font-size-16">{{$title}} - {{App\Models\Product::FindName($product_id)}} <br><br> {{App\Models\Productvariant::FindName($variant_id)}} <br><br>
+            <h4 class="mb-sm-0 font-size-16">Product: {{App\Models\Product::FindName($product_id)}} <br><br>Variant: {{App\Models\Productvariant::FindName($variant_id)}} <br><br>
 
                 Current Quantity: {{App\Models\Stock::stockVariant($variant_id)}}
 

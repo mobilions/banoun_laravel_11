@@ -66,7 +66,7 @@ tr.selected {background-color:#adf7a9  ! important;}
                         <th>Amount</th>
                         <th>Quantity</th>
                         <th>Payment Type</th>
-                        <th>Payment Status</th>
+                        <!-- <th>Payment Status</th> -->
                         <th>Order Status</th>
                         <th class="export-ignore">Action</th>
                     </tr>
@@ -80,7 +80,7 @@ tr.selected {background-color:#adf7a9  ! important;}
                         <td>{{$index->grandtotal}}</td>
                         <td>{{$index->totalqty}}</td>
                         <td>{{$index->paymenttype}}</td>
-                        <td>{{$index->paymentstatus}}</td>
+                        <!-- <td>{{$index->paymentstatus}}</td> -->
                         <td>{{optional($index->orderStatus)->name ?? App\Models\Orderstatus::FindName($index->orderstatus)}}</td>
                         <td class="export-ignore"><a href="{{url('/order')}}/{{$index->id}}/view" class="btn btn-outline-secondary me-2 waves-effect waves-light btn-sm font-size-18"><i class="mdi mdi-eye"></i></a></td>
                     </tr>

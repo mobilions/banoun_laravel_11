@@ -144,7 +144,7 @@ Route::prefix('productvariants')->group(function () {
     Route::post('/store', [ProductvariantController::class, 'store']);
     Route::get('/{id}/edit', [ProductvariantController::class, 'edit']);
     Route::post('/update', [ProductvariantController::class, 'update']);
-    Route::post('/{id}/{product_id}/delete', [ProductvariantController::class, 'destroy']);
+    Route::get('/{id}/{product_id}/delete', [ProductvariantController::class, 'destroy']);
 });
 
 Route::prefix('variant')->group(function () {

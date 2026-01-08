@@ -469,7 +469,7 @@
                                         $thirdImage = $log->imageurl3 ? (\Illuminate\Support\Str::startsWith($log->imageurl3, ['http://','https://','//']) ? $log->imageurl3 : asset($log->imageurl3)) : null;
                                     @endphp
 
-                                    <div class="col-lg-2 mt-3 mb-3">
+                                    <!-- <div class="col-lg-2 mt-3 mb-3">
                                        @if($primaryImage)
                                            <img src="{{$primaryImage}}" width="80" alt="{{$log->name}}" title="{{$log->name}}">
                                        @else
@@ -491,7 +491,7 @@
                                        @else
                                            <span class="text-muted">No image</span>
                                        @endif
-                                    </div>  
+                                    </div>   -->
 
                                     <div class="col-lg-6 mt-3 mb-3">
 

@@ -28,42 +28,68 @@ tr.selected {background-color:#adf7a9  ! important;}
     <div class="col-md-12">
         <div class="card">
             <div class="card-body">
-                <!-- @if($order->orderstatus=='1')
-                    <form action="{{route('order.status.update', [$order->id, 2])}}" method="post" class="d-inline float-end me-3">
-                        @csrf
-                        <button type="submit" class="btn btn-warning btn-sm waves-effect waves-light" onclick="return confirm('Mark order as Out for Delivery?');">
-                            <i class="bx bx-check font-size-14 align-middle me-2"></i> Out for Delivery
-                        </button>
-                    </form><br><br>
-                @endif
+                    @php
+                    $statusFlow = [
+                        null => [
+                            'next' => 1,
+                            'label' => 'Mark as Paid',
+                            'confirm' => 'Mark order as Payment Paid?',
+                            'btn' => 'warning',
+                            'icon' => 'bx bx-check',
+                        ],
+                        1 => [
+                            'next' => 2,
+                            'label' => 'Mark as Processing',
+                            'confirm' => 'Mark order as Processing?',
+                            'btn' => 'primary',
+                            'icon' => 'bx bx-loader',
+                        ],
+                        2 => [
+                            'next' => 3,
+                            'label' => 'Mark as Shipped',
+                            'confirm' => 'Mark order as Shipped?',
+                            'btn' => 'info',
+                            'icon' => 'bx bx-package',
+                        ],
+                        3 => [
+                            'next' => 4,
+                            'label' => 'Out for Delivery',
+                            'confirm' => 'Mark order as Out for Delivery?',
+                            'btn' => 'warning',
+                            'icon' => 'bx bx-run',
+                        ],
+                        4 => [
+                            'next' => 5,
+                            'label' => 'Mark as Delivered',
+                            'confirm' => 'Mark order as Delivered?',
+                            'btn' => 'success',
+                            'icon' => 'bx bx-check-circle',
+                        ],
+                    ];
+                    @endphp
 
-                @if($order->orderstatus=='2')
-                    <form action="{{route('order.status.update', [$order->id, 3])}}" method="post" class="d-inline float-end me-3">
-                        @csrf
-                        <button type="submit" class="btn btn-success btn-sm waves-effect waves-light" onclick="return confirm('Mark order as Delivered?');">
-                            <i class="bx bx-check font-size-14 align-middle me-2"></i> Delivered
-                        </button>
-                    </form><br><br>
-                @endif
+                    @if(isset($statusFlow[$order->orderstatus]))
+                        @php $step = $statusFlow[$order->orderstatus]; @endphp
 
-                @if($order->orderstatus =='1' || $order->orderstatus =='2')
-                    <form action="{{route('order.status.update', [$order->id, 4])}}" method="post" class="d-inline float-end me-3">
-                        @csrf
-                        <button type="submit" class="btn btn-danger btn-sm waves-effect waves-light" onclick="return confirm('Request Return & Refund for this order?');">
-                            <i class="bx bx-block font-size-14 align-middle me-2"></i> Request for Return & Refund
-                        </button>
-                    </form><br><br>
-                @endif
+                        <form action="{{ route('order.status.update', [$order->id, $step['next']]) }}"
+                            method="POST"
+                            class="d-inline float-end me-3">
+                            @csrf
 
-                @if($order->orderstatus=='4')
-                    <form action="{{route('order.status.update', [$order->id, 5])}}" method="post" class="d-inline float-end me-3">
-                        @csrf
-                        <button type="submit" class="btn btn-danger btn-sm waves-effect waves-light" onclick="return confirm('Cancel this order?');">
-                            <i class="bx bx-block font-size-14 align-middle me-2"></i> Cancel Order
-                        </button>
-                    </form><br><br>
-                @endif -->
+                            <button type="submit"
+                                    class="btn btn-{{ $step['btn'] }} btn-sm waves-effect waves-light"
+                                    onclick="return confirm('{{ $step['confirm'] }}');">
+                                <i class="{{ $step['icon'] }} font-size-14 align-middle me-2"></i>
+                                {{ $step['label'] }}
+                            </button>
+                        </form>
+                    @endif
 
+                    @if($order->orderstatus == 5)
+                        <span class="badge bg-success float-end me-3">
+                            <i class="bx bx-check-circle me-1"></i> Order Completed
+                        </span>
+                    @endif
 
                     <div class="row">
                         <div class="col-lg-3 mb-3">
@@ -208,13 +234,9 @@ tr.selected {background-color:#adf7a9  ! important;}
                         @foreach ($order_tracks as $olog)
 
                         <tr>
-
                             <td>{{$olog->id}}</td>
-
                             <td>{{optional($olog->status)->name ?? App\Models\Orderstatus::FindName($olog->status_id)}}</td>
-
-                            <td>{{date('d M, Y',strtotime($olog->created_at))}}</td>
-
+                            <td>{{ $olog->created_at->timezone('Asia/Kuwait')->format('d M, Y H:i') }}</td>
                         </tr>
 
                         @endforeach

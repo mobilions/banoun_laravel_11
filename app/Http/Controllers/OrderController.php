@@ -93,37 +93,24 @@ class OrderController extends Controller
         $orderLog->created_by = Auth::user()->id;
         $orderLog->save();
 
-        if($val==2){
-            $subject = Emailtemplate::FindSubject('Out for Delivery');
-            $msgcontent = '';
-            $msgcontent .= Emailtemplate::FindContent('Out for Delivery');
-            $content = view('layouts.mailcontent',compact('msgcontent'))->render();
-            $this->sendMail($user->email,$content,$subject);
+        $statusMailMap = [
+            1 => 'payment_paid',
+            2 => 'order_processing',
+            3 => 'order_shipped',
+            4 => 'order_out_for_delivery',
+            5 => 'order_delivered',
+        ];
+
+        if (isset($statusMailMap[$val])) {
+           $template = EmailTemplate::byType($statusMailMap[$val]);
+           if ($template) {
+                $subject = $template->name;
+                $msgcontent = $template->message;
+                $content = view('layouts.mailcontent', compact('msgcontent'))->render();
+                $this->sendMail($user->email, $content, $subject);
+            }
         }
 
-        if($val==3){
-            $subject = Emailtemplate::FindSubject('Order Delivered');
-            $msgcontent = '';
-            $msgcontent .= Emailtemplate::FindContent('Order Delivered');
-            $content = view('layouts.mailcontent',compact('msgcontent'))->render();
-            $this->sendMail($user->email,$content,$subject);
-        }
-
-        if($val==4){
-            $subject = Emailtemplate::FindSubject('Request for Return & Refund');
-            $msgcontent = '';
-            $msgcontent .= Emailtemplate::FindContent('Request for Return & Refund');
-            $content = view('layouts.mailcontent',compact('msgcontent'))->render();
-            $this->sendMail($user->email,$content,$subject);
-        }
-
-        if($val==5){
-            $subject = Emailtemplate::FindSubject('Order Cancelled');
-            $msgcontent = '';
-            $msgcontent .= Emailtemplate::FindContent('Order Cancelled');
-            $content = view('layouts.mailcontent',compact('msgcontent'))->render();
-            $this->sendMail($user->email,$content,$subject);
-        }
 
         return redirect('order/'.$id.'/view');
 
