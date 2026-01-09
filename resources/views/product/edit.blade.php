@@ -192,7 +192,7 @@
 
                                                  @foreach($subcategories as $sub)
 
-                                                  <option class="all category_{{$sub->id}}" @if($sub->id==$log->subcategory_id) selected='' @endif value="{{$sub->id}}">{{$sub->name}} @if($sub->name_ar!='')- {{$sub->name_ar}}@endif</option>
+                                                  <option class="all category_{{$sub->category_id}}" @if($sub->id==$log->subcategory_id) selected='' @endif value="{{$sub->id}}">{{$sub->name}} @if($sub->name_ar!='')- {{$sub->name_ar}}@endif</option>
 
                                                  @endforeach
 
@@ -693,39 +693,32 @@
 @section('ScriptContent')
 
 <script>
-
-    var category_id=$('#category_id').val();
-
-    if(category_id!=''){
-
-
-
-         $('.all').hide();
-
-         var category_id='category_'+category_id;
-
-         $('.'+category_id).show();
-
-    }
+    $(document).ready(function() {
+        // Load subcategories for initially selected category
+        var initialCategoryId = $('#category_id').val();
+        if(initialCategoryId && initialCategoryId !== '') {
+            $('.all').hide();
+            $('.category_' + initialCategoryId).show();
+        } else {
+            $('.all').hide();
+        }
+    });
 
     function loadType() {
-
-       var category_id=$('#category_id').val();
-
-       if(category_id!=''){
-
-
-
-         $('.all').hide();
-
-         var category_id='category_'+category_id;
-
-         $('.'+category_id).show();
-
-       }
-
+        var category_id = $('#category_id').val();
+        if(category_id && category_id !== '') {
+            // Hide all subcategories first
+            $('#subcategory_id option.all').hide();
+            // Show only subcategories for selected category
+            $('#subcategory_id option.category_' + category_id).show();
+            // Reset subcategory selection
+            $('#subcategory_id').val('');
+        } else {
+            // If no category selected, hide all
+            $('#subcategory_id option.all').hide();
+            $('#subcategory_id').val('');
+        }
     }
-
 </script>
 
 <script src="{{asset('/assets')}}/libs/tinymce/tinymce.min.js"></script>
