@@ -28,7 +28,7 @@ tr.selected {background-color:#adf7a9  ! important;}
 
         <div class="page-title-box d-sm-flex align-items-center justify-content-between">
 
-            <h4 class="mb-sm-0 font-size-16">{{$title}} - {{App\Models\Product::FindName($product_id)}} <br><br> {{App\Models\Productvariant::FindName($variant_id)}} <br><br>
+            <h4 class="mb-sm-0 font-size-16">Product: {{App\Models\Product::FindName($product_id)}} <br><br>Variant: {{App\Models\Productvariant::FindName($variant_id)}} <br><br>
 
                 Current Quantity: {{App\Models\Stock::stockVariant($variant_id)}}
 
@@ -201,7 +201,7 @@ tr.selected {background-color:#adf7a9  ! important;}
                             <th>#</th>
                             <th>Quantity</th>
                             <th>Date Added</th>
-                            <th>Status</th>
+                            <!-- <th>Status</th> -->
                             <th class="export-ignore">Action</th>
                         </tr>
                     </thead>           
@@ -211,7 +211,7 @@ tr.selected {background-color:#adf7a9  ! important;}
                             <td>{{$index->id}}</td>
                             <td>{{$index->quantity}}</td>
                             <td>{{date('d-m-Y', strtotime($index->created_at))}}</td>
-                            <td><span class="{{$index->status_badge_class}}">{{ucfirst($index->status_text)}}</span></td>
+                            <!-- <td><span class="{{$index->status_badge_class}}">{{ucfirst($index->status_text)}}</span></td> -->
                             <td class="export-ignore">
                                 @if($index->status == 0)
                                     <button type="button" 
@@ -267,6 +267,7 @@ tr.selected {background-color:#adf7a9  ! important;}
                             <th>Date Added</th>
 
                             <th>Transaction</th>
+                            <th>Action By</th>
 
                         </tr>
 
@@ -285,6 +286,7 @@ tr.selected {background-color:#adf7a9  ! important;}
                             <td>{{date('d-m-Y',strtotime($index->created_at))}}</td>
 
                                 <td>{{$index->process}}</td>
+                                <td>{{ $index->user ? $index->user->name : 'N/A' }}</td>
 
                         </tr>
 

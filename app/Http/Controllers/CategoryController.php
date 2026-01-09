@@ -101,6 +101,11 @@ class CategoryController extends Controller
             'description' => 'nullable|string',
             'description_ar' => 'nullable|string',
             'imgfile' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        ],[
+            'imgfile.required' => 'The image file field is required.',
+            'imgfile.image' => 'The file must be an image.',
+            'imgfile.mimes' => 'The image must be a file of type: jpeg, png, jpg, gif, svg.',
+            'imgfile.max' => 'The image may not be greater than 2048 kilobytes.',
         ]);
 
         $imgurl    = '';
@@ -221,6 +226,11 @@ class CategoryController extends Controller
             'description_ar' => 'nullable|string',
             'imgfile' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'imgfile_val' => 'nullable|string',
+        ],[
+            'imgfile.required' => 'The image file field is required.',
+            'imgfile.image' => 'The file must be an image.',
+            'imgfile.mimes' => 'The image must be a file of type: jpeg, png, jpg, gif, svg.',
+            'imgfile.max' => 'The image may not be greater than 2048 kilobytes.',
         ]);
 
         $imgurl    = '';

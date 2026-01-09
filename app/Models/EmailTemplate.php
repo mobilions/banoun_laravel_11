@@ -24,4 +24,11 @@ class EmailTemplate extends Model
         'delete_status' => 'integer'
     ];
 
+    public static function byType($type)
+    {
+        return self::where('mail_type', $type)
+            ->where('delete_status', 0)
+            ->first();
+    }
+
 }

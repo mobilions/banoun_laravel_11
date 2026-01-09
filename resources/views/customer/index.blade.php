@@ -57,6 +57,38 @@ tr.selected {background-color:#adf7a9  ! important;}
     <div class="card">
 
         <div class="card-body">
+            <!-- Filters -->
+            <form method="GET" action="{{url('/customer')}}" class="mb-3">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label>Search</label>
+                        <input type="text" name="search" class="form-control" placeholder="Name, Email, Phone..." value="{{ request('search') }}">
+                    </div>
+                    <div class="col-md-2">
+                        <label>Verification Status</label>
+                        <select name="is_verified" class="form-select">
+                            <option value="1" {{ request('is_verified', '1') == '1' ? 'selected' : '' }}>Verified</option>
+                            <option value="0" {{ request('is_verified') == '0' ? 'selected' : '' }}>Not Verified</option>
+                            <option value="" {{ request('is_verified') === '' ? 'selected' : '' }}>All</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label>Min Credit</label>
+                        <input type="number" name="min_credit" class="form-control" placeholder="Min" value="{{ request('min_credit') }}" step="0.01" min="0">
+                    </div>
+                    <div class="col-md-2">
+                        <label>Max Credit</label>
+                        <input type="number" name="max_credit" class="form-control" placeholder="Max" value="{{ request('max_credit') }}" step="0.01" min="0">
+                    </div>
+                    <div class="col-md-1 mt-4">
+                        <button type="submit" class="btn btn-primary waves-effect waves-light w-100" title="Filter"><i class="mdi mdi-filter"></i></button>
+                    </div>
+                    <div class="col-md-2 mt-4">
+                        <a href="{{url('/customer')}}" class="btn btn-secondary waves-effect waves-light w-100" title="Reset"><i class="mdi mdi-refresh"></i></a>
+                    </div>
+                </div>
+            </form>
+
             <table id="datatable-buttons" class="table table-bordered nowrap w-100 align-middle">
                 <thead>
                     <tr>
@@ -69,13 +101,13 @@ tr.selected {background-color:#adf7a9  ! important;}
                     </tr>
                 </thead>           
                 <tbody>
-                    @foreach ($indexes as $index)
+                    @forelse ($indexes as $index)
                     <tr>
-                        <td>{{$index->id}}</td>
+                        <td data-export="{{$index->id}}">{{$index->id}}</td>
                         <td data-export="{{$index->name}}">{{$index->name}}</td>
-                        <td data-export="{{$index->phone ?? '—'}}">{{$index->phone ?? '—'}}</td>
+                        <td data-export="{{$index->phone ?? 'N/A'}}">{{$index->phone ?? '—'}}</td>
                         <td data-export="{{$index->email}}">{{$index->email}}</td>
-                        <td data-export="{{$index->credit_balance ?? 0}}">{{number_format($index->credit_balance ?? 0, 2)}}</td>
+                        <td data-export="{{number_format($index->credit_balance ?? 0, 2)}}">{{number_format($index->credit_balance ?? 0, 2)}}</td>
                         <td class="export-ignore">
                             <a href="{{url('/customer')}}/{{$index->id}}/view" class="btn btn-outline-info me-2 waves-effect waves-light btn-sm font-size-18" title="View Details"><i class="mdi mdi-eye"></i></a>
                             <a href="{{url('/customer')}}/{{$index->id}}/edit" class="btn btn-outline-secondary me-2 waves-effect waves-light btn-sm font-size-18" title="Edit"><i class="mdi mdi-pencil"></i></a>
@@ -87,7 +119,11 @@ tr.selected {background-color:#adf7a9  ! important;}
                             </form>
                         </td>
                     </tr>
-                    @endforeach
+                    @empty
+                    <tr>
+                        <td colspan="6" class="text-center">No customers found.</td>
+                    </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
@@ -129,32 +165,65 @@ tr.selected {background-color:#adf7a9  ! important;}
 <script>
 (function ($) {
     $(document).ready(function () {
-        var exportOptions = {
-            columns: function (idx, data, node) {
-                return !$(node).hasClass('export-ignore');
-            },
-            format: {
-                body: function (data, row, column, node) {
-                    var text = $(node).attr('data-export') || $(data).text().trim();
-                    return text;
-                }
-            }
-        };
-        var exportButtons = [
-            { extend: "copy", exportOptions: exportOptions },
-            { extend: "excel", exportOptions: exportOptions },
-            { extend: "pdf", exportOptions: exportOptions,
-                customize: function (doc) {
-                    doc.defaultStyle.fontSize = 8;
-                    doc.styles.tableHeader.fontSize = 9;
-                    doc.pageMargins = [10, 10, 10, 10];
-                }
-            }
-        ];
         var table = $("#datatable-buttons").DataTable({
             pageLength: 10,
             lengthMenu: [[10, 20, 50, 100, -1], [10, 20, 50, 100, "All"]],
-            buttons: exportButtons,
+            buttons: [
+                { 
+                    extend: "copy", 
+                    exportOptions: { 
+                        columns: ":visible:not(.export-ignore)",
+                        format: {
+                            body: function (data, row, column, node) {
+                                var exportData = $(node).attr('data-export');
+                                return exportData !== undefined ? exportData : data.replace(/<[^>]*>/g, '').trim();
+                            }
+                        }
+                    } 
+                },
+                { 
+                    extend: "excel", 
+                    filename: "Customers_Export",
+                    exportOptions: { 
+                        columns: ":visible:not(.export-ignore)",
+                        format: {
+                            body: function (data, row, column, node) {
+                                var exportData = $(node).attr('data-export');
+                                return exportData !== undefined ? exportData : data.replace(/<[^>]*>/g, '').trim();
+                            }
+                        }
+                    },
+                    customize: function(xlsx) {
+                        var sheet = xlsx.xl.worksheets['sheet1.xml'];
+                        $('row', sheet).each(function() {
+                            var cell = $(this).find('c[is="1"]');
+                            if (cell.length) {
+                                $(this).find('c').attr('s', '1');
+                            }
+                        });
+                    }
+                },
+                { 
+                    extend: "pdf", 
+                    filename: "Customers_Export",
+                    exportOptions: { 
+                        columns: ":visible:not(.export-ignore)",
+                        format: {
+                            body: function (data, row, column, node) {
+                                var exportData = $(node).attr('data-export');
+                                var text = exportData !== undefined ? exportData : data.replace(/<[^>]*>/g, '').trim();
+                                return text.replace(/\n/g, ' ').substring(0, 200);
+                            }
+                        }
+                    },
+                    customize: function(doc) {
+                        doc.defaultStyle.fontSize = 8;
+                        doc.styles.tableHeader.fontSize = 9;
+                        doc.pageMargins = [10, 10, 10, 10];
+                        doc.content[1].table.widths = ['10%', '25%', '20%', '25%', '20%'];
+                    }
+                }
+            ],
             responsive: false,
             columnDefs: [
                 { targets: 'export-ignore', orderable: false, searchable: false, exportable: false }

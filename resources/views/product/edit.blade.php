@@ -164,9 +164,9 @@
 
                                             <label>Category <span class="text-danger">*</span></label>
 
-                                            <select onchange="loadType()" class="form-control" name="category_id" id="category_id" required="">
+                                            <select onchange="loadType()" class="form-control" name="category_id" id="category_id" >
 
-                                                <option value="">Select</option>
+                                                <option value="" disabled>Select</option>
 
                                                  @foreach($categories as $cat)
 
@@ -186,13 +186,13 @@
 
                                             <label>SubCategory <span class="text-danger">*</span></label>
 
-                                            <select class="form-control" name="subcategory_id" id="subcategory_id" required="">
+                                            <select class="form-control" name="subcategory_id" id="subcategory_id" >
 
-                                                <option value="">Select</option>
+                                                <option value="" disabled>Select</option>
 
                                                  @foreach($subcategories as $sub)
 
-                                                  <option class="all category_{{$sub->id}}" @if($sub->id==$log->subcategory_id) selected='' @endif value="{{$sub->id}}">{{$sub->name}} @if($sub->name_ar!='')- {{$sub->name_ar}}@endif</option>
+                                                  <option class="all category_{{$sub->category_id}}" @if($sub->id==$log->subcategory_id) selected='' @endif value="{{$sub->id}}">{{$sub->name}} @if($sub->name_ar!='')- {{$sub->name_ar}}@endif</option>
 
                                                  @endforeach
 
@@ -208,9 +208,9 @@
 
                                             <label>Brand <span class="text-danger">*</span></label>
 
-                                            <select class="form-control" name="brand_id" id="brand_id" required="">
+                                            <select class="form-control" name="brand_id" id="brand_id" >
 
-                                                <option value="">Select</option>
+                                                <option value="" disabled>Select</option>
 
                                                  @foreach($brands as $brd)
 
@@ -230,7 +230,7 @@
 
                                             <label>Name <span class="text-danger">*</span></label>
 
-                                            <input value="{{$log->name}}" class="form-control" type="text" name="name" id="name" required="">
+                                            <input value="{{$log->name}}" class="form-control" type="text" name="name" id="name" >
 
                                         </div>
 
@@ -256,7 +256,7 @@
 
                                             <label>Price <span class="text-danger">*</span></label>
 
-                                            <input value="{{$log->price}}" class="form-control" type="text" name="price" id="price" required="">
+                                            <input value="{{$log->price}}" class="form-control" type="text" name="price" id="price" >
 
                                         </div>
 
@@ -268,7 +268,7 @@
 
                                             <label>Offer Price <span class="text-danger">*</span></label>
 
-                                            <input class="form-control" value="{{$log->price_offer}}" type="text" name="price_offer" id="price_offer" required="">
+                                            <input class="form-control" value="{{$log->price_offer}}" type="text" name="price_offer" id="price_offer" >
 
                                         </div>
 
@@ -280,7 +280,7 @@
 
                                             <label>Discount % <span class="text-danger">*</span></label>
 
-                                            <input class="form-control" type="text" name="percentage_discount" id="percentage_discount" value="0" value="{{$log->percentage_discount}}" required="">
+                                            <input class="form-control" type="text" name="percentage_discount" id="percentage_discount" value="{{$log->percentage_discount}}" >
 
                                             <input class="form-control" value="{{$log->imageurl}}"  name="imgfile_val" id="imgfile_val" type="hidden">
 
@@ -310,9 +310,7 @@
 
                                              ?>
 
-                                            <select class="select2 form-control select2-multiple" name="searchtag_id[]" id="searchtag_id"  multiple="multiple" required="" data-placeholder="Choose ...">
-
-                                                <option value="">Select</option>
+                                            <select class="select2 form-control select2-multiple" name="searchtag_id[]" id="searchtag_id"  multiple="multiple"  data-placeholder="Select">
 
                                                  @foreach($searchtags as $list)
 
@@ -321,7 +319,6 @@
                                                  @endforeach
 
                                             </select>
-                                            @error('searchtag_id') <span class="text-danger font-size-12">{{ $message }}</span> @enderror
 
                                         </div>
 
@@ -367,9 +364,7 @@
 
                                              ?>
 
-                                            <select class="select2 form-control select2-multiple" name="size_id[]" id="size_id"  multiple="multiple" required="" data-placeholder="Choose ...">
-
-                                                <option value="">Select</option>
+                                            <select class="select2 form-control select2-multiple" name="size_id[]" id="size_id"  multiple="multiple"  data-placeholder="Select">
 
                                                  @foreach($sizes as $list)
 
@@ -378,7 +373,6 @@
                                                  @endforeach
 
                                             </select>
-                                            @error('size_id') <span class="text-danger font-size-12">{{ $message }}</span> @enderror
 
                                         </div>
 
@@ -396,9 +390,7 @@
 
                                              ?>
 
-                                            <select class="select2 form-control select2-multiple" name="color_id[]" id="color_id"  multiple="multiple" required="" data-placeholder="Choose ...">
-
-                                                <option value="">Select</option>
+                                            <select class="select2 form-control select2-multiple" name="color_id[]" id="color_id"  multiple="multiple"  data-placeholder="Select">
 
                                                  @foreach($colors as $list)
 
@@ -407,7 +399,6 @@
                                                  @endforeach
 
                                             </select>
-                                            @error('color_id') <span class="text-danger font-size-12">{{ $message }}</span> @enderror
 
                                         </div>
 
@@ -469,7 +460,7 @@
                                         $thirdImage = $log->imageurl3 ? (\Illuminate\Support\Str::startsWith($log->imageurl3, ['http://','https://','//']) ? $log->imageurl3 : asset($log->imageurl3)) : null;
                                     @endphp
 
-                                    <div class="col-lg-2 mt-3 mb-3">
+                                    <!-- <div class="col-lg-2 mt-3 mb-3">
                                        @if($primaryImage)
                                            <img src="{{$primaryImage}}" width="80" alt="{{$log->name}}" title="{{$log->name}}">
                                        @else
@@ -491,7 +482,7 @@
                                        @else
                                            <span class="text-muted">No image</span>
                                        @endif
-                                    </div>  
+                                    </div>   -->
 
                                     <div class="col-lg-6 mt-3 mb-3">
 
@@ -541,7 +532,7 @@
 
                                                 <label for="formFileSm" class="form-label">Image file </label>
 
-                                                <input class="form-control" name="imgfile" id="imgfile" type="file" required="">
+                                                <input class="form-control" name="imgfile" id="imgfile" type="file" >
 
                                                 <input type="hidden" name="product_id" value="{{$log->id}}">
 
@@ -702,39 +693,32 @@
 @section('ScriptContent')
 
 <script>
-
-    var category_id=$('#category_id').val();
-
-    if(category_id!=''){
-
-
-
-         $('.all').hide();
-
-         var category_id='category_'+category_id;
-
-         $('.'+category_id).show();
-
-    }
+    $(document).ready(function() {
+        // Load subcategories for initially selected category
+        var initialCategoryId = $('#category_id').val();
+        if(initialCategoryId && initialCategoryId !== '') {
+            $('.all').hide();
+            $('.category_' + initialCategoryId).show();
+        } else {
+            $('.all').hide();
+        }
+    });
 
     function loadType() {
-
-       var category_id=$('#category_id').val();
-
-       if(category_id!=''){
-
-
-
-         $('.all').hide();
-
-         var category_id='category_'+category_id;
-
-         $('.'+category_id).show();
-
-       }
-
+        var category_id = $('#category_id').val();
+        if(category_id && category_id !== '') {
+            // Hide all subcategories first
+            $('#subcategory_id option.all').hide();
+            // Show only subcategories for selected category
+            $('#subcategory_id option.category_' + category_id).show();
+            // Reset subcategory selection
+            $('#subcategory_id').val('');
+        } else {
+            // If no category selected, hide all
+            $('#subcategory_id option.all').hide();
+            $('#subcategory_id').val('');
+        }
     }
-
 </script>
 
 <script src="{{asset('/assets')}}/libs/tinymce/tinymce.min.js"></script>
@@ -785,24 +769,24 @@
                 });
             });
 
-            $form.on('submit', function (event) {
-                let hasError = false;
-                ['#searchtag_id', '#size_id', '#color_id'].forEach(function (selector) {
-                    const $field = $form.find(selector);
-                    if ($field.length) {
-                        if (!$field.val() || !$field.val().length) {
-                            hasError = true;
-                            $field.siblings('.invalid-feedback.client-side').remove();
-                            $field.after('<div class="invalid-feedback client-side d-block">This field is required.</div>');
-                        } else {
-                            $field.siblings('.invalid-feedback.client-side').remove();
-                        }
-                    }
-                });
-                if (hasError) {
-                    event.preventDefault();
-                }
-            });
+            // $form.on('submit', function (event) {
+            //     let hasError = false;
+            //     ['#searchtag_id', '#size_id', '#color_id'].forEach(function (selector) {
+            //         const $field = $form.find(selector);
+            //         if ($field.length) {
+            //             if (!$field.val() || !$field.val().length) {
+            //                 hasError = true;
+            //                 $field.siblings('.invalid-feedback.client-side').remove();
+            //                 $field.after('<div class="invalid-feedback client-side d-block">This field is required.</div>');
+            //             } else {
+            //                 $field.siblings('.invalid-feedback.client-side').remove();
+            //             }
+            //         }
+            //     });
+            //     if (hasError) {
+            //         event.preventDefault();
+            //     }
+            // });
         };
 
         $(function () {

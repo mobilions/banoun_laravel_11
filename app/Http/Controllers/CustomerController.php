@@ -14,7 +14,7 @@ use App\Models\Userkids;
 
 use App\Models\UserAddress;
 
-use App\Models\Cartmaster;
+use App\Models\CartMaster;
 
 use Illuminate\Http\Request;
 
@@ -48,13 +48,46 @@ class CustomerController extends Controller
 
 
 
-    public function index()
+    public function index(Request $request)
 
     {
 
         $title = "Customer";
 
-        $indexes = User::active()->where('role','user')->where('is_verified',1)->get();
+        $this->validate($request, [
+            'search' => 'nullable|string|max:255',
+            'is_verified' => 'nullable',
+            'min_credit' => 'nullable|numeric|min:0',
+            'max_credit' => 'nullable|numeric|min:0',
+        ]);
+
+        $query = User::active()->where('role','user');
+
+        if ($request->filled('is_verified')) {
+            if ($request->is_verified !== '') {
+                $query->where('is_verified', (int)$request->is_verified);
+            }
+        } else {
+            $query->where('is_verified', 1);
+        }
+
+        if ($request->has('search') && $request->search) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('phone', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->has('min_credit') && $request->min_credit) {
+            $query->where('credit_balance', '>=', $request->min_credit);
+        }
+        if ($request->has('max_credit') && $request->max_credit) {
+            $query->where('credit_balance', '<=', $request->max_credit);
+        }
+
+        $indexes = $query->orderByDesc('created_at')->get();
 
         return view('customer.index',compact('title','indexes'));  
 
@@ -73,7 +106,7 @@ class CustomerController extends Controller
         $kids = Userkids::where('user_id',$id)->get();
 
         $userAddress=UserAddress::with('userarea')->where('user_id',$id)->get();
-        $cartMasters=Cartmaster::where('user_id',$id)->get();
+        $cartMasters=CartMaster::where('user_id',$id)->get();
 
         $wishlists=Wishlist::where('created_by',$id)->where('delete_status',0)->get();
 
@@ -98,15 +131,11 @@ class CustomerController extends Controller
         $this->validate($request, [
             'editid' => 'required|exists:users,id',
             'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:users,email,'.$request->editid,
             'phone' => 'nullable|string|max:20',
         ], [
             'editid.required' => 'Customer ID is required.',
             'editid.exists' => 'Selected customer does not exist.',
             'name.required' => 'Name is required.',
-            'email.required' => 'Email is required.',
-            'email.email' => 'Please enter a valid email address.',
-            'email.unique' => 'This email is already registered.',
             'phone.max' => 'Phone number must not exceed 20 characters.',
         ]);
 

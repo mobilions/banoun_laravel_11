@@ -27,6 +27,11 @@ class OrderController extends Controller
         $this->validate($request, [
             'fromdate' => 'nullable|date',
             'todate' => 'nullable|date|after_or_equal:fromdate',
+            'search' => 'nullable|string|max:255',
+            'order_status' => 'nullable|integer',
+            'payment_type' => 'nullable|string',
+            'min_amount' => 'nullable|numeric|min:0',
+            'max_amount' => 'nullable|numeric|min:0',
         ]);
 
         $fromdate = $request->input('fromdate', date('Y-m-01'));
@@ -34,12 +39,47 @@ class OrderController extends Controller
         
         $todate1 = date('Y-m-d', strtotime("+1 day", strtotime($todate)));
 
-        $indexes = CartMaster::with(['user'])
-            ->whereBetween('created_at',[$fromdate, $todate1])
-            ->orderByDesc('created_at')
-            ->get();
+        $query = CartMaster::with(['user', 'orderStatus'])
+            ->whereBetween('created_at',[$fromdate, $todate1]);
 
-        return view('order.index',compact('title','indexes','fromdate','todate'));  
+        // Search functionality
+        if ($request->has('search') && $request->search) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('order_number', 'like', "%{$search}%")
+                  ->orWhereHas('user', function($userQuery) use ($search) {
+                      $userQuery->where('name', 'like', "%{$search}%")
+                                ->orWhere('phone', 'like', "%{$search}%")
+                                ->orWhere('email', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        // Filter by order status
+        if ($request->has('order_status') && $request->order_status) {
+            $query->where('orderstatus', $request->order_status);
+        }
+
+        // Filter by payment type
+        if ($request->has('payment_type') && $request->payment_type) {
+            $query->where('paymenttype', $request->payment_type);
+        }
+
+        // Filter by amount range
+        if ($request->has('min_amount') && $request->min_amount) {
+            $query->where('grandtotal', '>=', $request->min_amount);
+        }
+        if ($request->has('max_amount') && $request->max_amount) {
+            $query->where('grandtotal', '<=', $request->max_amount);
+        }
+
+        $indexes = $query->orderByDesc('created_at')->get();
+
+        // For filters dropdown
+        $orderStatuses = \App\Models\Orderstatus::all();
+        $paymentTypes = CartMaster::distinct()->whereNotNull('paymenttype')->pluck('paymenttype')->filter();
+
+        return view('order.index',compact('title','indexes','fromdate','todate','orderStatuses','paymentTypes'));  
     }
     /**
      * Show the form for creating a new resource.
@@ -93,37 +133,24 @@ class OrderController extends Controller
         $orderLog->created_by = Auth::user()->id;
         $orderLog->save();
 
-        if($val==2){
-            $subject = Emailtemplate::FindSubject('Out for Delivery');
-            $msgcontent = '';
-            $msgcontent .= Emailtemplate::FindContent('Out for Delivery');
-            $content = view('layouts.mailcontent',compact('msgcontent'))->render();
-            $this->sendMail($user->email,$content,$subject);
+        $statusMailMap = [
+            1 => 'payment_paid',
+            2 => 'order_processing',
+            3 => 'order_shipped',
+            4 => 'order_out_for_delivery',
+            5 => 'order_delivered',
+        ];
+
+        if (isset($statusMailMap[$val])) {
+           $template = EmailTemplate::byType($statusMailMap[$val]);
+           if ($template) {
+                $subject = $template->name;
+                $msgcontent = $template->message;
+                $content = view('layouts.mailcontent', compact('msgcontent'))->render();
+                $this->sendMail($user->email, $content, $subject);
+            }
         }
 
-        if($val==3){
-            $subject = Emailtemplate::FindSubject('Order Delivered');
-            $msgcontent = '';
-            $msgcontent .= Emailtemplate::FindContent('Order Delivered');
-            $content = view('layouts.mailcontent',compact('msgcontent'))->render();
-            $this->sendMail($user->email,$content,$subject);
-        }
-
-        if($val==4){
-            $subject = Emailtemplate::FindSubject('Request for Return & Refund');
-            $msgcontent = '';
-            $msgcontent .= Emailtemplate::FindContent('Request for Return & Refund');
-            $content = view('layouts.mailcontent',compact('msgcontent'))->render();
-            $this->sendMail($user->email,$content,$subject);
-        }
-
-        if($val==5){
-            $subject = Emailtemplate::FindSubject('Order Cancelled');
-            $msgcontent = '';
-            $msgcontent .= Emailtemplate::FindContent('Order Cancelled');
-            $content = view('layouts.mailcontent',compact('msgcontent'))->render();
-            $this->sendMail($user->email,$content,$subject);
-        }
 
         return redirect('order/'.$id.'/view');
 

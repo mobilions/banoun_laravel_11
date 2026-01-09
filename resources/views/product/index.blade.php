@@ -85,8 +85,11 @@ tr.selected {background-color:#adf7a9  ! important;}
                     <div class="col-md-2">
                         <input type="number" name="max_price" class="form-control" placeholder="Max Price" value="{{ request('max_price') }}" step="0.01">
                     </div>
-                    <div class="col-md-1">
-                        <button type="submit" class="btn btn-primary w-100">Filter</button>
+                    <div class="col-md-1 mt-4">
+                        <button type="submit" class="btn btn-primary waves-effect waves-light w-100" title="Filter"><i class="mdi mdi-filter"></i></button>
+                    </div>
+                    <div class="col-md-1 mt-4">
+                        <a href="{{ route('products') }}" class="btn btn-secondary waves-effect waves-light w-100" title="Reset"><i class="mdi mdi-refresh"></i></a>
                     </div>
                 </div>
             </form>

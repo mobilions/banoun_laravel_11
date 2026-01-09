@@ -29,14 +29,18 @@ class Setting extends Model
         'giftwrap_price',
         'created_by',
         'updated_by',
-        'delete_status'
+        'delete_status',
+        'mail_configurtion', //json field 1000 varchar length
     ];
 
     protected $casts = [
         'giftwrap_price' => 'decimal:2',
         'created_by' => 'integer',
         'updated_by' => 'integer',
-        'delete_status' => 'integer'
+        'delete_status' => 'integer',
+        'mail_configurtion' => 'array'
     ];
+
+    
 
 }
