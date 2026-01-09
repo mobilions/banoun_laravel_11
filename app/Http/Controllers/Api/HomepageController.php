@@ -127,6 +127,7 @@ class HomepageController extends BaseController
                 'products.category_id as categoryId',
                 'products.subcategory_id as subcategoryId',
                 'products.brand_id as brandId',
+                'products.size',
                 'categories.name as categoryName',
                 'subcategories.name as subcategoryName',
                 'brands.name as brandName'
@@ -134,6 +135,7 @@ class HomepageController extends BaseController
             ->leftJoin('categories', 'categories.id', '=', 'products.category_id')
             ->leftJoin('subcategories', 'subcategories.id', '=', 'products.subcategory_id')
             ->leftJoin('brands', 'brands.id', '=', 'products.brand_id')
+            ->leftJoin('productvariants', 'productvariants.product_id', '=', 'products.id')
             ->where('products.delete_status', '0');
             if($request->keyId != ""){
                 $product = $product->where("products.id", $request->keyId);
@@ -150,16 +152,42 @@ class HomepageController extends BaseController
             if($request->subcategoryId != ""){
                 $product = $product->where("products.subcategory_id", $request->subcategoryId);
             }
+            if($request->sizeId != ""){
+                $product = $product->where("productvariants.size_id", $request->sizeId);
+            }
+            if($request->colorId != ""){
+                $product = $product->where("productvariants.color_id", $request->colorId);
+            }
+            if($request->minPrice != ""){
+                $product = $product->where("products.price_offer", ">=", $request->minPrice);
+            }
+            if($request->maxPrice != ""){
+                $product = $product->where("products.price_offer", "<=", $request->maxPrice);
+            }
+            if($request->orderby == "h2l"){
+                $product = $product->orderBy("products.price_offer", "desc");
+            }
+            if($request->orderby == "l2h"){
+                $product = $product->orderBy("products.price_offer", "asc");
+            }
             $product = $product->offset($offset)
             ->limit($limit)
             ->get();
 
         $product = $product->map(function($item){
             $Productimage = ProductImage::where("product_id", $item->productId)->where("delete_status", "0")->first();
+            $size_id = 0;
+            $sizeName = "";
+            if($item->size != ""){
+                $size_id = trim(explode(',', $item->size)[0]);
+                $VariantsSub = VariantsSub::where("id", $size_id)->first();
+                $sizeName = !empty($VariantsSub) ? $VariantsSub->color_val : "";
+            }
+            unset($item->size);
             $item->wishlistId = 0;
             $item->is_wishlisted = 0;
-            $item->sizeid = 0;
-            $item->sizeName = "";
+            $item->sizeid = $size_id;
+            $item->sizeName = $sizeName;
             $item->imageurl = !empty($Productimage) ? $Productimage->imageurl : "";
             return $item;
         });

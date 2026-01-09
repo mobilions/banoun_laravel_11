@@ -61,29 +61,27 @@ class ProductvariantController extends Controller
      * @return \Illuminate\Http\Response
 
      */
-
     public function create($id)
-
     {   
         $title = "Product Variant";
-
-        // Dynamic variant lookup instead of hardcoded IDs
-        $sizeVariant = \App\Models\Variant::where('name', 'Size')->active()->first();
-        $colorVariant = \App\Models\Variant::where('name', 'Color')->active()->first();
+        $product = \App\Models\Product::findOrFail($id);
         
         $size = collect();
         $color = collect();
-        
-        if ($sizeVariant) {
-            $size = Variantsub::active()->where('variant_id', $sizeVariant->id)->get();
+        if (!empty($product->size)) {
+            $sizeIds = explode(',', $product->size);
+            $size = Variantsub::active()
+                ->whereIn('id', $sizeIds)
+                ->get();
         }
         
-        if ($colorVariant) {
-            $color = Variantsub::active()->where('variant_id', $colorVariant->id)->get();
+        if (!empty($product->colors)) {
+            $colorIds = explode(',', $product->colors);
+            $color = Variantsub::active()
+                ->whereIn('id', $colorIds)
+                ->get();
         }
-
         return view('productvariant.create', compact('title', 'id', 'size', 'color'));
-
     }
 
 

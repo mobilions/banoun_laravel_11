@@ -82,7 +82,7 @@
             <div class="col-lg-12 mb-3">
                 <div>
                     <label>Name: <span class="text-danger">*</span></label>
-                    <input class="form-control" type="text" placeholder="Enter Name" value="" name="name" id="search_name" required="">
+                    <input class="form-control" type="text" placeholder="Enter Name" value="" name="name" id="search_name" >
                 </div>
             </div>
             <div class="col-lg-12 mb-3">
@@ -114,7 +114,7 @@
             <div class="col-lg-12 mb-3">
                 <div>
                     <label>Name: <span class="text-danger">*</span></label>
-                    <input class="form-control" type="text" placeholder="Enter Size Name (e.g., Small, Medium, Large)" value="" name="size_name" id="size_name" required="">
+                    <input class="form-control" type="text" placeholder="Enter Size Name (e.g., Small, Medium, Large)" value="" name="size_name" id="size_name" >
                 </div>
             </div>
             <div class="col-lg-12 mb-3">
@@ -153,7 +153,7 @@
             <div class="col-lg-12 mb-3">
                 <div>
                     <label>Name: <span class="text-danger">*</span></label>
-                    <input class="form-control" type="text" placeholder="Enter Color Name (e.g., Red, Blue)" value="" name="color_name" id="color_name" required="">
+                    <input class="form-control" type="text" placeholder="Enter Color Name (e.g., Red, Blue)" value="" name="color_name" id="color_name" >
                 </div>
             </div>
             <div class="col-lg-12 mb-3">
@@ -228,18 +228,17 @@
 
                             <label>Category <span class="text-danger">*</span></label>
 
-                            <select onchange="loadType()" class="form-control" name="category_id" id="category_id" required="">
+                            <select onchange="loadType()" class="form-control" name="category_id" id="category_id">
 
-                                <option value="">Select</option>
+                                <option value="" disabled {{ old('category_id') ? '' : 'selected' }}>Select</option>
 
-                                 @foreach($categories as $cat)
+                                @foreach($categories as $cat)
 
-                                  <option value="{{$cat->id}}">{{$cat->name}} @if($cat->name_ar!='')- {{$cat->name_ar}}@endif</option>
+                                  <option value="{{$cat->id}}" {{ old('category_id') == $cat->id ? 'selected' : '' }}>{{$cat->name}} @if($cat->name_ar!='')- {{$cat->name_ar}}@endif</option>
 
                                  @endforeach
 
                             </select>
-                            @error('category_id') <span class="text-danger font-size-12">{{ $message }}</span> @enderror
                         </div>
 
                     </div>
@@ -250,18 +249,17 @@
 
                             <label>SubCategory <span class="text-danger">*</span></label>
 
-                            <select class="form-control" name="subcategory_id" id="subcategory_id" required="">
+                            <select class="form-control" name="subcategory_id" id="subcategory_id">
 
-                                <option value="">Select</option>
+                                <option value="" disabled {{ old('subcategory_id') ? '' : 'selected' }}>Select</option>
 
                                  @foreach($subcategories as $sub)
 
-                                  <option class="all category_{{$sub->category_id}}" value="{{$sub->id}}">{{$sub->name}} @if($sub->name_ar!='')- {{$sub->name_ar}}@endif</option>
+                                  <option class="all category_{{$sub->category_id}}" value="{{$sub->id}}" {{ old('subcategory_id') == $sub->id ? 'selected' : '' }}>{{$sub->name}} @if($sub->name_ar!='')- {{$sub->name_ar}}@endif</option>
 
                                  @endforeach
 
                             </select>
-                            @error('subcategory_id') <span class="text-danger font-size-12">{{ $message }}</span> @enderror
                         </div>
 
                     </div>
@@ -272,18 +270,17 @@
 
                             <label>Brand <span class="text-danger">*</span></label>
 
-                            <select class="form-control" name="brand_id" id="brand_id" required="" onchange='SelectBrandTag()'>
+                            <select class="form-control" name="brand_id" id="brand_id" onchange='SelectBrandTag()'>
 
-                                <option value="">Select</option>
+                                <option value="" disabled {{ old('brand_id') ? '' : 'selected' }}>Select</option>
 
                                  @foreach($brands as $brd)
 
-                                  <option value="{{$brd->id}}">{{$brd->name}} @if($brd->name_ar!='')- {{$brd->name_ar}}@endif</option>
+                                  <option value="{{$brd->id}}" {{ old('brand_id') == $brd->id ? 'selected' : '' }}>{{$brd->name}} @if($brd->name_ar!='')- {{$brd->name_ar}}@endif</option>
 
                                  @endforeach
 
                             </select>
-                            @error('brand_id') <span class="text-danger font-size-12">{{ $message }}</span> @enderror
                         </div>
 
                     </div>
@@ -294,7 +291,7 @@
 
                             <label>Name <span class="text-danger">*</span></label>
 
-                            <input class="form-control" type="text" name="name" id="name" required="">
+                            <input class="form-control" type="text" name="name" id="name" value="{{ old('name') }}">
 
                         </div>
 
@@ -306,7 +303,7 @@
 
                             <label>Name in arabic</label>
 
-                            <input class="form-control" type="text" name="name_ar" id="name_ar">
+                            <input class="form-control" type="text" name="name_ar" id="name_ar" value="{{ old('name_ar') }}">
 
                         </div>
 
@@ -320,7 +317,7 @@
 
                             <label>Price <span class="text-danger">*</span></label>
 
-                            <input class="form-control" type="text" name="price" id="price" required="">
+                            <input class="form-control" type="text" name="price" id="price" value="{{ old('price') }}">
 
                         </div>
 
@@ -332,7 +329,7 @@
 
                             <label>Offer Price <span class="text-danger">*</span></label>
 
-                            <input class="form-control" type="text" name="price_offer" id="price_offer" required="">
+                            <input class="form-control" type="text" name="price_offer" id="price_offer" value="{{ old('price_offer') }}">
 
                         </div>
 
@@ -344,7 +341,7 @@
 
                             <label>Discount % <span class="text-danger">*</span></label>
 
-                            <input class="form-control" type="text" name="percentage_discount" id="percentage_discount" value="0" required="">
+                            <input class="form-control" type="text" name="percentage_discount" id="percentage_discount" value="{{ old('percentage_discount', '0') }}">
 
                         </div>
 
@@ -358,29 +355,26 @@
 
                             <label>Search Tages <button type="button" class="btn-sm btn-primary btn-sm btn-rounded waves-effect waves-light" data-bs-toggle="modal" data-bs-target="#myModal">Add<i class="mdi mdi-plus ms-1"></i></button></label>
 
-                            <select class="select2 form-control select2-multiple" name="searchtag_id[]" id="searchtag_id"  multiple="multiple" required="" data-placeholder="Choose ...">
-
-                                <option value="">Select</option>
+                            <select class="select2 form-control select2-multiple" name="searchtag_id[]" id="searchtag_id"  multiple="multiple"  data-placeholder="Select">
 
                                  @foreach($searchtags as $list)
 
-                                  <option value="{{$list->id}}">{{$list->title}} @if($list->title_ar!='')- {{$list->title_ar}}@endif</option>
+                                  <option value="{{$list->id}}" {{ in_array($list->id, old('searchtag_id', [])) ? 'selected' : '' }}>{{$list->title}} @if($list->title_ar!='')- {{$list->title_ar}}@endif</option>
 
                                  @endforeach
 
                             </select>
-                            @error('searchtag_id') <span class="text-danger font-size-12">{{ $message }}</span> @enderror
                         </div>
 
                     </div>
 
                      <div class="col-lg-3 mb-3"><br>
 
-                        <input type="checkbox" name="is_newarrival" id="is_newarrival" class="form-check-input" checked>
+                        <input type="checkbox" name="is_newarrival" id="is_newarrival" class="form-check-input" {{ old('is_newarrival', true) ? 'checked' : '' }}>
 
                         <label class="form-check-label" for="is_newarrival">is New Arrival</label><br>
 
-                        <input type="checkbox" name="is_trending" id="is_trending" class="form-check-input" checked>
+                        <input type="checkbox" name="is_trending" id="is_trending" class="form-check-input" {{ old('is_trending', true) ? 'checked' : '' }}>
 
                         <label class="form-check-label" for="is_trending">is Trending</label>
 
@@ -388,11 +382,11 @@
 
                     <div class="col-lg-3 mb-3"><br>
 
-                        <input type="checkbox" name="is_topsearch" id="is_topsearch" class="form-check-input" checked>
+                        <input type="checkbox" name="is_topsearch" id="is_topsearch" class="form-check-input" {{ old('is_topsearch', true) ? 'checked' : '' }}>
 
                         <label class="form-check-label" for="is_topsearch">is Top Search</label><br>
 
-                        <input type="checkbox" name="is_recommended" id="is_recommended" class="form-check-input" checked>
+                        <input type="checkbox" name="is_recommended" id="is_recommended" class="form-check-input" {{ old('is_recommended', true) ? 'checked' : '' }}>
 
                         <label class="form-check-label" for="is_recommended">is Recommended</label>
 
@@ -406,18 +400,15 @@
 
                             <label>Select Size<span class="text-danger">*</span> <button type="button" class="btn-sm btn-primary btn-sm btn-rounded waves-effect waves-light" data-bs-toggle="modal" data-bs-target="#sizeModal">Add<i class="mdi mdi-plus ms-1"></i></button></label>
 
-                            <select class="select2 form-control select2-multiple" name="size_id[]" id="size_id"  multiple="multiple" required="" data-placeholder="Choose ..." required="">
-
-                                <option value="">Select</option>
+                            <select class="select2 form-control select2-multiple" name="size_id[]" id="size_id"  multiple="multiple"  data-placeholder="Select">
 
                                  @foreach($sizes as $list)
 
-                                  <option value="{{$list->id}}">{{$list->name}} @if($list->name_ar!='')- {{$list->name_ar}}@endif</option>
+                                  <option value="{{$list->id}}" {{ in_array($list->id, old('size_id', [])) ? 'selected' : '' }}>{{$list->name}} @if($list->name_ar!='')- {{$list->name_ar}}@endif</option>
 
                                  @endforeach
 
                             </select>
-                            @error('size_id') <span class="text-danger font-size-12">{{ $message }}</span> @enderror
                         </div>
 
                     </div>
@@ -428,18 +419,15 @@
 
                             <label>Select Colors<span class="text-danger">*</span> <button type="button" class="btn-sm btn-primary btn-sm btn-rounded waves-effect waves-light" data-bs-toggle="modal" data-bs-target="#colorModal">Add<i class="mdi mdi-plus ms-1"></i></button></label>
 
-                            <select class="select2 form-control select2-multiple" name="color_id[]" id="color_id"  multiple="multiple" required="" data-placeholder="Choose ..." required="">
-
-                                <option value="">Select</option>
+                            <select class="select2 form-control select2-multiple" name="color_id[]" id="color_id"  multiple="multiple"  data-placeholder="Select">
 
                                  @foreach($colors as $list)
 
-                                  <option value="{{$list->id}}">{{$list->name}} @if($list->name_ar!='')- {{$list->name_ar}}@endif</option>
+                                  <option value="{{$list->id}}" {{ in_array($list->id, old('color_id', [])) ? 'selected' : '' }}>{{$list->name}} @if($list->name_ar!='')- {{$list->name_ar}}@endif</option>
 
                                  @endforeach
 
                             </select>
-                            @error('color_id') <span class="text-danger font-size-12">{{ $message }}</span> @enderror
                         </div>
 
                     </div>
@@ -456,7 +444,7 @@
 
                         </div>
 
-                    @error('imgfile') <span class="font-size-12 ms-1 text-danger">{{ $message }}</strong> </span> @enderror
+                    <!-- @error('imgfile') <span class="font-size-12 ms-1 text-danger">{{ $message }}</strong> </span> @enderror -->
 
                     </div>  
 
@@ -472,7 +460,7 @@
 
                         </div>
 
-                    @error('imgfile2') <span class="font-size-12 ms-1 text-danger">{{ $message }}</strong> </span> @enderror
+                    <!-- @error('imgfile2') <span class="font-size-12 ms-1 text-danger">{{ $message }}</strong> </span> @enderror -->
 
                     </div>  
 
@@ -488,7 +476,7 @@
 
                         </div>
 
-                    @error('imgfile3') <span class="font-size-12 ms-1 text-danger">{{ $message }}</strong> </span> @enderror
+                    <!-- @error('imgfile3') <span class="font-size-12 ms-1 text-danger">{{ $message }}</strong> </span> @enderror -->
 
                     </div>  
 
@@ -500,7 +488,7 @@
 
                             <label>Description</label>
 
-                            <textarea class="form-control" type="text" name="description" id="description"></textarea>
+                            <textarea class="form-control" type="text" name="description" id="description">{{ old('description') }}</textarea>
 
                         </div>
 
@@ -512,7 +500,7 @@
 
                             <label>Description in arabic</label>
 
-                            <textarea class="form-control" type="text" name="description_ar" id="description_ar"></textarea>
+                            <textarea class="form-control" type="text" name="description_ar" id="description_ar">{{ old('description_ar') }}</textarea>
 
                         </div>
 
@@ -524,7 +512,7 @@
 
                             <label>More Info</label>
 
-                            <textarea class="form-control" type="text" name="more_info" id="more_info"></textarea>
+                            <textarea class="form-control" type="text" name="more_info" id="more_info">{{ old('more_info') }}</textarea>
 
                         </div>
 
@@ -536,7 +524,7 @@
 
                             <label>More Info in arabic</label>
 
-                            <textarea class="form-control" type="text" name="more_info_ar" id="more_info_ar"></textarea>
+                            <textarea class="form-control" type="text" name="more_info_ar" id="more_info_ar">{{ old('more_info_ar') }}</textarea>
 
                         </div>
 
@@ -570,24 +558,25 @@
 
 <script>
 
-    $('.all').hide();
+    $(document).ready(function() {
+        // Initially hide all subcategories
+        $('.all').hide();
+    });
 
     function loadType() {
-
-       var category_id=$('#category_id').val();
-
-       if(category_id!=''){
-
-
-
-         $('.all').hide();
-
-         var category_id='category_'+category_id;
-
-         $('.'+category_id).show();
-
-       }
-
+        var category_id = $('#category_id').val();
+        if(category_id && category_id !== '') {
+            // Hide all subcategories first
+            $('#subcategory_id option.all').hide();
+            // Show only subcategories for selected category
+            $('#subcategory_id option.category_' + category_id).show();
+            // Reset subcategory selection
+            $('#subcategory_id').val('');
+        } else {
+            // If no category selected, hide all
+            $('#subcategory_id option.all').hide();
+            $('#subcategory_id').val('');
+        }
     }
 
 </script>
@@ -596,19 +585,91 @@
 
 <script>
 
-    $(document).ready(function(){0<$("#description").length&&tinymce.init({selector:"textarea#description",height:300,plugins:["advlist autolink link image lists charmap print preview hr anchor pagebreak spellchecker","searchreplace wordcount visualblocks visualchars code fullscreen insertdatetime media nonbreaking","save table contextmenu directionality emoticons template paste textcolor"],toolbar:"insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | l      ink image | print preview media fullpage | forecolor backcolor emoticons",style_formats:[{title:"Bold text",inline:"b"},{title:"Red text",inline:"span",styles:{color:"#ff0000"}},{title:"Red header",block:"h1",styles:{color:"#ff0000"}},{title:"Example 1",inline:"span",classes:"example1"},{title:"Example 2",inline:"span",classes:"example2"},{title:"Table styles"},{title:"Table row 1",selector:"tr",classes:"tablerow1"}]})});
+    $(document).ready(function(){
+        if($("#description").length) {
+            var descriptionOld = {!! json_encode(old('description', '')) !!};
+            tinymce.init({
+                selector:"textarea#description",
+                height:300,
+                plugins:["advlist autolink link image lists charmap print preview hr anchor pagebreak spellchecker","searchreplace wordcount visualblocks visualchars code fullscreen insertdatetime media nonbreaking","save table contextmenu directionality emoticons template paste textcolor"],
+                toolbar:"insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | l      ink image | print preview media fullpage | forecolor backcolor emoticons",
+                style_formats:[{title:"Bold text",inline:"b"},{title:"Red text",inline:"span",styles:{color:"#ff0000"}},{title:"Red header",block:"h1",styles:{color:"#ff0000"}},{title:"Example 1",inline:"span",classes:"example1"},{title:"Example 2",inline:"span",classes:"example2"},{title:"Table styles"},{title:"Table row 1",selector:"tr",classes:"tablerow1"}],
+                setup: function(editor) {
+                    editor.on('init', function() {
+                        if(descriptionOld) {
+                            editor.setContent(descriptionOld);
+                        }
+                    });
+                }
+            });
+        }
+    });
 
 
 
-     $(document).ready(function(){0<$("#description_ar").length&&tinymce.init({selector:"textarea#description_ar",height:300,plugins:["advlist autolink link image lists charmap print preview hr anchor pagebreak spellchecker","searchreplace wordcount visualblocks visualchars code fullscreen insertdatetime media nonbreaking","save table contextmenu directionality emoticons template paste textcolor"],toolbar:"insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | l      ink image | print preview media fullpage | forecolor backcolor emoticons",style_formats:[{title:"Bold text",inline:"b"},{title:"Red text",inline:"span",styles:{color:"#ff0000"}},{title:"Red header",block:"h1",styles:{color:"#ff0000"}},{title:"Example 1",inline:"span",classes:"example1"},{title:"Example 2",inline:"span",classes:"example2"},{title:"Table styles"},{title:"Table row 1",selector:"tr",classes:"tablerow1"}]})});
+     $(document).ready(function(){
+         if($("#description_ar").length) {
+             var descriptionArOld = {!! json_encode(old('description_ar', '')) !!};
+             tinymce.init({
+                 selector:"textarea#description_ar",
+                 height:300,
+                 plugins:["advlist autolink link image lists charmap print preview hr anchor pagebreak spellchecker","searchreplace wordcount visualblocks visualchars code fullscreen insertdatetime media nonbreaking","save table contextmenu directionality emoticons template paste textcolor"],
+                 toolbar:"insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | l      ink image | print preview media fullpage | forecolor backcolor emoticons",
+                 style_formats:[{title:"Bold text",inline:"b"},{title:"Red text",inline:"span",styles:{color:"#ff0000"}},{title:"Red header",block:"h1",styles:{color:"#ff0000"}},{title:"Example 1",inline:"span",classes:"example1"},{title:"Example 2",inline:"span",classes:"example2"},{title:"Table styles"},{title:"Table row 1",selector:"tr",classes:"tablerow1"}],
+                 setup: function(editor) {
+                     editor.on('init', function() {
+                         if(descriptionArOld) {
+                             editor.setContent(descriptionArOld);
+                         }
+                     });
+                 }
+             });
+         }
+     });
 
 
 
-      $(document).ready(function(){0<$("#more_info").length&&tinymce.init({selector:"textarea#more_info",height:300,plugins:["advlist autolink link image lists charmap print preview hr anchor pagebreak spellchecker","searchreplace wordcount visualblocks visualchars code fullscreen insertdatetime media nonbreaking","save table contextmenu directionality emoticons template paste textcolor"],toolbar:"insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | l      ink image | print preview media fullpage | forecolor backcolor emoticons",style_formats:[{title:"Bold text",inline:"b"},{title:"Red text",inline:"span",styles:{color:"#ff0000"}},{title:"Red header",block:"h1",styles:{color:"#ff0000"}},{title:"Example 1",inline:"span",classes:"example1"},{title:"Example 2",inline:"span",classes:"example2"},{title:"Table styles"},{title:"Table row 1",selector:"tr",classes:"tablerow1"}]})});
+      $(document).ready(function(){
+          if($("#more_info").length) {
+              var moreInfoOld = {!! json_encode(old('more_info', '')) !!};
+              tinymce.init({
+                  selector:"textarea#more_info",
+                  height:300,
+                  plugins:["advlist autolink link image lists charmap print preview hr anchor pagebreak spellchecker","searchreplace wordcount visualblocks visualchars code fullscreen insertdatetime media nonbreaking","save table contextmenu directionality emoticons template paste textcolor"],
+                  toolbar:"insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | l      ink image | print preview media fullpage | forecolor backcolor emoticons",
+                  style_formats:[{title:"Bold text",inline:"b"},{title:"Red text",inline:"span",styles:{color:"#ff0000"}},{title:"Red header",block:"h1",styles:{color:"#ff0000"}},{title:"Example 1",inline:"span",classes:"example1"},{title:"Example 2",inline:"span",classes:"example2"},{title:"Table styles"},{title:"Table row 1",selector:"tr",classes:"tablerow1"}],
+                  setup: function(editor) {
+                      editor.on('init', function() {
+                          if(moreInfoOld) {
+                              editor.setContent(moreInfoOld);
+                          }
+                      });
+                  }
+              });
+          }
+      });
 
 
 
-     $(document).ready(function(){0<$("#more_info_ar").length&&tinymce.init({selector:"textarea#more_info_ar",height:300,plugins:["advlist autolink link image lists charmap print preview hr anchor pagebreak spellchecker","searchreplace wordcount visualblocks visualchars code fullscreen insertdatetime media nonbreaking","save table contextmenu directionality emoticons template paste textcolor"],toolbar:"insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | l      ink image | print preview media fullpage | forecolor backcolor emoticons",style_formats:[{title:"Bold text",inline:"b"},{title:"Red text",inline:"span",styles:{color:"#ff0000"}},{title:"Red header",block:"h1",styles:{color:"#ff0000"}},{title:"Example 1",inline:"span",classes:"example1"},{title:"Example 2",inline:"span",classes:"example2"},{title:"Table styles"},{title:"Table row 1",selector:"tr",classes:"tablerow1"}]})});
+     $(document).ready(function(){
+         if($("#more_info_ar").length) {
+             var moreInfoArOld = {!! json_encode(old('more_info_ar', '')) !!};
+             tinymce.init({
+                 selector:"textarea#more_info_ar",
+                 height:300,
+                 plugins:["advlist autolink link image lists charmap print preview hr anchor pagebreak spellchecker","searchreplace wordcount visualblocks visualchars code fullscreen insertdatetime media nonbreaking","save table contextmenu directionality emoticons template paste textcolor"],
+                 toolbar:"insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | l      ink image | print preview media fullpage | forecolor backcolor emoticons",
+                 style_formats:[{title:"Bold text",inline:"b"},{title:"Red text",inline:"span",styles:{color:"#ff0000"}},{title:"Red header",block:"h1",styles:{color:"#ff0000"}},{title:"Example 1",inline:"span",classes:"example1"},{title:"Example 2",inline:"span",classes:"example2"},{title:"Table styles"},{title:"Table row 1",selector:"tr",classes:"tablerow1"}],
+                 setup: function(editor) {
+                     editor.on('init', function() {
+                         if(moreInfoArOld) {
+                             editor.setContent(moreInfoArOld);
+                         }
+                     });
+                 }
+             });
+         }
+     });
 
 
 
@@ -891,28 +952,57 @@
                 });
             });
 
-            $form.on('submit', function (event) {
-                let hasError = false;
-                ['#searchtag_id', '#size_id', '#color_id'].forEach(function (selector) {
-                    const $field = $form.find(selector);
-                    if ($field.length) {
-                        if (!$field.val() || !$field.val().length) {
-                            hasError = true;
-                            $field.siblings('.invalid-feedback.client-side').remove();
-                            $field.after('<div class="invalid-feedback client-side d-block">This field is required.</div>');
-                        } else {
-                            $field.siblings('.invalid-feedback.client-side').remove();
-                        }
-                    }
-                });
-                if (hasError) {
-                    event.preventDefault();
-                }
-            });
+            // $form.on('submit', function (event) {
+                // let hasError = false;
+                // ['#searchtag_id', '#size_id', '#color_id'].forEach(function (selector) {
+                //     const $field = $form.find(selector);
+                //     if ($field.length) {
+                //         if (!$field.val() || !$field.val().length) {
+                //             hasError = true;
+                //             $field.siblings('.invalid-feedback.client-side').remove();
+                //             $field.after('<div class="invalid-feedback client-side d-block">This field is required.</div>');
+                //         } else {
+                //             $field.siblings('.invalid-feedback.client-side').remove();
+                //         }
+                //     }
+                // });
+                // if (hasError) {
+                //     event.preventDefault();
+                // }
+            // });
         };
 
         $(function () {
             initSelect2Within('#productForm');
+            
+            // Restore old values for Select2 multi-select fields
+            @if(old('searchtag_id'))
+                $('#searchtag_id').val({{ json_encode(old('searchtag_id')) }}).trigger('change');
+            @endif
+            
+            @if(old('size_id'))
+                $('#size_id').val({{ json_encode(old('size_id')) }}).trigger('change');
+            @endif
+            
+            @if(old('color_id'))
+                $('#color_id').val({{ json_encode(old('color_id')) }}).trigger('change');
+            @endif
+            
+            // Restore subcategories if category was previously selected
+            @if(old('category_id'))
+                var oldCategoryId = {{ old('category_id') }};
+                $('#category_id').val(oldCategoryId).trigger('change');
+                // Trigger loadType to show correct subcategories
+                setTimeout(function() {
+                    loadType();
+                    // Restore subcategory selection after subcategories are loaded
+                    @if(old('subcategory_id'))
+                        setTimeout(function() {
+                            $('#subcategory_id').val({{ old('subcategory_id') }});
+                        }, 100);
+                    @endif
+                }, 100);
+            @endif
             
             // Clear modal forms when modals are opened
             $('#myModal').on('show.bs.modal', function () {

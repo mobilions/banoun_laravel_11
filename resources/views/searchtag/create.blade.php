@@ -60,8 +60,7 @@
 
                             <label>Title <span class="text-danger">*</span></label>
 
-                            <input class="form-control @error('title') is-invalid @enderror" type="text" name="title" id="title" value="{{ old('title') }}" required>
-                            @error('title') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
+                            <input class="form-control" type="text" name="title" id="title" value="{{ old('title') }}" required>
 
                         </div>
 
@@ -73,8 +72,7 @@
 
                             <label>Title in arabic</label>
 
-                            <input class="form-control @error('title_ar') is-invalid @enderror" type="text" name="title_ar" id="title_ar" value="{{ old('title_ar') }}">
-                            @error('title_ar') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
+                            <input class="form-control" type="text" name="title_ar" id="title_ar" value="{{ old('title_ar') }}">
 
                         </div>
 

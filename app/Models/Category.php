@@ -26,6 +26,16 @@ class Category extends Model
         'delete_status' => 'integer'
     ];
 
+    public function subcategories() {
+        return $this->hasMany(Subcategory::class);
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('delete_status', 0);
+    }
+
+
     public static function FindName($id){
 
         $product = Category::select('name','name_ar')->where('id',$id)->first();

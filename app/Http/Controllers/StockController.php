@@ -52,7 +52,7 @@ class StockController extends Controller
 
         $title = "Stock";
 
-        $indexes = Stock::where('variant_id',$variant_id)->orderByDesc('created_at')->get();
+        $indexes = Stock::with('user')->where('variant_id',$variant_id)->orderByDesc('created_at')->get();
 
         $addstock = Stock::where('variant_id',$variant_id)
             //->where('process',StockProcess::ADD)
@@ -206,10 +206,20 @@ class StockController extends Controller
         
     //     return view('stock.stocklog',compact('title','indexes'));
     // }
-    public function stocklog()
+    public function stocklog(Request $request)
     {
         $title = "Stock List";
-        $indexes = Productvariant::query()
+
+        $this->validate($request, [
+            'search' => 'nullable|string|max:255',
+            'category_id' => 'nullable|integer|exists:categories,id',
+            'brand_id' => 'nullable|integer|exists:brands,id',
+            'subcategory_id' => 'nullable|integer|exists:subcategories,id',
+            'min_quantity' => 'nullable|numeric|min:0',
+            'max_quantity' => 'nullable|numeric|min:0',
+        ]);
+
+        $query = Productvariant::query()
                     ->with([
                         'product.category', 
                         'product.brand', 
@@ -222,12 +232,54 @@ class StockController extends Controller
                         'stocks_sum_quantity' => Stock::selectRaw('COALESCE(SUM(quantity), 0)')
                             ->whereColumn('stocks.variant_id', 'productvariants.id')
                             ->whereColumn('stocks.product_id', 'productvariants.product_id')
-                    ])
-                    ->havingRaw('stocks_sum_quantity > 0')
-                    ->get();
-                    
+                    ]);
 
-        return view('stock.stocklog', compact('title', 'indexes'));
+        // Search functionality
+        if ($request->has('search') && $request->search) {
+            $search = $request->search;
+            $query->whereHas('product', function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('name_ar', 'like', "%{$search}%");
+            });
+        }
+
+        // Filter by category
+        if ($request->has('category_id') && $request->category_id) {
+            $query->whereHas('product', function($q) use ($request) {
+                $q->where('category_id', $request->category_id);
+            });
+        }
+
+        // Filter by brand
+        if ($request->has('brand_id') && $request->brand_id) {
+            $query->whereHas('product', function($q) use ($request) {
+                $q->where('brand_id', $request->brand_id);
+            });
+        }
+
+        // Filter by subcategory
+        if ($request->has('subcategory_id') && $request->subcategory_id) {
+            $query->whereHas('product', function($q) use ($request) {
+                $q->where('subcategory_id', $request->subcategory_id);
+            });
+        }
+
+        // Filter by quantity range
+        if ($request->has('min_quantity') && $request->min_quantity) {
+            $query->havingRaw('stocks_sum_quantity >= ?', [$request->min_quantity]);
+        }
+        if ($request->has('max_quantity') && $request->max_quantity) {
+            $query->havingRaw('stocks_sum_quantity <= ?', [$request->max_quantity]);
+        }
+
+        $indexes = $query->havingRaw('stocks_sum_quantity > 0')->get();
+
+        // For filters dropdown
+        $categories = \App\Models\Category::active()->get();
+        $brands = \App\Models\Brand::active()->get();
+        $subcategories = \App\Models\Subcategory::active()->get();
+
+        return view('stock.stocklog', compact('title', 'indexes', 'categories', 'brands', 'subcategories'));
     }
 
     public function getStockDetails($variantId)
@@ -249,7 +301,9 @@ class StockController extends Controller
 
         DB::transaction(function () use ($stock) {
             $variantId = $stock->variant_id;
-            $stock->delete();
+            $stock->updated_by=Auth::user()->id;
+            $stock->process = StockProcess::DELETE;
+            $stock->save();
 
             $variant = Productvariant::lockForUpdate()->find($variantId);
             if ($variant) {
