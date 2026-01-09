@@ -131,15 +131,11 @@ class CustomerController extends Controller
         $this->validate($request, [
             'editid' => 'required|exists:users,id',
             'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:users,email,'.$request->editid,
             'phone' => 'nullable|string|max:20',
         ], [
             'editid.required' => 'Customer ID is required.',
             'editid.exists' => 'Selected customer does not exist.',
             'name.required' => 'Name is required.',
-            'email.required' => 'Email is required.',
-            'email.email' => 'Please enter a valid email address.',
-            'email.unique' => 'This email is already registered.',
             'phone.max' => 'Phone number must not exceed 20 characters.',
         ]);
 

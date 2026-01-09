@@ -52,7 +52,7 @@ class StockController extends Controller
 
         $title = "Stock";
 
-        $indexes = Stock::where('variant_id',$variant_id)->orderByDesc('created_at')->get();
+        $indexes = Stock::with('user')->where('variant_id',$variant_id)->orderByDesc('created_at')->get();
 
         $addstock = Stock::where('variant_id',$variant_id)
             //->where('process',StockProcess::ADD)
@@ -301,7 +301,9 @@ class StockController extends Controller
 
         DB::transaction(function () use ($stock) {
             $variantId = $stock->variant_id;
-            $stock->delete();
+            $stock->updated_by=Auth::user()->id;
+            $stock->process = StockProcess::DELETE;
+            $stock->save();
 
             $variant = Productvariant::lockForUpdate()->find($variantId);
             if ($variant) {

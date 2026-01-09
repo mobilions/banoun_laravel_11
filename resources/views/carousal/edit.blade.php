@@ -62,9 +62,7 @@
 
                             <label>Title <span class="text-danger">*</span></label>
 
-                            <input class="form-control @error('name') is-invalid @enderror" value="{{ old('name', $log->name) }}" type="text" name="name" id="name" required="">
-
-                            @error('name') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
+                            <input class="form-control" value="{{ old('name', $log->name) }}" type="text" name="name" id="name" required="">
 
                         </div>
 
@@ -76,9 +74,7 @@
 
                             <label>Title in arabic</label>
 
-                            <input class="form-control @error('name_ar') is-invalid @enderror" value="{{ old('name_ar', $log->name_ar) }}" type="text" name="name_ar" id="name_ar">
-
-                            @error('name_ar') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
+                            <input class="form-control" value="{{ old('name_ar', $log->name_ar) }}" type="text" name="name_ar" id="name_ar">
 
                         </div>
 
@@ -90,9 +86,7 @@
 
                             <label>Description</label>
 
-                            <textarea class="form-control @error('description') is-invalid @enderror" type="text" name="description" id="description">{{ old('description', $log->description) }}</textarea>
-
-                            @error('description') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
+                            <textarea class="form-control" type="text" name="description" id="description">{{ old('description', $log->description) }}</textarea>
 
                         </div>
 
@@ -104,9 +98,7 @@
 
                             <label>Description in arabic</label>
 
-                            <textarea class="form-control @error('description_ar') is-invalid @enderror" type="text" name="description_ar" id="description_ar">{{ old('description_ar', $log->description_ar) }}</textarea>
-
-                            @error('description_ar') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
+                            <textarea class="form-control" type="text" name="description_ar" id="description_ar">{{ old('description_ar', $log->description_ar) }}</textarea>
 
                         </div>
 
@@ -118,9 +110,7 @@
 
                             <label for="formFileSm" class="form-label">Image file <small class="text-muted ms-1">(File size should be 278x370)</small> </label>
 
-                            <input class="form-control @error('imgfile') is-invalid @enderror" name="imgfile" id="imgfile" type="file">
-
-                            @error('imgfile') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
+                            <input class="form-control" name="imgfile" id="imgfile" type="file">
 
                             <input class="form-control" value="{{$log->imageurl}}"  name="imgfile_val" id="imgfile_val" type="hidden">
 

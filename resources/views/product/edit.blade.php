@@ -164,9 +164,9 @@
 
                                             <label>Category <span class="text-danger">*</span></label>
 
-                                            <select onchange="loadType()" class="form-control" name="category_id" id="category_id" required="">
+                                            <select onchange="loadType()" class="form-control" name="category_id" id="category_id" >
 
-                                                <option value="">Select</option>
+                                                <option value="" disabled>Select</option>
 
                                                  @foreach($categories as $cat)
 
@@ -186,9 +186,9 @@
 
                                             <label>SubCategory <span class="text-danger">*</span></label>
 
-                                            <select class="form-control" name="subcategory_id" id="subcategory_id" required="">
+                                            <select class="form-control" name="subcategory_id" id="subcategory_id" >
 
-                                                 <option value="" selected disabled>Select</option>
+                                                <option value="" disabled>Select</option>
 
                                                  @foreach($subcategories as $sub)
 
@@ -208,9 +208,9 @@
 
                                             <label>Brand <span class="text-danger">*</span></label>
 
-                                            <select class="form-control" name="brand_id" id="brand_id" required="">
+                                            <select class="form-control" name="brand_id" id="brand_id" >
 
-                                                <option value="">Select</option>
+                                                <option value="" disabled>Select</option>
 
                                                  @foreach($brands as $brd)
 
@@ -230,7 +230,7 @@
 
                                             <label>Name <span class="text-danger">*</span></label>
 
-                                            <input value="{{$log->name}}" class="form-control" type="text" name="name" id="name" required="">
+                                            <input value="{{$log->name}}" class="form-control" type="text" name="name" id="name" >
 
                                         </div>
 
@@ -256,7 +256,7 @@
 
                                             <label>Price <span class="text-danger">*</span></label>
 
-                                            <input value="{{$log->price}}" class="form-control" type="text" name="price" id="price" required="">
+                                            <input value="{{$log->price}}" class="form-control" type="text" name="price" id="price" >
 
                                         </div>
 
@@ -268,7 +268,7 @@
 
                                             <label>Offer Price <span class="text-danger">*</span></label>
 
-                                            <input class="form-control" value="{{$log->price_offer}}" type="text" name="price_offer" id="price_offer" required="">
+                                            <input class="form-control" value="{{$log->price_offer}}" type="text" name="price_offer" id="price_offer" >
 
                                         </div>
 
@@ -280,7 +280,7 @@
 
                                             <label>Discount % <span class="text-danger">*</span></label>
 
-                                            <input class="form-control" type="text" name="percentage_discount" id="percentage_discount" value="{{$log->percentage_discount}}" required="">
+                                            <input class="form-control" type="text" name="percentage_discount" id="percentage_discount" value="{{$log->percentage_discount}}" >
 
                                             <input class="form-control" value="{{$log->imageurl}}"  name="imgfile_val" id="imgfile_val" type="hidden">
 
@@ -310,9 +310,7 @@
 
                                              ?>
 
-                                            <select class="select2 form-control select2-multiple" name="searchtag_id[]" id="searchtag_id"  multiple="multiple" required="" data-placeholder="Choose ...">
-
-                                                <option value="">Select</option>
+                                            <select class="select2 form-control select2-multiple" name="searchtag_id[]" id="searchtag_id"  multiple="multiple"  data-placeholder="Select">
 
                                                  @foreach($searchtags as $list)
 
@@ -321,7 +319,6 @@
                                                  @endforeach
 
                                             </select>
-                                            @error('searchtag_id') <span class="text-danger font-size-12">{{ $message }}</span> @enderror
 
                                         </div>
 
@@ -367,9 +364,7 @@
 
                                              ?>
 
-                                            <select class="select2 form-control select2-multiple" name="size_id[]" id="size_id"  multiple="multiple" required="" data-placeholder="Choose ...">
-
-                                                <option value="">Select</option>
+                                            <select class="select2 form-control select2-multiple" name="size_id[]" id="size_id"  multiple="multiple"  data-placeholder="Select">
 
                                                  @foreach($sizes as $list)
 
@@ -378,7 +373,6 @@
                                                  @endforeach
 
                                             </select>
-                                            @error('size_id') <span class="text-danger font-size-12">{{ $message }}</span> @enderror
 
                                         </div>
 
@@ -396,9 +390,7 @@
 
                                              ?>
 
-                                            <select class="select2 form-control select2-multiple" name="color_id[]" id="color_id"  multiple="multiple" required="" data-placeholder="Choose ...">
-
-                                                <option value="">Select</option>
+                                            <select class="select2 form-control select2-multiple" name="color_id[]" id="color_id"  multiple="multiple"  data-placeholder="Select">
 
                                                  @foreach($colors as $list)
 
@@ -407,7 +399,6 @@
                                                  @endforeach
 
                                             </select>
-                                            @error('color_id') <span class="text-danger font-size-12">{{ $message }}</span> @enderror
 
                                         </div>
 
@@ -541,7 +532,7 @@
 
                                                 <label for="formFileSm" class="form-label">Image file </label>
 
-                                                <input class="form-control" name="imgfile" id="imgfile" type="file" required="">
+                                                <input class="form-control" name="imgfile" id="imgfile" type="file" >
 
                                                 <input type="hidden" name="product_id" value="{{$log->id}}">
 
@@ -785,24 +776,24 @@
                 });
             });
 
-            $form.on('submit', function (event) {
-                let hasError = false;
-                ['#searchtag_id', '#size_id', '#color_id'].forEach(function (selector) {
-                    const $field = $form.find(selector);
-                    if ($field.length) {
-                        if (!$field.val() || !$field.val().length) {
-                            hasError = true;
-                            $field.siblings('.invalid-feedback.client-side').remove();
-                            $field.after('<div class="invalid-feedback client-side d-block">This field is required.</div>');
-                        } else {
-                            $field.siblings('.invalid-feedback.client-side').remove();
-                        }
-                    }
-                });
-                if (hasError) {
-                    event.preventDefault();
-                }
-            });
+            // $form.on('submit', function (event) {
+            //     let hasError = false;
+            //     ['#searchtag_id', '#size_id', '#color_id'].forEach(function (selector) {
+            //         const $field = $form.find(selector);
+            //         if ($field.length) {
+            //             if (!$field.val() || !$field.val().length) {
+            //                 hasError = true;
+            //                 $field.siblings('.invalid-feedback.client-side').remove();
+            //                 $field.after('<div class="invalid-feedback client-side d-block">This field is required.</div>');
+            //             } else {
+            //                 $field.siblings('.invalid-feedback.client-side').remove();
+            //             }
+            //         }
+            //     });
+            //     if (hasError) {
+            //         event.preventDefault();
+            //     }
+            // });
         };
 
         $(function () {

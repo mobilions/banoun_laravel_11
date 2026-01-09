@@ -60,9 +60,8 @@
 
                             <label>Info <span class="text-danger">*</span></label>
 
-                            <input class="form-control @error('name') is-invalid @enderror" type="text" name="name" id="name" value="{{ old('name') }}" required="">
+                            <input class="form-control " type="text" name="name" id="name" value="{{ old('name') }}" required="">
 
-                            @error('name') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
 
                         </div>
 
@@ -74,9 +73,8 @@
 
                             <label>Info in arabic</label>
 
-                            <input class="form-control @error('name_ar') is-invalid @enderror" type="text" name="name_ar" id="name_ar" value="{{ old('name_ar') }}">
+                            <input class="form-control " type="text" name="name_ar" id="name_ar" value="{{ old('name_ar') }}">
 
-                            @error('name_ar') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
 
                         </div>
 
@@ -88,9 +86,8 @@
 
                             <label for="formFileSm" class="form-label">Image file <small class="text-muted ms-1">(File size should be 80x80, SVG format)</small></label>
 
-                            <input class="form-control @error('imgfile') is-invalid @enderror" name="imgfile" id="imgfile" type="file">
+                            <input class="form-control " name="imgfile" id="imgfile" type="file">
 
-                            @error('imgfile') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
 
                         </div>
 

@@ -267,6 +267,7 @@ tr.selected {background-color:#adf7a9  ! important;}
                             <th>Date Added</th>
 
                             <th>Transaction</th>
+                            <th>Action By</th>
 
                         </tr>
 
@@ -285,6 +286,7 @@ tr.selected {background-color:#adf7a9  ! important;}
                             <td>{{date('d-m-Y',strtotime($index->created_at))}}</td>
 
                                 <td>{{$index->process}}</td>
+                                <td>{{ $index->user ? $index->user->name : 'N/A' }}</td>
 
                         </tr>
 

@@ -121,22 +121,41 @@ class SettingController extends Controller
         // Handle mail configuration update separately
         if ($request->has('update_mail_config')) {
             try {
+                // Get existing setting to preserve password if not provided
+                $setting = Setting::where('delete_status', '0')->first();
+                $existingMailConfig = $setting && $setting->mail_configurtion ? $setting->mail_configurtion : [];
+                
                 $mailConfig = [
-                    'MAIL_MAILER' => $request->input('MAIL_MAILER', config('mail.default', 'smtp')),
-                    'MAIL_HOST' => $request->input('MAIL_HOST', config('mail.mailers.smtp.host', '')),
-                    'MAIL_PORT' => $request->input('MAIL_PORT', config('mail.mailers.smtp.port', '587')),
-                    'MAIL_USERNAME' => $request->input('MAIL_USERNAME', config('mail.mailers.smtp.username', '')),
-                    'MAIL_ENCRYPTION' => $request->input('MAIL_ENCRYPTION', env('MAIL_ENCRYPTION', 'tls')), // Not in config, use env directly
-                    'MAIL_FROM_ADDRESS' => $request->input('MAIL_FROM_ADDRESS', config('mail.from.address', '')),
-                    'MAIL_FROM_NAME' => $request->input('MAIL_FROM_NAME', config('mail.from.name', '')),
+                    'MAIL_MAILER' => $request->input('MAIL_MAILER', 'smtp'),
+                    'MAIL_HOST' => $request->input('MAIL_HOST', ''),
+                    'MAIL_PORT' => $request->input('MAIL_PORT', '587'),
+                    'MAIL_USERNAME' => $request->input('MAIL_USERNAME', ''),
+                    'MAIL_ENCRYPTION' => $request->input('MAIL_ENCRYPTION', 'tls'),
+                    'MAIL_FROM_ADDRESS' => $request->input('MAIL_FROM_ADDRESS', ''),
+                    'MAIL_FROM_NAME' => $request->input('MAIL_FROM_NAME', ''),
                 ];
                 
-                // Only update password if provided (to avoid overwriting with empty)
+                // Only update password if provided, otherwise preserve existing
                 if (!empty($request->input('MAIL_PASSWORD'))) {
                     $mailConfig['MAIL_PASSWORD'] = $request->input('MAIL_PASSWORD');
+                } elseif (isset($existingMailConfig['MAIL_PASSWORD'])) {
+                    $mailConfig['MAIL_PASSWORD'] = $existingMailConfig['MAIL_PASSWORD'];
                 }
                 
-                EnvHelper::updateEnv($mailConfig);
+                if ($setting) {
+                    // Update existing setting
+                    $setting->mail_configurtion = $mailConfig;
+                    $setting->updated_by = Auth::user()->id;
+                    $setting->save();
+                } else {
+                    // Create new setting with mail config only
+                    $setting = new Setting();
+                    $setting->mail_configurtion = $mailConfig;
+                    $setting->company = 'Default';
+                    $setting->delete_status = 0;
+                    $setting->created_by = Auth::user()->id;
+                    $setting->save();
+                }
                 
                 return redirect()->back()->with('success', 'Mail configuration updated successfully.');
             } catch (\Exception $e) {
@@ -199,6 +218,12 @@ class SettingController extends Controller
         $data->giftwrap_price = $request->giftwrap_price;
 
         $data->imageurl    = $imgurl;
+
+        // Preserve existing mail configuration if updating general settings
+        $existingSetting = Setting::where('delete_status', '0')->first();
+        if ($existingSetting && $existingSetting->mail_configurtion) {
+            $data->mail_configurtion = $existingSetting->mail_configurtion;
+        }
 
         $data->created_by=Auth::user()->id;
 

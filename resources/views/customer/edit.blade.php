@@ -62,7 +62,7 @@
                     <div class="col-lg-6 mb-3">
                         <div>
                             <label>Email (Username) <span class="text-danger">*</span></label>
-                            <input value="{{ old('email', $log->email) }}" class="form-control @error('email') is-invalid @enderror" type="email" name="email" id="email" required="">
+                            <input value="{{ old('email', $log->email) }}" class="form-control @error('email') is-invalid @enderror disable" type="email" name="email" id="email"  disabled>
                             @error('email') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
                         </div>
                     </div> 

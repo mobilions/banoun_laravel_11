@@ -117,6 +117,29 @@ tr.selected {background-color:#adf7a9  ! important;}
     <div class="card">
 
         <div class="card-body">
+            <!-- Filters -->
+            <form method="GET" action="{{ route('stock.list') }}" class="mb-3">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label>Search</label>
+                        <input type="text" name="search" class="form-control" placeholder="Product, Variant..." value="{{ request('search') }}">
+                    </div>
+                    <div class="col-md-2">
+                        <label>Status</label>
+                        <select name="status" class="form-select">
+                            <option value="0" {{ request('status', '0') == '0' ? 'selected' : '' }}>Pending</option>
+                            <option value="1" {{ request('status') == '1' ? 'selected' : '' }}>Approved</option>
+                            <option value="" {{ request('status') === '' ? 'selected' : '' }}>All</option>
+                        </select>
+                    </div>
+                    <div class="col-md-1 mt-4">
+                        <button type="submit" class="btn btn-primary waves-effect waves-light w-100" title="Filter"><i class="mdi mdi-filter"></i></button>
+                    </div>
+                    <div class="col-md-1 mt-4">
+                        <a href="{{ route('stock.list') }}" class="btn btn-secondary waves-effect waves-light w-100" title="Reset"><i class="mdi mdi-refresh"></i></a>
+                    </div>
+                </div>
+            </form>
 
             <table id="datatable-buttons" class="table table-bordered dt-responsive nowrap w-100">
 

@@ -244,12 +244,12 @@ class SubcategoryController extends Controller
             'name_ar' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'description_ar' => 'nullable|string',
-            'imgfile' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'imgfile' => 'nullable|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'imgfile_val' => 'nullable|string',
         ], [
-            'imgfile.image' => 'Image file must be an image.',
-            'imgfile.mimes' => 'Image file must be a file of type: jpeg, png, jpg, gif, svg.',
-            'imgfile.max' => 'Image file size must not exceed 2MB.',
+            'imgfile.image' => 'The file must be an image.',
+            'imgfile.mimes' => 'The image must be a file of type: jpeg, png, jpg, gif, svg.',
+            'imgfile.max' => 'The image may not be greater than 2048 kilobytes.',
         ]);
 
         $imgurl    = '';

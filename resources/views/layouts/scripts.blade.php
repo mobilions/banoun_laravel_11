@@ -21,7 +21,7 @@
 })();
 </script>
 @yield('ScriptContent')
-@if ($errors->any())
+<!-- @if ($errors->any())
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     var errorBag = @json($errors->toArray());
@@ -36,6 +36,9 @@ document.addEventListener('DOMContentLoaded', function () {
             var type = (node.type || '').toLowerCase();
             if (type !== 'hidden' && type !== 'file') {
                 node.classList.add('is-invalid');
+            }
+            if (type === 'file') {
+                return;
             }
             var message = errorBag[field][0] || '';
             if (!message) {
@@ -55,7 +58,7 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 @endif
-@if ($errors->any() && count(session()->getOldInput() ?? []))
+ @if ($errors->any() && count(session()->getOldInput() ?? []))
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     var oldInput = @json(session()->getOldInput());
@@ -88,4 +91,4 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 </script>
-@endif
+@endif -->

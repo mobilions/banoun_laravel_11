@@ -144,11 +144,9 @@ class ProductController extends Controller
     {
         $title = "Product";
 
-        // $categories = \App\Models\Category::active()->get();
-        $categories = \App\Models\Category::active()
-                        ->whereHas('subcategories', function($query) {
-                            $query->active();
-                        })
+        // Get only categories that have at least one subcategory
+        $categories = \App\Models\Category::where('delete_status', 0)
+                        ->whereHas('subcategories')
                         ->get();
 
         $subcategories = \App\Models\Subcategory::active()->get();
@@ -217,6 +215,13 @@ class ProductController extends Controller
             'imgfile3' => ['nullable','image','mimes:jpeg,png,jpg,gif,svg,webp','max:2048','dimensions:min_width=100,min_height=100,max_width=4000,max_height=4000'],
         ], [
             'price_offer.lte' => 'Offer price cannot be greater than the regular price.',
+            'imgfile.required' => 'Primary image is required.',
+            'category_id.required' => 'Category is required.',
+            'subcategory_id.required' => 'Subcategory is required.',
+            'brand_id.required' => 'Brand is required.',
+            'color_id.required' => 'At least one color must be selected.',
+            'size_id.required' => 'At least one size must be selected.',
+            'searchtag_id.required' => 'At least one search tag must be selected.',
         ]);
 
 
@@ -411,11 +416,9 @@ class ProductController extends Controller
             return redirect('/product')->with('error', 'Product not found.');
         }
 
-        //$categories = \App\Models\Category::active()->get();
-        $categories = \App\Models\Category::active()
-                        ->whereHas('subcategories', function($query) {
-                            $query->active();
-                        })
+        // Get only categories that have at least one subcategory
+        $categories = \App\Models\Category::where('delete_status', 0)
+                        ->whereHas('subcategories')
                         ->get();
 
         $subcategories = \App\Models\Subcategory::active()->get();
@@ -478,32 +481,43 @@ class ProductController extends Controller
 
     public function update(Request $request, Product $product)
     {
-        $this->validate($request, [
-            'editid' => 'required|exists:products,id',
-            'category_id' => 'required|exists:categories,id',
-            'subcategory_id' => 'required|exists:subcategories,id',
-            'brand_id' => 'required|exists:brands,id',
-            'name' => 'required|string|max:255',
-            'name_ar' => 'nullable|string|max:255',
-            'description' => 'nullable|string',
-            'description_ar' => 'nullable|string',
-            'more_info' => 'nullable|string',
-            'more_info_ar' => 'nullable|string',
-            'price' => 'required|numeric|min:0',
-            'price_offer' => 'required|numeric|min:0|lte:price',
-            'percentage_discount' => 'required|numeric|min:0|max:100',
-            'color_id' => 'required|array|min:1',
-            'color_id.*' => 'exists:variants_sub,id',
-            'size_id' => 'required|array|min:1',
-            'size_id.*' => 'exists:variants_sub,id',
-            'searchtag_id' => 'required|array|min:1',
-            'searchtag_id.*' => 'exists:search_tags,id',
-            'imgfile' => ['nullable','image','mimes:jpeg,png,jpg,gif,svg,webp','max:2048','dimensions:min_width=100,min_height=100,max_width=4000,max_height=4000'],
-            'imgfile2' => ['nullable','image','mimes:jpeg,png,jpg,gif,svg,webp','max:2048','dimensions:min_width=100,min_height=100,max_width=4000,max_height=4000'],
-            'imgfile3' => ['nullable','image','mimes:jpeg,png,jpg,gif,svg,webp','max:2048','dimensions:min_width=100,min_height=100,max_width=4000,max_height=4000'],
-        ], [
+        try {
+            $this->validate($request, [
+                'editid' => 'required|exists:products,id',
+                'category_id' => 'required|exists:categories,id',
+                'subcategory_id' => 'required|exists:subcategories,id',
+                'brand_id' => 'required|exists:brands,id',
+                'name' => 'required|string|max:255',
+                'name_ar' => 'nullable|string|max:255',
+                'description' => 'nullable|string',
+                'description_ar' => 'nullable|string',
+                'more_info' => 'nullable|string',
+                'more_info_ar' => 'nullable|string',
+                'price' => 'required|numeric|min:0',
+                'price_offer' => 'required|numeric|min:0|lte:price',
+                'percentage_discount' => 'required|numeric|min:0|max:100',
+                'color_id' => 'required|array|min:1',
+                'color_id.*' => 'exists:variants_sub,id',
+                'size_id' => 'required|array|min:1',
+                'size_id.*' => 'exists:variants_sub,id',
+                'searchtag_id' => 'required|array|min:1',
+                'searchtag_id.*' => 'exists:search_tags,id',
+                'imgfile' => ['nullable','image','mimes:jpeg,png,jpg,gif,svg,webp','max:2048','dimensions:min_width=100,min_height=100,max_width=4000,max_height=4000'],
+                'imgfile2' => ['nullable','image','mimes:jpeg,png,jpg,gif,svg,webp','max:2048','dimensions:min_width=100,min_height=100,max_width=4000,max_height=4000'],
+                'imgfile3' => ['nullable','image','mimes:jpeg,png,jpg,gif,svg,webp','max:2048','dimensions:min_width=100,min_height=100,max_width=4000,max_height=4000'],
+            ], [
             'price_offer.lte' => 'Offer price cannot be greater than the regular price.',
+            'category_id.required' => 'Category is required.',
+            'subcategory_id.required' => 'Subcategory is required.',
+            'brand_id.required' => 'Brand is required.',
+            'color_id.required' => 'At least one color must be selected.',
+            'size_id.required' => 'At least one size must be selected.',
+            'searchtag_id.required' => 'At least one search tag must be selected.',
         ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::error('Validation errors: ' . json_encode($e->errors()));
+            throw $e;
+        }
 
         $is_newarrival=0;
 

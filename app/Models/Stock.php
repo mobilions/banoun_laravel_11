@@ -53,6 +53,11 @@ class Stock extends Model
         return $this->belongsTo(Cart::class);
     }
 
+    public function user()
+    {
+        return $this->belongsTo(\App\Models\User::class, 'updated_by');
+    }
+
     public  static function updateStock($product_id,$productvariants_id,$quantity,$process,$cart_id=0)
 
    {
@@ -66,7 +71,7 @@ class Stock extends Model
             $data->quantity    = $quantity;
             $data->cart_id    = $cart_id;
             $data->process    = $process;
-            $data->created_by=Auth::user()->id;
+            $data->updated_by=Auth::user()->id;
             $data->save();
 
             $variant = Productvariant::where('id',$productvariants_id)->lockForUpdate()->first();

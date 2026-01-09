@@ -75,8 +75,8 @@
 
                     </div>
  
-                    <div class="col-lg-4 mb-3" >
-                            <!-- style="display: none;" -->
+                    <div class="col-lg-4 mb-3" style="display: none;" >
+                            <!--  -->
                         <div>
 
                             <label>Color</label>
