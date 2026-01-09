@@ -146,7 +146,9 @@ class ProductController extends Controller
 
         // Get only categories that have at least one subcategory
         $categories = \App\Models\Category::where('delete_status', 0)
-                        ->whereHas('subcategories')
+                        ->whereHas('subcategories', function($query) {
+                            $query->where('delete_status', 0);
+                        })
                         ->get();
 
         $subcategories = \App\Models\Subcategory::active()->get();
@@ -418,7 +420,9 @@ class ProductController extends Controller
 
         // Get only categories that have at least one subcategory
         $categories = \App\Models\Category::where('delete_status', 0)
-                        ->whereHas('subcategories')
+                        ->whereHas('subcategories', function($query) {
+                    $query->where('delete_status', 0);
+                })
                         ->get();
 
         $subcategories = \App\Models\Subcategory::active()->get();
