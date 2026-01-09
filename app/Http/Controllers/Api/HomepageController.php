@@ -135,7 +135,6 @@ class HomepageController extends BaseController
             ->leftJoin('categories', 'categories.id', '=', 'products.category_id')
             ->leftJoin('subcategories', 'subcategories.id', '=', 'products.subcategory_id')
             ->leftJoin('brands', 'brands.id', '=', 'products.brand_id')
-            ->leftJoin('productvariants', 'productvariants.product_id', '=', 'products.id')
             ->where('products.delete_status', '0');
             if($request->keyId != ""){
                 $product = $product->where("products.id", $request->keyId);
@@ -152,11 +151,20 @@ class HomepageController extends BaseController
             if($request->subcategoryId != ""){
                 $product = $product->where("products.subcategory_id", $request->subcategoryId);
             }
-            if($request->sizeId != ""){
-                $product = $product->where("productvariants.size_id", $request->sizeId);
-            }
-            if($request->colorId != ""){
-                $product = $product->where("productvariants.color_id", $request->colorId);
+            if ($request->sizeId != "" || $request->colorId != "") {
+                $product = $product->whereExists(function ($q) use ($request) {
+                    $q->select(DB::raw(1))
+                      ->from('productvariants')
+                      ->whereColumn('productvariants.product_id', 'products.id');
+            
+                    if ($request->sizeId != "") {
+                        $q->where('productvariants.size_id', $request->sizeId);
+                    }
+            
+                    if ($request->colorId != "") {
+                        $q->where('productvariants.color_id', $request->colorId);
+                    }
+                });
             }
             if($request->minPrice != ""){
                 $product = $product->where("products.price_offer", ">=", $request->minPrice);
