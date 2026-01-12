@@ -172,6 +172,9 @@ class HomepageController extends BaseController
             if($request->maxPrice != ""){
                 $product = $product->where("products.price_offer", "<=", $request->maxPrice);
             }
+            if($request->orderby == "trending"){
+                $product = $product->orderBy("products.is_trending", "desc");
+            }
             if($request->orderby == "h2l"){
                 $product = $product->orderBy("products.price_offer", "desc");
             }
