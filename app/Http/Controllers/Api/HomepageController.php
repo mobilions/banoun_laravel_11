@@ -815,6 +815,7 @@ class HomepageController extends BaseController
 
         $size = Productvariant::where('product_id', $request->productId)
             ->where('size_id', $request->sizeid)
+            ->where('delete_status', '0')
             ->first();
 
         if (empty($size)) {
@@ -872,6 +873,7 @@ class HomepageController extends BaseController
 
         $size = Productvariant::where('product_id', $cart->product_id)
             ->where('size_id', $cart->size_id)
+            ->where('delete_status', '0')
             ->first();
 
         if ($size->available_quantity < $request->qty) {
