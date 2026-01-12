@@ -173,8 +173,7 @@ tr.selected {background-color:#adf7a9  ! important;}
 
                             <div class="col-lg-12 mt-3 mb-3">
 
-                                <center><button type="submit" class="btn btn-primary waves-effect waves-light me-2">Add</button></center>
-
+                               <button type="submit" class="btn btn-primary waves-effect waves-light me-2" style="width: 120px ;">Add</button>
                             </div>
 
                         </div>
@@ -189,7 +188,7 @@ tr.selected {background-color:#adf7a9  ! important;}
 
     </div>
 
-    <div  class="col-md-8">
+    <div  class="col-md-12">
 
         <div class="card">
 
