@@ -1287,7 +1287,7 @@ class HomepageController extends BaseController
             return $this->sendError(["error" => "Cart is empty."]);
         }
         
-        $CartMaster->update([
+        CartMaster::where("user_id", $userId)->where("is_checkouted", "0")->where("is_deleted", "0")->update([
             "address_id" => $request->addressId,
             "paymenttype" => $request->paymentType,
             "use_credit" => $request->useCredit,
