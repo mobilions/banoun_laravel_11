@@ -1516,7 +1516,7 @@ class HomepageController extends BaseController
             $MyOrdersData = $tempOrder;
         }
 
-        $data['MyOrdersData'] = $MyOrdersData;
+        $data['order'] = $MyOrdersData;
         $message['success'] = "Order detail get successfully.";
         return $this->sendResponse($data, $message); 
     }
