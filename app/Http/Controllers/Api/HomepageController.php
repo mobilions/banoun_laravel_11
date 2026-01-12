@@ -402,7 +402,7 @@ class HomepageController extends BaseController
         $topbanners = Topcollection::select('imageurl', 'type', 'category_id as categoryId')->where('delete_status','0')->take(4)->get();
         $categories = Category::select('id as categoryId', 'name', 'description', 'imageurl')->where('delete_status','0')->take(4)->get();
         $designers = Brand::select('id as brandId', 'imageurl', 'name')->where('delete_status','0')->take(4)->get();
-        $new_arrivals = Product::select('id as productId', 'name', 'price', 'price_offer', 'category_id as categoryId', 'subcategory_id as subcategoryId', 'brand_id as brandId')->where('delete_status','0')->take(8)->get();
+        $new_arrivals = Product::select('id as productId', 'name', 'price', 'price_offer', 'category_id as categoryId', 'subcategory_id as subcategoryId', 'brand_id as brandId')->where('delete_status','0')->where("is_newarrival", "1")->take(8)->get();
 
         $new_arrivals = $new_arrivals->map(function($item){
             $Productimage = ProductImage::where("product_id", $item->productId)->where("delete_status", "0")->first();
@@ -419,7 +419,7 @@ class HomepageController extends BaseController
             return $item;
         });
 
-        $trending = Product::select('id as productId', 'name', 'price', 'price_offer',  'category_id as categoryId', 'subcategory_id as subcategoryId', 'brand_id as brandId')->where('delete_status','0')->inRandomOrder()->limit(8)->get();
+        $trending = Product::select('id as productId', 'name', 'price', 'price_offer',  'category_id as categoryId', 'subcategory_id as subcategoryId', 'brand_id as brandId')->where('delete_status','0')->where('is_trending','0')->limit(8)->get();
 
         $trending = $trending->map(function($item){
             $Productimage = ProductImage::where("product_id", $item->productId)->where("delete_status", "0")->first();
@@ -1214,6 +1214,7 @@ class HomepageController extends BaseController
         ->leftJoin("variants_sub", "variants_sub.id", "=", "wishlists.size_id")
         ->where("wishlists.created_by", $userId)
         ->where("wishlists.delete_status", "0")
+        ->orderBy("wishlists.id", "desc")
         ->get();
 
         $Wishlists = $Wishlists->map(function($item){
@@ -1522,7 +1523,7 @@ class HomepageController extends BaseController
             
             $tempOrder = [
                 "orderId" => $CartMaster->id,
-                "order_date" => date("d-m-Y", strtotime($CartMaster->created_at)),
+                "order_date" => date("Y-m-d", strtotime($CartMaster->created_at)),
                 "order_number" => $CartMaster->order_number,
                 "grand_total" => $CartMaster->grandtotal,
                 "delivery_price" => $CartMaster->delivery,
