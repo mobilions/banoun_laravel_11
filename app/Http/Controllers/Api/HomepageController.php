@@ -131,7 +131,7 @@ class HomepageController extends BaseController
                 'categories.name as categoryName',
                 'subcategories.name as subcategoryName',
                 'brands.name as brandName'
-            )
+            )->active()
             ->leftJoin('categories', 'categories.id', '=', 'products.category_id')
             ->leftJoin('subcategories', 'subcategories.id', '=', 'products.subcategory_id')
             ->leftJoin('brands', 'brands.id', '=', 'products.brand_id')
