@@ -136,11 +136,8 @@ class HomepageController extends BaseController
             ->leftJoin('subcategories', 'subcategories.id', '=', 'products.subcategory_id')
             ->leftJoin('brands', 'brands.id', '=', 'products.brand_id')
             ->where('products.delete_status', '0');
-            if($request->keyId != "" && $request->keyId != null){
+            if($request->keyId != "" && $request->keyId != null && $request->keyId != "0"){
                 $product = $product->where("products.id", $request->keyId);
-            }
-            if ($request->keyword != "" && $request->keyword != null) {
-                $product = $product->where("products.name", "like", "%" . $request->keyword . "%");
             }
             if($request->brandId != "0" && $request->brandId != "" && $request->brandId != null){
                 $product = $product->where("products.brand_id", $request->brandId);
@@ -171,6 +168,9 @@ class HomepageController extends BaseController
             }
             if($request->maxPrice != "" && $request->maxPrice != "0" && $request->maxPrice != null){
                 $product = $product->where("products.price_offer", "<=", $request->maxPrice);
+            }
+            if ($request->keyword != "" && $request->keyword != null) {
+                $product = $product->where("products.name", "like", "%" . $request->keyword . "%")->orWhere("brands.name", "like", "%" . $request->keyword . "%");
             }
             if($request->orderby == "trending"){
                 $product = $product->orderBy("products.is_trending", "desc");
@@ -403,9 +403,9 @@ class HomepageController extends BaseController
 
     public function homepage(){
 
-        $topbanners = Topcollection::select('imageurl', 'type', 'category_id as categoryId')->where('delete_status','0')->take(4)->get();
+        $topbanners = Topcollection::select('imageurl', 'type', 'category_id as categoryId')->where('delete_status','0')->get();
         $categories = Category::select('id as categoryId', 'name', 'description', 'imageurl')->where('delete_status','0')->take(4)->get();
-        $designers = Brand::select('id as brandId', 'imageurl', 'name')->where('delete_status','0')->take(4)->get();
+        $designers = Brand::select('id as brandId', 'imageurl', 'name')->where('delete_status','0')->take(8)->get();
         $new_arrivals = Product::select('id as productId', 'name', 'price', 'price_offer', 'category_id as categoryId', 'subcategory_id as subcategoryId', 'brand_id as brandId')->where('delete_status','0')->where("is_newarrival", "1")->take(8)->get();
 
         $new_arrivals = $new_arrivals->map(function($item){
@@ -440,8 +440,13 @@ class HomepageController extends BaseController
             return $item;
         });
 
+        $userId = auth("api")->user() ? auth("api")->id() : "";
+        $cart_count = 0;
+        if($userId != ""){
+            $cart_count = Cart::where("user_id", $userId)->where("delete_status", "0")->count();
+        }
         $data["header"] = "Free delivery for all over above 15 KD";
-        $data["cart_count"] = 0;
+        $data["cart_count"] = $cart_count;
         $data["topbanners"] = $topbanners;
         $data["categories"] = $categories;
         $data["designers"] = $designers;
