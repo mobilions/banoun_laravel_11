@@ -181,7 +181,7 @@ class HomepageController extends BaseController
             if($request->orderby == "l2h"){
                 $product = $product->orderBy("products.price_offer", "asc");
             }
-            echo $product->toSql();exit;
+            $sql = $product->toSql();
             $product = $product->offset($offset)
             ->limit($limit)
             ->get();
@@ -216,6 +216,7 @@ class HomepageController extends BaseController
         $data['colors'] = $colors;
         $data['sizes'] = $sizes;
         $data['products'] = $product;
+        $data['sql'] = $sql;
 
         $message["success"] = 'Product Lists';
         return $this->sendResponse($data, $message);
