@@ -422,7 +422,7 @@ class HomepageController extends BaseController
             return $item;
         });
 
-        $trending = Product::select('id as productId', 'name', 'price', 'price_offer',  'category_id as categoryId', 'subcategory_id as subcategoryId', 'brand_id as brandId')->where('delete_status','0')->where('is_trending','0')->limit(8)->get();
+        $trending = Product::select('id as productId', 'name', 'price', 'price_offer',  'category_id as categoryId', 'subcategory_id as subcategoryId', 'brand_id as brandId')->where('delete_status','0')->where('is_trending','1')->limit(8)->get();
 
         $trending = $trending->map(function($item){
             $Productimage = ProductImage::where("product_id", $item->productId)->where("delete_status", "0")->first();
@@ -1403,6 +1403,7 @@ class HomepageController extends BaseController
 
         $CartMasters = CartMaster::where('user_id', $userId)
             ->where('is_checkouted', '1')
+            ->where('id', 'desc')
             ->skip($offset)
             ->take($limit)
             ->get();
@@ -1451,7 +1452,7 @@ class HomepageController extends BaseController
             
             $tempOrder = [
                 "orderId" => $CartMaster->id,
-                "order_date" => date("d-m-Y", strtotime($CartMaster->created_at)),
+                "order_date" => date("Y-m-d", strtotime($CartMaster->created_at)),
                 "order_number" => $CartMaster->order_number,
                 "grand_total" => $CartMaster->grandtotal,
                 "delivery_price" => $CartMaster->delivery,
