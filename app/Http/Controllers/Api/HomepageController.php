@@ -181,6 +181,7 @@ class HomepageController extends BaseController
             if($request->orderby == "l2h"){
                 $product = $product->orderBy("products.price_offer", "asc");
             }
+            echo $product->toSql();exit;
             $product = $product->offset($offset)
             ->limit($limit)
             ->get();
