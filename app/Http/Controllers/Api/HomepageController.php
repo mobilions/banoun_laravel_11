@@ -136,19 +136,19 @@ class HomepageController extends BaseController
             ->leftJoin('subcategories', 'subcategories.id', '=', 'products.subcategory_id')
             ->leftJoin('brands', 'brands.id', '=', 'products.brand_id')
             ->where('products.delete_status', '0');
-            if($request->keyId != ""){
+            if($request->keyId != "" && $request->keyId != null){
                 $product = $product->where("products.id", $request->keyId);
             }
-            if ($request->keyword != "") {
+            if ($request->keyword != "" && $request->keyword != null) {
                 $product = $product->where("products.name", "like", "%" . $request->keyword . "%");
             }
-            if($request->brandId != "0" && $request->brandId != ""){
+            if($request->brandId != "0" && $request->brandId != "" && $request->brandId != null){
                 $product = $product->where("products.brand_id", $request->brandId);
             }
-            if($request->categoryId != ""){
+            if($request->categoryId != "" && $request->categoryId != "0" && $request->categoryId != null){
                 $product = $product->where("products.category_id", $request->categoryId);
             }
-            if($request->subcategoryId != ""){
+            if($request->subcategoryId != "" && $request->subcategoryId != "0" && $request->subcategoryId != null){
                 $product = $product->where("products.subcategory_id", $request->subcategoryId);
             }
             if ($request->sizeId != "" || $request->colorId != "") {
@@ -157,19 +157,19 @@ class HomepageController extends BaseController
                       ->from('productvariants')
                       ->whereColumn('productvariants.product_id', 'products.id');
             
-                    if ($request->sizeId != "") {
+                    if ($request->sizeId != "" && $request->sizeId != "0" && $request->sizeId != null) {
                         $q->where('productvariants.size_id', $request->sizeId);
                     }
             
-                    if ($request->colorId != "") {
+                    if ($request->colorId != "" && $request->colorId != "0" && $request->colorId != null) {
                         $q->where('productvariants.color_id', $request->colorId);
                     }
                 });
             }
-            if($request->minPrice != ""){
+            if($request->minPrice != "" && $request->minPrice != "0" && $request->minPrice != null){
                 $product = $product->where("products.price_offer", ">=", $request->minPrice);
             }
-            if($request->maxPrice != ""){
+            if($request->maxPrice != "" && $request->maxPrice != "0" && $request->maxPrice != null){
                 $product = $product->where("products.price_offer", "<=", $request->maxPrice);
             }
             if($request->orderby == "trending"){
@@ -356,6 +356,7 @@ class HomepageController extends BaseController
             ->leftJoin('subcategories', 'subcategories.id', '=', 'products.subcategory_id')
             ->leftJoin('brands', 'brands.id', '=', 'products.brand_id')
             ->where('products.delete_status', '0')
+            ->where('products.is_topsearch', '1')
             ->orderBy("products.search_count", "desc")
             ->get();
 
