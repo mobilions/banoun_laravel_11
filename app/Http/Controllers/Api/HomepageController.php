@@ -131,7 +131,7 @@ class HomepageController extends BaseController
                 'categories.name as categoryName',
                 'subcategories.name as subcategoryName',
                 'brands.name as brandName'
-            )->active()
+            )
             ->leftJoin('categories', 'categories.id', '=', 'products.category_id')
             ->leftJoin('subcategories', 'subcategories.id', '=', 'products.subcategory_id')
             ->leftJoin('brands', 'brands.id', '=', 'products.brand_id')
@@ -148,7 +148,7 @@ class HomepageController extends BaseController
             if($request->subcategoryId != "" && $request->subcategoryId != "0" && $request->subcategoryId != null){
                 $product = $product->where("products.subcategory_id", $request->subcategoryId);
             }
-            if ($request->sizeId != "" || $request->colorId != "") {
+            if (($request->sizeId != "" && $request->sizeId != "0" && $request->sizeId != null) || ($request->colorId != "" && $request->colorId != "0" && $request->colorId != null)) {
                 $product = $product->whereExists(function ($q) use ($request) {
                     $q->select(DB::raw(1))
                       ->from('productvariants')
