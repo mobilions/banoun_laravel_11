@@ -195,8 +195,17 @@ class HomepageController extends BaseController
                 $sizeName = !empty($VariantsSub) ? $VariantsSub->color_val : "";
             }
             unset($item->size);
-            $item->wishlistId = 0;
-            $item->is_wishlisted = 0;
+            $wishlistId = 0;
+            $is_wishlisted = 0;
+            if(auth("api")->user()){
+                $Wishlist = Wishlist::where("product_id", $item->productId)->where("created_by", auth("api")->id())->where("delete_status", "0")->first();
+                if(!empty($Wishlist)){
+                    $wishlistId = $Wishlist->id;
+                    $is_wishlisted = 1;
+                }
+            }
+            $item->wishlistId = $wishlistId;
+            $item->is_wishlisted = $is_wishlisted;
             $item->sizeid = $size_id;
             $item->sizeName = $sizeName;
             $item->imageurl = !empty($Productimage) ? $Productimage->imageurl : "";
@@ -259,8 +268,17 @@ class HomepageController extends BaseController
                 $sizeName = !empty($VariantsSub) ? $VariantsSub->color_val : "";
                 $qty = !empty($Productvariant) ? $Productvariant->available_quantity : 0;
             }
-            $product->wishlistId = 0;
-            $product->is_wishlisted = 0;
+            $wishlistId = 0;
+            $is_wishlisted = 0;
+            if(auth("api")->user()){
+                $Wishlist = Wishlist::where("product_id", $product->productId)->where("created_by", auth("api")->id())->where("delete_status", "0")->first();
+                if(!empty($Wishlist)){
+                    $wishlistId = $Wishlist->id;
+                    $is_wishlisted = 1;
+                }
+            }
+            $product->wishlistId = $wishlistId;
+            $product->is_wishlisted = $is_wishlisted;
             $product->sizeid = $size_id;
             $product->qty = $qty;
             $product->sizeName = $sizeName;
@@ -299,9 +317,17 @@ class HomepageController extends BaseController
                     $sizeName = !empty($VariantsSub) ? $VariantsSub->color_val : "";
                     $qty = !empty($Productvariant) ? $Productvariant->available_quantity : 0;
                 }
-                
-                $item->wishlistId = 0;
-                $item->is_wishlisted = 0;
+                $wishlistId = 0;
+                $is_wishlisted = 0;
+                if(auth("api")->user()){
+                    $Wishlist = Wishlist::where("product_id", $item->productId)->where("created_by", auth("api")->id())->where("delete_status", "0")->first();
+                    if(!empty($Wishlist)){
+                        $wishlistId = $Wishlist->id;
+                        $is_wishlisted = 1;
+                    }
+                }
+                $item->wishlistId = $wishlistId;
+                $item->is_wishlisted = $is_wishlisted;
                 $item->sizeid = $size_id;
                 $item->qty = $qty;
                 $item->sizeName = $sizeName;
@@ -362,8 +388,17 @@ class HomepageController extends BaseController
 
         $product = $product->map(function($item){
             $Productimage = ProductImage::where("product_id", $item->productId)->where("delete_status", "0")->first();
-            $item->wishlistId = 0;
-            $item->is_wishlisted = 0;
+            $wishlistId = 0;
+            $is_wishlisted = 0;
+            if(auth("api")->user()){
+                $Wishlist = Wishlist::where("product_id", $item->productId)->where("created_by", auth("api")->id())->where("delete_status", "0")->first();
+                if(!empty($Wishlist)){
+                    $wishlistId = $Wishlist->id;
+                    $is_wishlisted = 1;
+                }
+            }
+            $item->wishlistId = $wishlistId;
+            $item->is_wishlisted = $is_wishlisted;
             $item->sizeid = 0;
             $item->qty = 0;
             $item->sizeName = "";
@@ -410,11 +445,20 @@ class HomepageController extends BaseController
 
         $new_arrivals = $new_arrivals->map(function($item){
             $Productimage = ProductImage::where("product_id", $item->productId)->where("delete_status", "0")->first();
-            $item->wishlistId = 0;
+            $wishlistId = 0;
+            $is_wishlisted = 0;
+            if(auth("api")->user()){
+                $Wishlist = Wishlist::where("product_id", $item->productId)->where("created_by", auth("api")->id())->where("delete_status", "0")->first();
+                if(!empty($Wishlist)){
+                    $wishlistId = $Wishlist->id;
+                    $is_wishlisted = 1;
+                }
+            }
+            $item->wishlistId = $wishlistId;
+            $item->is_wishlisted = $is_wishlisted;
             $item->brandName = "";
             $item->categoryName = "";
             $item->subcategoryName = "";
-            $item->is_wishlisted = 0;
             $item->sizeid = 0;
             $item->qty = 0;
             $item->sizeName = "";
@@ -427,11 +471,20 @@ class HomepageController extends BaseController
 
         $trending = $trending->map(function($item){
             $Productimage = ProductImage::where("product_id", $item->productId)->where("delete_status", "0")->first();
-            $item->wishlistId = 0;
+            $wishlistId = 0;
+            $is_wishlisted = 0;
+            if(auth("api")->user()){
+                $Wishlist = Wishlist::where("product_id", $item->productId)->where("created_by", auth("api")->id())->where("delete_status", "0")->first();
+                if(!empty($Wishlist)){
+                    $wishlistId = $Wishlist->id;
+                    $is_wishlisted = 1;
+                }
+            }
+            $item->wishlistId = $wishlistId;
+            $item->is_wishlisted = $is_wishlisted;
             $item->brandName = "";
             $item->categoryName = "";
             $item->subcategoryName = "";
-            $item->is_wishlisted = 0;
             $item->sizeid = 0;
             $item->qty = 0;
             $item->sizeName = "";
