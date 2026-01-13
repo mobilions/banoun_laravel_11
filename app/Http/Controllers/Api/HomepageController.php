@@ -149,19 +149,29 @@ class HomepageController extends BaseController
                 $product = $product->where("products.subcategory_id", $request->subcategoryId);
             }
             if (($request->sizeId != "" && $request->sizeId != "0" && $request->sizeId != null) || ($request->colorId != "" && $request->colorId != "0" && $request->colorId != null)) {
-                $product = $product->whereExists(function ($q) use ($request) {
-                    $q->select(DB::raw(1))
-                      ->from('productvariants')
-                      ->whereColumn('productvariants.product_id', 'products.id');
+                // $product = $product->whereExists(function ($q) use ($request) {
+                    // $q->select(DB::raw(1))
+                    //   ->from('productvariants')
+                    //   ->whereColumn('productvariants.product_id', 'products.id');
             
-                    if ($request->sizeId != "" && $request->sizeId != "0" && $request->sizeId != null) {
-                        $q->where('productvariants.size_id', $request->sizeId);
-                    }
-            
-                    if ($request->colorId != "" && $request->colorId != "0" && $request->colorId != null) {
-                        $q->where('productvariants.color_id', $request->colorId);
-                    }
-                });
+        if ($request->filled('sizeId')) {
+            $q->where('productvariants.size_id', (int) $request->sizeId);
+        }
+
+        if ($request->filled('colorId')) {
+            $colors = array_map('intval', explode(',', $request->colorId));
+
+            $q->where(function ($cq) use ($colors) {
+                foreach ($colors as $color) {
+                    $cq->orWhereRaw(
+                        'FIND_IN_SET(?, products.colors)',
+                        [$color]
+                    );
+                }
+            });
+        
+
+                }
             }
             if($request->minPrice != "" && $request->minPrice != "0" && $request->minPrice != null){
                 $product = $product->where("products.price_offer", ">=", $request->minPrice);
