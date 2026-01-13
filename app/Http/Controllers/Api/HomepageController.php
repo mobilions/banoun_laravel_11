@@ -1403,7 +1403,7 @@ class HomepageController extends BaseController
 
         $CartMasters = CartMaster::where('user_id', $userId)
             ->where('is_checkouted', '1')
-            ->where('id', 'desc')
+            ->orderBy('id', 'desc')
             ->skip($offset)
             ->take($limit)
             ->get();
