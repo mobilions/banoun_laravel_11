@@ -10,6 +10,7 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Intervention\Image\ImageServiceProvider;
 use App\Http\Middleware\CheckApiAuthentication;
+use App\Http\Middleware\LogApiRequests;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withProviders([
@@ -38,6 +39,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
             'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
             'CheckApiAuthentication' => CheckApiAuthentication::class
+        ]);
+
+        $middleware->group('api', [
+            LogApiRequests::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
