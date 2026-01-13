@@ -995,10 +995,11 @@ class HomepageController extends BaseController
         if(empty($CartMaster)){
             return $this->sendError(["error" => "Cart is empty."]);
         }
-        $CartMaster->update([
-            "coupon_code" => null
-        ]);
-
+        // $CartMaster->update([
+        //     "coupon_code" => null
+        // ]);
+        $CartMaster->coupon_code = null;
+        $CartMaster->save();
         $cartData = $this->getCartSummary($userId);
         if(!empty($cartData)){
             unset($cartData["carts"]);
