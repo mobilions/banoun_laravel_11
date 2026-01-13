@@ -172,6 +172,9 @@ class HomepageController extends BaseController
             if ($request->keyword != "" && $request->keyword != null) {
                 $product = $product->where("products.name", "like", "%" . $request->keyword . "%")->orWhere("brands.name", "like", "%" . $request->keyword . "%");
             }
+            if($request->orderby == "new"){
+                $product = $product->orderBy("products.is_newarrival", "desc");
+            }
             if($request->orderby == "trending"){
                 $product = $product->orderBy("products.is_trending", "desc");
             }
@@ -181,7 +184,6 @@ class HomepageController extends BaseController
             if($request->orderby == "l2h"){
                 $product = $product->orderBy("products.price_offer", "asc");
             }
-            $sql = $product->toSql();
             $product = $product->offset($offset)
             ->limit($limit)
             ->get();
@@ -216,7 +218,6 @@ class HomepageController extends BaseController
         $data['colors'] = $colors;
         $data['sizes'] = $sizes;
         $data['products'] = $product;
-        $data['sql'] = $sql;
 
         $message["success"] = 'Product Lists';
         return $this->sendResponse($data, $message);
