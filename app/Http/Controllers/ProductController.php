@@ -81,7 +81,7 @@ class ProductController extends Controller
         }
 
         // Pagination
-        $indexes = $query->paginate(15)->withQueryString();
+        $indexes = $query->get();
 
         // For filters dropdown
         $categories = \App\Models\Category::active()->get();
