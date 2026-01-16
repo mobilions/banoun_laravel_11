@@ -256,36 +256,69 @@ class ProductvariantController extends Controller
 
      */
 
-    public function edit(Productvariant $Productvariant,$id)
+    // public function edit(Productvariant $Productvariant,$id)
 
+    // {   
+    //     $title = "Product Variant";
+
+    //     $log = Productvariant::with(['product', 'sizeVariant', 'colorVariant'])
+    //         ->where('id',$id)
+    //         ->first();
+
+    //     if (empty($log)) {
+    //         return redirect()->back()->with('error', 'Product variant not found.');
+    //     }
+
+    //     // Dynamic variant lookup instead of hardcoded IDs
+    //     $sizeVariant = \App\Models\Variant::where('name', 'Size')->active()->first();
+    //     $colorVariant = \App\Models\Variant::where('name', 'Color')->active()->first();
+        
+    //     $size = collect();
+    //     $color = collect();
+        
+    //     if ($sizeVariant) {
+    //         $size = Variantsub::active()->where('variant_id', $sizeVariant->id)->get();
+    //     }
+        
+    //     if ($colorVariant) {
+    //         $color = Variantsub::active()->where('variant_id', $colorVariant->id)->get();
+    //     }
+
+    //     return view('productvariant.edit', compact('title', 'log', 'size', 'color'));
+
+    // }
+    public function edit(Productvariant $Productvariant, $id)
     {   
         $title = "Product Variant";
 
         $log = Productvariant::with(['product', 'sizeVariant', 'colorVariant'])
-            ->where('id',$id)
+            ->where('id', $id)
             ->first();
 
         if (empty($log)) {
             return redirect()->back()->with('error', 'Product variant not found.');
         }
 
-        // Dynamic variant lookup instead of hardcoded IDs
-        $sizeVariant = \App\Models\Variant::where('name', 'Size')->active()->first();
-        $colorVariant = \App\Models\Variant::where('name', 'Color')->active()->first();
+        $product = $log->product;
         
         $size = collect();
         $color = collect();
         
-        if ($sizeVariant) {
-            $size = Variantsub::active()->where('variant_id', $sizeVariant->id)->get();
+        if (!empty($product->size)) {
+            $sizeIds = explode(',', $product->size);
+            $size = Variantsub::active()
+                ->whereIn('id', $sizeIds)
+                ->get();
         }
         
-        if ($colorVariant) {
-            $color = Variantsub::active()->where('variant_id', $colorVariant->id)->get();
+        if (!empty($product->colors)) {
+            $colorIds = explode(',', $product->colors);
+            $color = Variantsub::active()
+                ->whereIn('id', $colorIds)
+                ->get();
         }
 
         return view('productvariant.edit', compact('title', 'log', 'size', 'color'));
-
     }
 
 
