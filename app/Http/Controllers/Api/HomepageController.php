@@ -33,6 +33,7 @@ use App\Models\Cart;
 use App\Models\CartMaster;
 use App\Models\Wishlist;
 use App\Models\SizeChart;
+use App\Models\PageContent;
 use App\Models\DeliveryOption;
 use App\Models\UserKid;
 use App\Models\User;
@@ -1195,8 +1196,10 @@ class HomepageController extends BaseController
         if(empty($CartMaster)){
             return $this->sendError(["error" => "Cart is empty."]);
         }
+        $Setting = Setting::where("delete_status", "0")->first();
         $CartMaster->update([
-            "is_giftwrap" => $request->is_giftwrap
+            "is_giftwrap" => $request->is_giftwrap,
+            "giftwrap_price" => $request->is_giftwrap == "1" ? $Setting->giftwrap_price : 0,
         ]);
 
         $cartData = $this->getCartSummary($userId);
@@ -1254,8 +1257,8 @@ class HomepageController extends BaseController
             return $item;
         });
         
-        $total = $subtotal + $tax - $discount;
-        $grandtotal = $total + $delivery;
+        $total = $subtotal;
+        $grandtotal = ($total + $delivery + $tax) - $discount;
         $CartMaster = CartMaster::where("user_id", $userId)->where("is_checkouted", "0")->where("is_deleted", "0")->first();
         if(empty($CartMaster)){
             CartMaster::create([
@@ -1274,10 +1277,10 @@ class HomepageController extends BaseController
                 $Coupon = Coupon::where("coupon_code", $CartMaster->coupon_code)->where("delete_status", "0")->first();
                 if(!empty($Coupon)){
                     if($Coupon->price_type == "Price"){
-                        $total = $total - $Coupon->coupon_val;
+                        $discount = $Coupon->coupon_val;
                         $grandtotal = $grandtotal - $Coupon->coupon_val;
                     } else if($Coupon->price_type == "Percentage"){
-                        $total = ($total / 100) * (100 - $Coupon->coupon_val);
+                        $discount = ($grandtotal / 100) * $Coupon->coupon_val;
                         $grandtotal = ($grandtotal / 100) * (100 - $Coupon->coupon_val);
                     }
                 }
@@ -1288,7 +1291,7 @@ class HomepageController extends BaseController
                 "tax" => $tax,
                 "delivery" => $delivery,
                 "discount" => $discount,
-                "grandtotal" => $grandtotal,
+                "grandtotal" => (floatval($grandtotal) + floatval($CartMaster->giftwrap_price)),
                 "totalqty" => $totalqty,
             ]);
         }
@@ -1301,7 +1304,7 @@ class HomepageController extends BaseController
             "giftwrap_price" => $CartMaster->giftwrap_price,
             "totalprice" => $CartMaster->total,
             "cart_count" => $cart_count,
-            "offer_price" => $CartMaster->total,
+            "offer_price" => $CartMaster->discount,
             "delivery_price" => $CartMaster->delivery,
             "promo_price" => $CartMaster->promo_price,
             "grand_total" => $CartMaster->grandtotal,
@@ -1651,25 +1654,25 @@ class HomepageController extends BaseController
     }
 
     public function sizecharts(){
-        $SizeChart = SizeChart::where('delete_status','0')->where('type',"size_chart")->first();
+        $PageContent = PageContent::where('delete_status','0')->where('type',"sizes")->first();
 
-        $data["description"] = !empty($SizeChart) ? $SizeChart->description : "";
+        $data["description"] = !empty($PageContent) ? $PageContent->description : "";
         $message['success'] = "Size charts get successfully.";
         return $this->sendResponse($data, $message); 
     }
 
     public function legal_terms(){
-        $SizeChart = SizeChart::where('delete_status','0')->where('type',"legal")->first();
+        $PageContent = PageContent::where('delete_status','0')->where('type',"legal")->first();
 
-        $data["description"] = !empty($SizeChart) ? $SizeChart->description : "";
+        $data["description"] = !empty($PageContent) ? $PageContent->description : "";
         $message['success'] = "Legal terms get successfully.";
         return $this->sendResponse($data, $message); 
     }
 
     public function terms_conditions(){
-        $terms_conditions = Faq::where('delete_status','0')->where('type',"terms")->first();
+        $PageContent = Faq::where('delete_status','0')->where('type',"term")->first();
 
-        $data["description"] = !empty($terms_conditions) ? $terms_conditions->content : "";
+        $data["description"] = !empty($PageContent) ? $PageContent->description : "";
         $message['success'] = "Terms and condition get successfully.";
         return $this->sendResponse($data, $message); 
     }
