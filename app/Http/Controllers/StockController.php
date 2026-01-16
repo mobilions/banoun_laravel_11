@@ -52,13 +52,13 @@ class StockController extends Controller
 
         $title = "Stock";
 
-        $indexes = Stock::with('user')->where('variant_id',$variant_id)->orderByDesc('created_at')->get();
+        $indexes = Stock::with('user')->where('variant_id',$variant_id)->orderBy('id', 'desc')->get();
 
         $addstock = Stock::where('variant_id',$variant_id)
-            //->where('process',StockProcess::ADD)
-            ->orderByDesc('created_at')
+            ->where('process','!=',StockProcess::DELETE)
+            ->orderBy('id', 'desc')
             ->get();
-
+        
         return view('stock.index',compact('title','indexes','variant_id','product_id','addstock'));  
 
     }
@@ -71,7 +71,7 @@ class StockController extends Controller
         $this->validate($request, [
             'product_id' => 'required|exists:products,id',
             'variant_id' => 'required|exists:productvariants,id',
-            'quantity' => 'required|integer|min:1',
+            //'quantity' => 'required|integer|min:1',
         ]);
 
         $variant = Productvariant::where('id', $request->variant_id)
@@ -97,7 +97,7 @@ class StockController extends Controller
     {
         $this->validate($request, [
             'editid' => 'required|exists:stocks,id',
-            'quantity' => 'required|integer|min:1',
+           // 'quantity' => 'required|integer|min:1',
         ]);
 
         $data = Stock::find($request->editid);
@@ -111,14 +111,31 @@ class StockController extends Controller
         }
 
         DB::transaction(function () use ($data, $request) {
-            $data->quantity = $request->quantity;
-            $data->updated_by=Auth::user()->id;
-            $data->process = StockProcess::UPDATE;
-            $data->save();
-
             $variant = Productvariant::lockForUpdate()->find($data->variant_id);
             if ($variant) {
-                $variant->available_quantity = Stock::stockVariant($data->variant_id);
+                $data->previous_quantity = $variant->available_quantity ?? 0;
+            }
+
+            $oldQuantity = $data->quantity; // Store the old quantity
+            $newQuantity = $request->quantity;
+
+            $data->quantity = $newQuantity;
+            $data->updated_by=Auth::user()->id;
+             if ($newQuantity > $oldQuantity) {
+            $data->process = StockProcess::ADD;
+            } elseif ($newQuantity < $oldQuantity) {
+                $data->process = StockProcess::REMOVE;
+            } else {
+                $data->process = StockProcess::UPDATE; // No change in quantity
+            }
+            $data->save();
+
+            if ($variant) {
+                $qty = Stock::stockVariant($data->variant_id);
+                $data->current_quantity = $qty;
+                $data->save();
+
+                $variant->available_quantity = $qty;
                 $variant->updated_by = Auth::user()->id;
                 $variant->save();
             }
@@ -301,13 +318,21 @@ class StockController extends Controller
 
         DB::transaction(function () use ($stock) {
             $variantId = $stock->variant_id;
+            $variant = Productvariant::lockForUpdate()->find($variantId);
+            if ($variant) {
+                $stock->previous_quantity = $variant->available_quantity ?? 0;
+            }
+
             $stock->updated_by=Auth::user()->id;
             $stock->process = StockProcess::DELETE;
             $stock->save();
 
-            $variant = Productvariant::lockForUpdate()->find($variantId);
             if ($variant) {
-                $variant->available_quantity = Stock::stockVariant($variantId);
+                $qty = Stock::stockVariant($variantId);
+                $stock->current_quantity = $qty;
+                $stock->save();
+
+                $variant->available_quantity = $qty;
                 $variant->updated_by = Auth::user()->id;
                 $variant->save();
             }

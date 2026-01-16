@@ -18,6 +18,8 @@ class Stock extends Model
         'product_id',
         'variant_id',
         'quantity',
+        'previous_quantity',
+        'current_quantity',
         'process',
         'status',
         'cart_id',
@@ -28,6 +30,9 @@ class Stock extends Model
     protected $casts = [
         'product_id' => 'integer',
         'variant_id' => 'integer',
+        'quantity' => 'integer',
+        'previous_quantity' => 'integer',
+        'current_quantity' => 'integer',
         'status' => 'integer',
         'cart_id' => 'integer',
         'created_by' => 'integer',
@@ -65,21 +70,28 @@ class Stock extends Model
    	
 
         DB::transaction(function () use ($product_id,$productvariants_id,$quantity,$process,$cart_id) {
-    		  $data = new Stock; 
-            $data->product_id = $product_id;
-            $data->variant_id = $productvariants_id;
-            $data->quantity    = $quantity;
-            $data->cart_id    = $cart_id;
-            $data->process    = $process;
-            $data->updated_by=Auth::user()->id;
-            $data->save();
 
             $variant = Productvariant::where('id',$productvariants_id)->lockForUpdate()->first();
             if (empty($variant)) { 
                 throw new \Exception('Product variant not found.');
             }
 
+            $previous_qty = $variant->available_quantity ?? 0;
+
+    		  $data = new Stock; 
+            $data->product_id = $product_id;
+            $data->variant_id = $productvariants_id;
+            $data->quantity    = $quantity;
+            $data->previous_quantity = $previous_qty;
+            $data->cart_id    = $cart_id;
+            $data->process    = $process;
+            $data->updated_by=Auth::user()->id;
+            $data->save();
+
             $qty=self::stockVariant($productvariants_id);
+
+            $data->current_quantity = $qty;
+            $data->save();
 
             $variant->available_quantity = $qty;
             $variant->updated_by=Auth::user()->id;
@@ -104,7 +116,7 @@ class Stock extends Model
 
    {
 
-   		$add=Stock::where('process',StockProcess::ADD)->where('product_id',$product_id)->sum('quantity');
+   		$add=Stock::whereIn('process',[StockProcess::ADD, StockProcess::UPDATE])->where('product_id',$product_id)->sum('quantity');
 
    		$sales=Stock::where('process',StockProcess::SALES)->where('product_id',$product_id)->sum('quantity');
 
@@ -132,7 +144,7 @@ class Stock extends Model
 
    {
 
-   		$add=Stock::where('process',StockProcess::ADD)->where('variant_id',$variant_id)->sum('quantity');
+   		$add=Stock::whereIn('process',[StockProcess::ADD, StockProcess::UPDATE])->where('variant_id',$variant_id)->sum('quantity');
 
    		$sales=Stock::where('process',StockProcess::SALES)->where('variant_id',$variant_id)->sum('quantity');
 

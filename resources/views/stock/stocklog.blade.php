@@ -246,14 +246,17 @@ tr.selected {background-color:#adf7a9 !important;}
                 '<thead>' +
                 '<tr>' +
                 '<th>#</th>' +
-                '<th>Date Added</th>' +
-                '<th>Quantity Added</th>' +
-                '<th>Process</th>' +
-                '<th>Status</th>' +
+                '<th>Date</th>' +
+                '<th>Total at action perfomed</th>' +
+              
+                '<th>Current Qty</th>' +
+                '<th>Prev Qty</th>' +   
+                // '<th>Action By</th>' +              
+                // '<th>Status</th>' +
                 '</tr>' +
                 '</thead>' +
                 '<tbody class="stock-details-body">' +
-                '<tr><td colspan="5" class="text-center">' +
+                '<tr><td colspan="8" class="text-center">' +
                 '<div class="spinner-border spinner-border-sm" role="status">' +
                 '<span class="visually-hidden">Loading...</span>' +
                 '</div>' +
@@ -289,26 +292,53 @@ tr.selected {background-color:#adf7a9 !important;}
                                 minute: '2-digit'
                             });
                             
-                            var row = '<tr>' +
-                                '<td>' + (index + 1) + '</td>' +
-                                '<td>' + formattedDate + '</td>' +
-                                '<td><strong>' + stock.quantity + '</strong></td>' +
-                                '<td><span class="badge bg-success">' + stock.process + '</span></td>' +
-                                '<td>' + (stock.status == 1 ? '<span class="badge bg-success">Active</span>' : '<span class="badge bg-secondary">Inactive</span>') + '</td>' +
-                                '</tr>';
+                            var processedQty = '';
+var totalWhileAction = '';
+
+// Calculate Processed Quantity based on process type
+if (stock.process === 'Remove') {
+    processedQty = (stock.current_quantity - stock.quantity);
+} else if (stock.process === 'Add') {
+    processedQty = stock.quantity;
+} else {
+    processedQty = stock.quantity;
+}
+
+// Calculate Total while action performed
+if (stock.process === 'Remove') {
+    totalWhileAction = (stock.current_quantity + stock.quantity);
+} else if (stock.process === 'Add' || stock.process === 'Delete') {
+    totalWhileAction = stock.current_quantity;
+} else {
+    totalWhileAction = stock.current_quantity;
+}
+
+var row = '<tr>' +
+    '<td>' + (index + 1) + '</td>' +
+    '<td>' + formattedDate + '</td>' +
+    '<td>' + processedQty + ' <span class="badge ' + 
+        (stock.process === 'Remove' ? 'bg-danger' : 
+         stock.process === 'Delete' ? 'bg-danger' : 
+         'bg-success') + 
+        '">' + stock.process + '</span>' + '</td>' +
+    '<td>' + totalWhileAction + '</td>' +
+    '<td>' + (stock.previous_quantity || 0) + '</td>' +
+    
+    // '<td>' + (stock.user ? stock.user.name : 'N/A') + '</td>' +
+    '</tr>';
                             
                             tbody.append(row);
                         });
                         
                         console.log("Rows appended successfully");
                     } else {
-                        tbody.html('<tr><td colspan="5" class="text-center">No stock records found</td></tr>');
+                        tbody.html('<tr><td colspan="8" class="text-center">No stock records found</td></tr>');
                     }
                 },
                 error: function(xhr, status, error) {
                     console.error('AJAX Error:', xhr, status, error);
                     var tbody = detailsRow.find('.stock-details-body');
-                    tbody.html('<tr><td colspan="5" class="text-center text-danger">Error: ' + error + '</td></tr>');
+                    tbody.html('<tr><td colspan="8" class="text-center text-danger">Error: ' + error + '</td></tr>');
                 }
             });
         });
