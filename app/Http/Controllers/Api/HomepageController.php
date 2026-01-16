@@ -1195,8 +1195,10 @@ class HomepageController extends BaseController
         if(empty($CartMaster)){
             return $this->sendError(["error" => "Cart is empty."]);
         }
+        $Setting = Setting::where("delete_status", "0")->first();
         $CartMaster->update([
-            "is_giftwrap" => $request->is_giftwrap
+            "is_giftwrap" => $request->is_giftwrap,
+            "giftwrap_price" => $Setting->giftwrap_price,
         ]);
 
         $cartData = $this->getCartSummary($userId);
@@ -1254,8 +1256,8 @@ class HomepageController extends BaseController
             return $item;
         });
         
-        $total = $subtotal + $tax - $discount;
-        $grandtotal = $total + $delivery;
+        $total = $subtotal;
+        $grandtotal = ($total + $delivery + $tax) - $discount;
         $CartMaster = CartMaster::where("user_id", $userId)->where("is_checkouted", "0")->where("is_deleted", "0")->first();
         if(empty($CartMaster)){
             CartMaster::create([
@@ -1274,10 +1276,8 @@ class HomepageController extends BaseController
                 $Coupon = Coupon::where("coupon_code", $CartMaster->coupon_code)->where("delete_status", "0")->first();
                 if(!empty($Coupon)){
                     if($Coupon->price_type == "Price"){
-                        $total = $total - $Coupon->coupon_val;
                         $grandtotal = $grandtotal - $Coupon->coupon_val;
                     } else if($Coupon->price_type == "Percentage"){
-                        $total = ($total / 100) * (100 - $Coupon->coupon_val);
                         $grandtotal = ($grandtotal / 100) * (100 - $Coupon->coupon_val);
                     }
                 }
@@ -1288,7 +1288,7 @@ class HomepageController extends BaseController
                 "tax" => $tax,
                 "delivery" => $delivery,
                 "discount" => $discount,
-                "grandtotal" => $grandtotal,
+                "grandtotal" => ($grandtotal + $CartMaster->giftwrap_price),
                 "totalqty" => $totalqty,
             ]);
         }
