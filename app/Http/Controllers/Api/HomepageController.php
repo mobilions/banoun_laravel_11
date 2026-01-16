@@ -156,6 +156,19 @@ class HomepageController extends BaseController
 
         $product = $product->map(function($item){
             $Productimage = ProductImage::where("product_id", $item->productId)->where("delete_status", "0")->first();
+            
+            // Get minimum price from all variants (size-based pricing)
+            $minVariantPrice = Productvariant::where('product_id', $item->productId)
+                ->where('delete_status', '0')
+                ->min('price');
+            
+            // Use variant price if available, otherwise use product base price
+            if ($minVariantPrice !== null) {
+                $item->price = (float)$minVariantPrice;
+                // Calculate price_offer if needed (assuming same discount percentage)
+                // For now, keeping original price_offer, adjust if needed
+            }
+            
             $item->wishlistId = 0;
             $item->is_wishlisted = 0;
             $item->sizeid = 0;
@@ -206,9 +219,59 @@ class HomepageController extends BaseController
         $more_info = [];
         $similar_products = [];
         $images = [];
+        $variants = [];
         if(!empty($product)){
             $Productimage = ProductImage::where("product_id", $product->productId)->where("delete_status", "0")->first();
             $images = ProductImage::where("product_id", $product->productId)->where("delete_status", "0")->pluck("imageurl")->toArray();
+            
+            // Get variants grouped by size (size-based pricing)
+            $allVariants = Productvariant::where("product_id", $product->productId)
+                ->where("delete_status", "0")
+                ->with(['sizeVariant', 'colorVariant'])
+                ->get();
+            
+            // Group variants by size_id (same size = same price)
+            $variantsBySize = $allVariants->groupBy('size_id');
+            $variants = [];
+            
+            foreach ($variantsBySize as $sizeId => $sizeVariants) {
+                // Get first variant's price (all variants of same size have same price)
+                $firstVariant = $sizeVariants->first();
+                $sizeVariant = VariantsSub::where("id", $sizeId)->first();
+                
+                // Get all available colors for this size
+                $colors = $sizeVariants->map(function($variant) {
+                    // Check if color_id is not null and colorVariant relationship exists
+                    if ($variant->color_id && $variant->colorVariant) {
+                        return [
+                            'colorId' => $variant->color_id,
+                            'colorName' => $variant->colorVariant->name,
+                            'colorCode' => $variant->colorVariant->color_val ?? '',
+                        ];
+                    }
+                    return null;
+                })->filter()->unique(function($item) {
+                    return $item['colorId'];
+                })->values();
+                
+                // Calculate total available quantity for this size (sum across all colors)
+                $totalQty = $sizeVariants->sum('available_quantity');
+                
+                $variants[] = [
+                    'sizeid' => $sizeId,
+                    'sizeName' => $sizeVariant ? $sizeVariant->name : '',
+                    'price' => (float)$firstVariant->price,
+                    'available_quantity' => (int)$totalQty,
+                    'colors' => $colors,
+                ];
+            }
+            
+            // Get minimum price for display
+            $minPrice = $allVariants->min('price');
+            if ($minPrice !== null) {
+                $product->price = (float)$minPrice;
+            }
+            
             $size_id = 0;
             $qty = 0;
             $sizeName = "";
@@ -216,7 +279,7 @@ class HomepageController extends BaseController
             if($ProductTemp->size != ""){
                 $size_id = trim(explode(',', $ProductTemp->size)[0]);
                 $VariantsSub = VariantsSub::where("id", $size_id)->first();
-                $Productvariant = Productvariant::where("size_id", $size_id)->where("product_id", $ProductTemp->productId)->first();
+                $Productvariant = Productvariant::where("size_id", $size_id)->where("product_id", $ProductTemp->productId)->where("delete_status", "0")->first();
                 $sizeName = !empty($VariantsSub) ? $VariantsSub->color_val : "";
                 $qty = !empty($Productvariant) ? $Productvariant->available_quantity : 0;
             }
@@ -284,6 +347,7 @@ class HomepageController extends BaseController
         $data['more_info'] = $more_info;
         $data['similar_products'] = $similar_products;
         $data['images'] = $images;
+        $data['variants'] = $variants; // Size-based variants with prices and colors
 
         $message["success"] = 'Product detail get successfully.';
         return $this->sendResponse($data, $message);
@@ -322,6 +386,17 @@ class HomepageController extends BaseController
 
         $product = $product->map(function($item){
             $Productimage = ProductImage::where("product_id", $item->productId)->where("delete_status", "0")->first();
+            
+            // Get minimum price from all variants (size-based pricing)
+            $minVariantPrice = Productvariant::where('product_id', $item->productId)
+                ->where('delete_status', '0')
+                ->min('price');
+            
+            // Use variant price if available, otherwise use product base price
+            if ($minVariantPrice !== null) {
+                $item->price = (float)$minVariantPrice;
+            }
+            
             $item->wishlistId = 0;
             $item->is_wishlisted = 0;
             $item->sizeid = 0;
@@ -339,7 +414,7 @@ class HomepageController extends BaseController
 
     public function productsizelist(Request $request)
     {
-        $ProductSize = Productvariant::select(
+        $query = Productvariant::select(
                 'productvariants.product_id as productId',
                 'productvariants.size_id as sizeid',
                 'productvariants.price',
@@ -349,12 +424,33 @@ class HomepageController extends BaseController
             ->leftJoin('variants_sub', 'variants_sub.id', '=', 'productvariants.size_id')
             ->where('productvariants.delete_status', '0')
             ->where('variants_sub.delete_status', '0');
-            if($request->productId != ""){
-                $ProductSize = $ProductSize->where("productvariants.product_id", $request->productId);    
-            }
-            $ProductSize = $ProductSize->get();
+        if($request->productId != ""){
+            $query = $query->where("productvariants.product_id", $request->productId);    
+        }
+        
+        $ProductSize = $query->get();
 
-        $data['productsize'] = $ProductSize;
+        // Group by size_id (size-based pricing: same size = same price)
+        $groupedBySize = $ProductSize->groupBy('sizeid');
+        $productsize = [];
+        
+        foreach ($groupedBySize as $sizeId => $variants) {
+            // Get first variant's price (all variants of same size have same price)
+            $firstVariant = $variants->first();
+            
+            // Calculate total available quantity for this size (sum across all colors)
+            $totalQty = $variants->sum('available_quantity');
+            
+            $productsize[] = [
+                'productId' => $firstVariant->productId,
+                'sizeid' => $sizeId,
+                'name' => $firstVariant->name,
+                'price' => (float)$firstVariant->price,
+                'available_quantity' => (int)$totalQty,
+            ];
+        }
+
+        $data['productsize'] = $productsize;
 
         $message["success"] = 'Product size list get successfully.';
         return $this->sendResponse($data, $message);
@@ -370,6 +466,17 @@ class HomepageController extends BaseController
 
         $new_arrivals = $new_arrivals->map(function($item){
             $Productimage = ProductImage::where("product_id", $item->productId)->where("delete_status", "0")->first();
+            
+            // Get minimum price from all variants (size-based pricing)
+            $minVariantPrice = Productvariant::where('product_id', $item->productId)
+                ->where('delete_status', '0')
+                ->min('price');
+            
+            // Use variant price if available, otherwise use product base price
+            if ($minVariantPrice !== null) {
+                $item->price = (float)$minVariantPrice;
+            }
+            
             $item->wishlistId = 0;
             $item->brandName = "";
             $item->categoryName = "";
@@ -387,6 +494,17 @@ class HomepageController extends BaseController
 
         $trending = $trending->map(function($item){
             $Productimage = ProductImage::where("product_id", $item->productId)->where("delete_status", "0")->first();
+            
+            // Get minimum price from all variants (size-based pricing)
+            $minVariantPrice = Productvariant::where('product_id', $item->productId)
+                ->where('delete_status', '0')
+                ->min('price');
+            
+            // Use variant price if available, otherwise use product base price
+            if ($minVariantPrice !== null) {
+                $item->price = (float)$minVariantPrice;
+            }
+            
             $item->wishlistId = 0;
             $item->brandName = "";
             $item->categoryName = "";
@@ -762,7 +880,7 @@ class HomepageController extends BaseController
     public function addtocart(Request $request){
         $validator = Validator::make($request->all(), [
             'productId' => 'required|integer',
-            'sizeid'    => 'required|integer',
+            'sizeid'    => 'required|integer', // This is size_id (from variants_sub), not variant_id
             'qty'       => 'required|integer|min:1',
         ]);
 
@@ -777,18 +895,27 @@ class HomepageController extends BaseController
             return $this->sendError(["error" => "Product not found"]);
         }
 
-        $size = Productvariant::where('product_id', $request->productId)
-            ->where('id', $request->sizeid)
+        // Find any variant with this size_id (size-based pricing: all variants of same size have same price)
+        $variant = Productvariant::where('product_id', $request->productId)
+            ->where('size_id', $request->sizeid)
+            ->where('delete_status', '0')
             ->first();
 
-        if (empty($size)) {
-            return $this->sendError(["error" => "Size not available"]);
+        if (empty($variant)) {
+            return $this->sendError(["error" => "Size not available for this product"]);
         }
 
-        if ($size->available_quantity < $request->qty) {
-            return $this->sendError(["error" => "Only ".$size->available_quantity." quantity available"]);
+        // Calculate total available quantity for this size (sum across all colors)
+        $totalAvailableQty = Productvariant::where('product_id', $request->productId)
+            ->where('size_id', $request->sizeid)
+            ->where('delete_status', '0')
+            ->sum('available_quantity');
+
+        if ($totalAvailableQty < $request->qty) {
+            return $this->sendError(["error" => "Only ".$totalAvailableQty." quantity available for this size"]);
         }
 
+        // Check if cart item already exists for this product + size combination
         $cart = Cart::where('user_id', $userId)
             ->where('product_id', $request->productId)
             ->where('size_id', $request->sizeid)
@@ -796,19 +923,25 @@ class HomepageController extends BaseController
             ->first();
 
         if ($cart) {
+            // Check if total quantity (existing + new) exceeds available
+            $newTotalQty = $cart->qty + $request->qty;
+            if ($totalAvailableQty < $newTotalQty) {
+                return $this->sendError(["error" => "Only ".$totalAvailableQty." quantity available for this size. You already have ".$cart->qty." in cart"]);
+            }
             $cart->qty += $request->qty;
+            $cart->total_price = $variant->price * $cart->qty;
             $cart->save();
         } else {
-            $Productvariant = Productvariant::where("product_id", $request->productId)->where("size_id", $request->sizeid)->where("delete_status", "0")->first();
+            // Create new cart item (price is based on size, same for all colors)
             $cart = Cart::create([
                 'user_id'     => $userId,
                 'product_id'  => $request->productId,
                 'size_id'     => $request->sizeid,
-                'variant_id'     => !empty($Productvariant) ? $Productvariant->id : null,
+                'variant_id'  => $variant->id, // Store first variant_id for reference
                 'qty'         => $request->qty,
-                'actual_price'       => $size->price,
-                'offer_price' => $size->price,
-                'total_price' => $size->price * $request->qty,
+                'actual_price' => $variant->price, // Size-based price (same for all colors)
+                'offer_price' => $variant->price,
+                'total_price' => $variant->price * $request->qty,
             ]);
         }
         $cartData = $this->getCartSummary($userId);
@@ -834,15 +967,28 @@ class HomepageController extends BaseController
             return $this->sendError(["error" => "Cart item not found"]);
         }
 
-        $size = Productvariant::where('product_id', $cart->product_id)
-            ->where('id', $cart->size_id)
+        // Find a variant with this size_id to get the price (size-based pricing)
+        $variant = Productvariant::where('product_id', $cart->product_id)
+            ->where('size_id', $cart->size_id)
+            ->where('delete_status', '0')
             ->first();
 
-        if ($size->available_quantity < $request->qty) {
-            return $this->sendError(["error" => "Only ".$size->available_quantity." quantity available"]);
+        if (empty($variant)) {
+            return $this->sendError(["error" => "Size variant not found"]);
+        }
+
+        // Calculate total available quantity for this size (sum across all colors)
+        $totalAvailableQty = Productvariant::where('product_id', $cart->product_id)
+            ->where('size_id', $cart->size_id)
+            ->where('delete_status', '0')
+            ->sum('available_quantity');
+
+        if ($totalAvailableQty < $request->qty) {
+            return $this->sendError(["error" => "Only ".$totalAvailableQty." quantity available for this size"]);
         }
 
         $cart->qty = $request->qty;
+        $cart->total_price = $variant->price * $request->qty;
         $cart->save();
         
         $cartData = $this->getCartSummary($userId);
@@ -954,15 +1100,25 @@ class HomepageController extends BaseController
             return $this->sendError(["error" => "Product not found."]);
         }
 
+        // Find variant with this size_id (size-based pricing: all variants of same size have same price)
+        $variant = Productvariant::where('product_id', $Wishlist->product_id)
+            ->where('size_id', $request->sizeid)
+            ->where('delete_status', '0')
+            ->first();
+
+        if (empty($variant)) {
+            return $this->sendError(["error" => "Size not available for this product"]);
+        }
+
         Cart::create([
             "user_id" => $userId,
             "product_id" => $Wishlist->product_id,
-            "variant_id" => $Wishlist->variant_id,
+            "variant_id" => $variant->id, // Store variant_id for reference
             "size_id" => $request->sizeid,
             "qty" => $request->qty,
-            "actual_price" => $Product->price,
-            "offer_price" => $Product->price_offer,
-            "total_price" => $Product->price * $request->qty,
+            "actual_price" => $variant->price, // Use variant price (size-based pricing)
+            "offer_price" => $variant->price,
+            "total_price" => $variant->price * $request->qty,
         ]);
 
         $Wishlist->update([
@@ -980,16 +1136,29 @@ class HomepageController extends BaseController
         $Wishlists = Wishlist::where("created_by", $userId)->where("delete_status", "0")->get();
         foreach($Wishlists as $Wishlist){
             $Product = Product::where("id", $Wishlist->product_id)->first();
+            if(empty($Product)){
+                continue; // Skip if product not found
+            }
+
+            // Find variant with this size_id (size-based pricing: all variants of same size have same price)
+            $variant = Productvariant::where('product_id', $Wishlist->product_id)
+                ->where('size_id', $Wishlist->size_id)
+                ->where('delete_status', '0')
+                ->first();
+
+            if (empty($variant)) {
+                continue; // Skip if variant not found
+            }
     
             Cart::create([
                 "user_id" => $userId,
                 "product_id" => $Wishlist->product_id,
-                "variant_id" => $Wishlist->variant_id,
+                "variant_id" => $variant->id, // Store variant_id for reference
                 "size_id" => $Wishlist->size_id,
                 "qty" => $Wishlist->qty,
-                "actual_price" => $Product ? $Product->price : 0,
-                "offer_price" => $Product ? $Product->price_offer : 0,
-                "total_price" => ($Product ? $Product->price : 0) * $Wishlist->qty,
+                "actual_price" => $variant->price, // Use variant price (size-based pricing)
+                "offer_price" => $variant->price,
+                "total_price" => $variant->price * $Wishlist->qty,
             ]);
     
             $Wishlist->update([
@@ -1310,7 +1479,11 @@ class HomepageController extends BaseController
         
         $Carts = Cart::where("user_id", $userId)->where("delete_status", "0")->get();
         foreach($Carts as $Cart){
-            $Productvariant = Productvariant::where("product_id", $Cart->product_id)->where("size_id", $Cart->size_id)->where("delete_status", "0")->first();
+            // Use the specific variant_id stored in cart (exact color + size combination)
+            // This ensures we reduce quantity from the specific color that was ordered
+            $Productvariant = Productvariant::where("id", $Cart->variant_id)
+                ->where("delete_status", "0")
+                ->first();
             if(!empty($Productvariant)){
                 $Productvariant->available_quantity = $Productvariant->available_quantity - $Cart->qty;
                 $Productvariant->save();
