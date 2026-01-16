@@ -103,7 +103,7 @@ Route::prefix('topcollection')->group(function () {
     Route::post('/store', [TopcollectionController::class, 'store']);
     Route::get('/{id}/edit', [TopcollectionController::class, 'edit']);
     Route::post('/update', [TopcollectionController::class, 'update']);
-    Route::post('/{id}/delete', [TopcollectionController::class, 'destroy']);
+    Route::get('/{id}/delete', [TopcollectionController::class, 'destroy']);
 });
 
 Route::prefix('usbanner')->group(function () {
