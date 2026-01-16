@@ -656,7 +656,7 @@
                                                 <a href="{{ url('stock') }}/{{ $variant->id }}/{{ $variant->product_id }}" class="btn btn-outline-info btn-sm me-2" title="Manage Stock">
                                                     <i class="mdi mdi-store"></i>
                                                 </a>
-                                                <form action="{{ url('/productvariants') }}/{{ $variant->id }}/{{ $variant->product_id }}/delete" method="POST" class="d-inline" onsubmit="return confirm('Delete this variant?');">
+                                                <form action="{{ url('/productvariants') }}/{{ $variant->id }}/{{ $variant->product_id }}/delete" method="GET" class="d-inline" onsubmit="return confirm('Delete this variant?');">
                                                     @csrf
                                                     <button type="submit" class="btn btn-outline-danger btn-sm" title="Delete Variant">
                                                         <i class="mdi mdi-trash-can-outline"></i>
