@@ -1252,7 +1252,7 @@ if (!empty($colorIds) || !empty($sizeIds)) {
         $Setting = Setting::where("delete_status", "0")->first();
         $CartMaster->update([
             "is_giftwrap" => $request->is_giftwrap,
-            "giftwrap_price" => $Setting->giftwrap_price,
+            "giftwrap_price" => $request->is_giftwrap == "1" ? $Setting->giftwrap_price : 0,
         ]);
 
         $cartData = $this->getCartSummary($userId);
