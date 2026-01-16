@@ -143,6 +143,13 @@ tr.selected {background-color:#adf7a9  ! important;}
                 </tbody>
             </table>
 
+            <!-- Laravel Pagination -->
+            <!-- @if(method_exists($indexes, 'links'))
+                <div class="mt-3">
+                    {{ $indexes->links() }}
+                </div>
+            @endif -->
+
         </div>
 
     </div>
