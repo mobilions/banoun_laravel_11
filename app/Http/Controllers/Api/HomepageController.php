@@ -1355,7 +1355,7 @@ if (!empty($colorIds) || !empty($sizeIds)) {
             "giftwrap_price" => $CartMaster->giftwrap_price,
             "totalprice" => $CartMaster->total,
             "cart_count" => $cart_count,
-            "offer_price" => $CartMaster->total,
+            "offer_price" => $CartMaster->discount,
             "delivery_price" => $CartMaster->delivery,
             "promo_price" => $CartMaster->promo_price,
             "grand_total" => $CartMaster->grandtotal,
