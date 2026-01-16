@@ -61,9 +61,11 @@ tr.selected {background-color:#adf7a9  ! important;}
             <form method="GET" action="{{ route('products') }}" class="mb-3">
                 <div class="row g-3">
                     <div class="col-md-3">
+                        <label>Search</label>
                         <input type="text" name="search" class="form-control" placeholder="Search by name..." value="{{ request('search') }}">
                     </div>
                     <div class="col-md-2">
+                        <label>Category</label>
                         <select name="category_id" class="form-select">
                             <option value="">All Categories</option>
                             @foreach($categories ?? [] as $cat)
@@ -72,6 +74,7 @@ tr.selected {background-color:#adf7a9  ! important;}
                         </select>
                     </div>
                     <div class="col-md-2">
+                        <label>Brand</label>
                         <select name="brand_id" class="form-select">
                             <option value="">All Brands</option>
                             @foreach($brands ?? [] as $brand)
@@ -80,16 +83,19 @@ tr.selected {background-color:#adf7a9  ! important;}
                         </select>
                     </div>
                     <div class="col-md-2">
+                        <label>Min Price</label>
                         <input type="number" name="min_price" class="form-control" placeholder="Min Price" value="{{ request('min_price') }}" step="0.01">
                     </div>
                     <div class="col-md-2">
+                        <label>Max Price</label>
                         <input type="number" name="max_price" class="form-control" placeholder="Max Price" value="{{ request('max_price') }}" step="0.01">
                     </div>
-                    <div class="col-md-1 mt-4">
-                        <button type="submit" class="btn btn-primary waves-effect waves-light w-100" title="Filter"><i class="mdi mdi-filter"></i></button>
-                    </div>
-                    <div class="col-md-1 mt-4">
-                        <a href="{{ route('products') }}" class="btn btn-secondary waves-effect waves-light w-100" title="Reset"><i class="mdi mdi-refresh"></i></a>
+                    <div class="col-md-2">
+                        <label>&nbsp;</label>
+                        <div class="d-flex gap-2">
+                            <a href="{{ route('products') }}" class="btn btn-secondary waves-effect waves-light flex-fill" title="Reset"><i class="mdi mdi-refresh me-1"></i>Clear</a>
+                            <button type="submit" class="btn btn-primary waves-effect waves-light flex-fill" title="Filter"><i class="mdi mdi-filter me-1"></i>Filter</button>
+                        </div>
                     </div>
                 </div>
             </form>

@@ -121,23 +121,23 @@ class TopcollectionController extends Controller
         ];
 
         // If redirect_type is productlist, shopby and category_id are required
-        if ($request->redirect_type == 'productlist') {
-            $rules['shopby'] = 'required|string|in:category,subcategory,brand,product';
-            $rules['category_id'] = 'required|exists:categories,id';
-        } else {
-            $rules['shopby'] = 'nullable|string|in:category,subcategory,brand,product';
-            $rules['category_id'] = 'nullable|exists:categories,id';
-        }
+        // if ($request->redirect_type == 'productlist') {
+        //     $rules['shopby'] = 'required|string|in:category,subcategory,brand,product';
+        //     $rules['category_id'] = 'required|exists:categories,id';
+        // } else {
+        //     $rules['shopby'] = 'nullable|string|in:category,subcategory,brand,product';
+        //     $rules['category_id'] = 'nullable|exists:categories,id';
+        // }
 
         $this->validate($request, $rules, [
             'name.required' => 'Name is required.',
             'name.max' => 'Name must not exceed 255 characters.',
             'name_ar.max' => 'Arabic name must not exceed 255 characters.',
             'redirect_type.required' => 'Redirect type is required.',
-            'shopby.required' => 'Shop by is required when redirect type is Product List.',
-            'shopby.in' => 'Invalid shop by value.',
-            'category_id.required' => 'Category is required when redirect type is Product List.',
-            'category_id.exists' => 'Selected category does not exist.',
+            // 'shopby.required' => 'Shop by is required when redirect type is Product List.',
+            // 'shopby.in' => 'Invalid shop by value.',
+            // 'category_id.required' => 'Category is required when redirect type is Product List.',
+            // 'category_id.exists' => 'Selected category does not exist.',
             'imgfile.required' => 'Image is required.',
             'imgfile.image' => 'The file must be an image.',
             'imgfile.mimes' => 'The image must be a file of type: jpeg, png, jpg, gif, svg, webp.',
@@ -288,13 +288,13 @@ class TopcollectionController extends Controller
         ];
 
         // If redirect_type is productlist, shopby and category_id are required
-        if ($request->redirect_type == 'productlist') {
-            $rules['shopby'] = 'required|string|in:category,subcategory,brand,product';
-            $rules['category_id'] = 'required|exists:categories,id';
-        } else {
-            $rules['shopby'] = 'nullable|string|in:category,subcategory,brand,product';
-            $rules['category_id'] = 'nullable|exists:categories,id';
-        }
+        // if ($request->redirect_type == 'productlist') {
+        //     $rules['shopby'] = 'required|string|in:category,subcategory,brand,product';
+        //     $rules['category_id'] = 'required|exists:categories,id';
+        // } else {
+        //     $rules['shopby'] = 'nullable|string|in:category,subcategory,brand,product';
+        //     $rules['category_id'] = 'nullable|exists:categories,id';
+        // }
 
         $this->validate($request, $rules, [
             'editid.required' => 'Record ID is required.',
@@ -303,10 +303,10 @@ class TopcollectionController extends Controller
             'name.max' => 'Name must not exceed 255 characters.',
             'name_ar.max' => 'Arabic name must not exceed 255 characters.',
             'redirect_type.required' => 'Redirect type is required.',
-            'shopby.required' => 'Shop by is required when redirect type is Product List.',
-            'shopby.in' => 'Invalid shop by value.',
-            'category_id.required' => 'Category is required when redirect type is Product List.',
-            'category_id.exists' => 'Selected category does not exist.',
+            // 'shopby.required' => 'Shop by is required when redirect type is Product List.',
+            // 'shopby.in' => 'Invalid shop by value.',
+            // 'category_id.required' => 'Category is required when redirect type is Product List.',
+            // 'category_id.exists' => 'Selected category does not exist.',
             'imgfile.image' => 'The file must be an image.',
             'imgfile.mimes' => 'The image must be a file of type: jpeg, png, jpg, gif, svg, webp.',
             'imgfile.max' => 'The image size must not exceed 2MB.',
