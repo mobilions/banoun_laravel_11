@@ -1288,7 +1288,7 @@ class HomepageController extends BaseController
                 "tax" => $tax,
                 "delivery" => $delivery,
                 "discount" => $discount,
-                "grandtotal" => ($grandtotal + $CartMaster->giftwrap_price),
+                "grandtotal" => (floatval($grandtotal) + floatval($CartMaster->giftwrap_price)),
                 "totalqty" => $totalqty,
             ]);
         }
