@@ -33,6 +33,7 @@ use App\Models\Cart;
 use App\Models\CartMaster;
 use App\Models\Wishlist;
 use App\Models\SizeChart;
+use App\Models\PageContent;
 use App\Models\DeliveryOption;
 use App\Models\UserKid;
 use App\Models\User;
@@ -1653,25 +1654,25 @@ class HomepageController extends BaseController
     }
 
     public function sizecharts(){
-        $SizeChart = SizeChart::where('delete_status','0')->where('type',"size_chart")->first();
+        $PageContent = PageContent::where('delete_status','0')->where('type',"sizes")->first();
 
-        $data["description"] = !empty($SizeChart) ? $SizeChart->description : "";
+        $data["description"] = !empty($PageContent) ? $PageContent->description : "";
         $message['success'] = "Size charts get successfully.";
         return $this->sendResponse($data, $message); 
     }
 
     public function legal_terms(){
-        $SizeChart = SizeChart::where('delete_status','0')->where('type',"legal")->first();
+        $PageContent = PageContent::where('delete_status','0')->where('type',"legal")->first();
 
-        $data["description"] = !empty($SizeChart) ? $SizeChart->description : "";
+        $data["description"] = !empty($PageContent) ? $PageContent->description : "";
         $message['success'] = "Legal terms get successfully.";
         return $this->sendResponse($data, $message); 
     }
 
     public function terms_conditions(){
-        $terms_conditions = Faq::where('delete_status','0')->where('type',"terms")->first();
+        $PageContent = Faq::where('delete_status','0')->where('type',"term")->first();
 
-        $data["description"] = !empty($terms_conditions) ? $terms_conditions->content : "";
+        $data["description"] = !empty($PageContent) ? $PageContent->description : "";
         $message['success'] = "Terms and condition get successfully.";
         return $this->sendResponse($data, $message); 
     }
