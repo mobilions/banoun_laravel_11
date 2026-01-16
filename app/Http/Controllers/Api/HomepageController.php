@@ -267,7 +267,7 @@ class HomepageController extends BaseController
             if($ProductTemp->size != ""){
                 $size_id = trim(explode(',', $ProductTemp->size)[0]);
                 $VariantsSub = VariantsSub::where("id", $size_id)->first();
-                $Productvariant = Productvariant::where("size_id", $size_id)->where("product_id", $ProductTemp->productId)->first();
+                $Productvariant = Productvariant::where("size_id", $size_id)->where("product_id", $ProductTemp->id)->first();
                 $sizeName = !empty($VariantsSub) ? $VariantsSub->color_val : "";
                 $qty = !empty($Productvariant) ? $Productvariant->available_quantity : 0;
             }
@@ -316,7 +316,7 @@ class HomepageController extends BaseController
                 if($ProductTemp->size != ""){
                     $size_id = trim(explode(',', $ProductTemp->size)[0]);
                     $VariantsSub = VariantsSub::where("id", $size_id)->first();
-                    $Productvariant = Productvariant::where("size_id", $size_id)->where("product_id", $ProductTemp->productId)->first();
+                    $Productvariant = Productvariant::where("size_id", $size_id)->where("product_id", $ProductTemp->id)->first();
                     $sizeName = !empty($VariantsSub) ? $VariantsSub->color_val : "";
                     $qty = !empty($Productvariant) ? $Productvariant->available_quantity : 0;
                 }
@@ -400,11 +400,22 @@ class HomepageController extends BaseController
                     $is_wishlisted = 1;
                 }
             }
+            $size_id = 0;
+            $qty = 0;
+            $sizeName = "";
+            $ProductTemp = Product::where("id", $item->productId)->first();
+            if($ProductTemp->size != ""){
+                $size_id = trim(explode(',', $ProductTemp->size)[0]);
+                $VariantsSub = VariantsSub::where("id", $size_id)->first();
+                $Productvariant = Productvariant::where("size_id", $size_id)->where("product_id", $ProductTemp->id)->first();
+                $sizeName = !empty($VariantsSub) ? $VariantsSub->color_val : "";
+                $qty = !empty($Productvariant) ? $Productvariant->available_quantity : 0;
+            }
             $item->wishlistId = $wishlistId;
             $item->is_wishlisted = $is_wishlisted;
-            $item->sizeid = 0;
-            $item->qty = 0;
-            $item->sizeName = "";
+            $item->sizeid = $size_id;
+            $item->qty = $qty;
+            $item->sizeName = $sizeName;
             $item->imageurl = !empty($Productimage) ? $Productimage->imageurl : "";
             return $item;
         });
@@ -444,7 +455,14 @@ class HomepageController extends BaseController
         $topbanners = Topcollection::select('imageurl', 'type', 'category_id as categoryId')->where('delete_status','0')->get();
         $categories = Category::select('id as categoryId', 'name', 'description', 'imageurl')->where('delete_status','0')->take(4)->get();
         $designers = Brand::select('id as brandId', 'imageurl', 'name')->where('delete_status','0')->take(8)->get();
-        $new_arrivals = Product::select('id as productId', 'name', 'price', 'price_offer', 'category_id as categoryId', 'subcategory_id as subcategoryId', 'brand_id as brandId')->where('delete_status','0')->where("is_newarrival", "1")->take(8)->get();
+        $new_arrivals = Product::select('products.id as productId', 'products.name', 'products.price', 'products.price_offer', 'products.category_id as categoryId', 'products.subcategory_id as subcategoryId', 'products.brand_id as brandId', 'brands.name as brandName', 'categories.name as categoryName', 'subcategories.name as subcategoryName')
+        ->leftJoin("brands", "brands.id", "=", "products.brand_id")
+        ->leftJoin("categories", "categories.id", "=", "products.category_id")
+        ->leftJoin("subcategories", "subcategories.id", "=", "products.subcategory_id")
+        ->where('products.delete_status','0')
+        ->where("products.is_newarrival", "1")
+        ->take(8)
+        ->get();
 
         $new_arrivals = $new_arrivals->map(function($item){
             $Productimage = ProductImage::where("product_id", $item->productId)->where("delete_status", "0")->first();
@@ -457,20 +475,36 @@ class HomepageController extends BaseController
                     $is_wishlisted = 1;
                 }
             }
+            $size_id = 0;
+            $qty = 0;
+            $sizeName = "";
+            $ProductTemp = Product::where("id", $item->productId)->first();
+            if($ProductTemp->size != ""){
+                $size_id = trim(explode(',', $ProductTemp->size)[0]);
+                $VariantsSub = VariantsSub::where("id", $size_id)->first();
+                $Productvariant = Productvariant::where("size_id", $size_id)->where("product_id", $ProductTemp->id)->first();
+                $sizeName = !empty($VariantsSub) ? $VariantsSub->color_val : "";
+                $qty = !empty($Productvariant) ? $Productvariant->available_quantity : 0;
+            }
+
             $item->wishlistId = $wishlistId;
             $item->is_wishlisted = $is_wishlisted;
-            $item->brandName = "";
-            $item->categoryName = "";
-            $item->subcategoryName = "";
-            $item->sizeid = 0;
-            $item->qty = 0;
-            $item->sizeName = "";
+            $item->sizeid = $size_id;
+            $item->qty = $qty;
+            $item->sizeName = $sizeName;
             $item->imageurl = !empty($Productimage) ? $Productimage->imageurl : "";
 
             return $item;
         });
 
-        $trending = Product::select('id as productId', 'name', 'price', 'price_offer',  'category_id as categoryId', 'subcategory_id as subcategoryId', 'brand_id as brandId')->where('delete_status','0')->where('is_trending','1')->limit(8)->get();
+        $trending = Product::select('products.id as productId', 'products.name', 'products.price', 'products.price_offer', 'products.category_id as categoryId', 'products.subcategory_id as subcategoryId', 'products.brand_id as brandId', 'brands.name as brandName', 'categories.name as categoryName', 'subcategories.name as subcategoryName')
+        ->leftJoin("brands", "brands.id", "=", "products.brand_id")
+        ->leftJoin("categories", "categories.id", "=", "products.category_id")
+        ->leftJoin("subcategories", "subcategories.id", "=", "products.subcategory_id")
+        ->where('products.delete_status','0')
+        ->where("products.is_trending", "1")
+        ->take(8)
+        ->get();
 
         $trending = $trending->map(function($item){
             $Productimage = ProductImage::where("product_id", $item->productId)->where("delete_status", "0")->first();
@@ -485,12 +519,20 @@ class HomepageController extends BaseController
             }
             $item->wishlistId = $wishlistId;
             $item->is_wishlisted = $is_wishlisted;
-            $item->brandName = "";
-            $item->categoryName = "";
-            $item->subcategoryName = "";
-            $item->sizeid = 0;
-            $item->qty = 0;
-            $item->sizeName = "";
+            $size_id = 0;
+            $qty = 0;
+            $sizeName = "";
+            $ProductTemp = Product::where("id", $item->productId)->first();
+            if($ProductTemp->size != ""){
+                $size_id = trim(explode(',', $ProductTemp->size)[0]);
+                $VariantsSub = VariantsSub::where("id", $size_id)->first();
+                $Productvariant = Productvariant::where("size_id", $size_id)->where("product_id", $ProductTemp->id)->first();
+                $sizeName = !empty($VariantsSub) ? $VariantsSub->color_val : "";
+                $qty = !empty($Productvariant) ? $Productvariant->available_quantity : 0;
+            }
+            $item->sizeid = $size_id;
+            $item->qty = $qty;
+            $item->sizeName = $sizeName;
             $item->imageurl = !empty($Productimage) ? $Productimage->imageurl : "";
 
             return $item;
