@@ -137,64 +137,73 @@ class ProductvariantController extends Controller
             'imgfile3.mimes' => 'Image file 3 must be a file of type: jpeg, png, jpg, gif, svg, webp.',
             'imgfile3.max' => 'Image file 3 size must not exceed 2MB.',
         ]);
-
-
-
-        $imgurl    = '';
-
-        $path   = $request->file('imgfile');
+        $imgurl = '';
+        $path = $request->file('imgfile');
 
         if (!empty($path)) {
-
-        $store  = Storage::putFile('public/image', $path);
-
-            //$imgurl    = Storage::url($store);
-
-            //$imgurl = url('/').'/storage/app/'.$store;
-
-            $imgurl = config('app.imgurl').basename($store);
-
+            try {
+                $filename = time() . '_' . uniqid() . '.' . $path->getClientOriginalExtension();
+                $destinationPath = storage_path('app/public/image');
+                
+                if (!file_exists($destinationPath)) {
+                    mkdir($destinationPath, 0777, true);
+                }
+                
+                $path->move($destinationPath, $filename);
+                $imgurl = '/storage/image/' . $filename;
+                
+            } catch (\Exception $e) {
+                \Log::error('Image 1 Storage Error: ' . $e->getMessage());
+            }
+        } else {
+            $imgurl = $request->imgfile_val;
         }
 
-        //echo "hi"; exit();
+        // Image 2
+        $imgurl2 = '';
+        $path2 = $request->file('imgfile2');
 
-
-
-        $imgurl2    = '';
-
-        $path   = $request->file('imgfile2');
-
-        if (!empty($path)) {
-
-            $store  = Storage::putFile('public/image', $path);
-
-            //$imgurl    = Storage::url($store);
-
-            //$imgurl = url('/').'/storage/app/'.$store;
-
-            $imgurl2 = config('app.imgurl').basename($store);
-
+        if (!empty($path2)) {
+            try {
+                $filename2 = time() . '_' . uniqid() . '.' . $path2->getClientOriginalExtension();
+                $destinationPath = storage_path('app/public/image');
+                
+                if (!file_exists($destinationPath)) {
+                    mkdir($destinationPath, 0777, true);
+                }
+                
+                $path2->move($destinationPath, $filename2);
+                $imgurl2 = '/storage/image/' . $filename2;
+                
+            } catch (\Exception $e) {
+                \Log::error('Image 2 Storage Error: ' . $e->getMessage());
+            }
+        } else {
+            $imgurl2 = $request->imgfile_val2;
         }
 
+        // Image 3
+        $imgurl3 = '';
+        $path3 = $request->file('imgfile3');
 
-
-        $imgurl3    = '';
-
-        $path   = $request->file('imgfile3');
-
-        if (!empty($path)) {
-
-            $store  = Storage::putFile('public/image', $path);
-
-            //$imgurl    = Storage::url($store);
-
-            //$imgurl = url('/').'/storage/app/'.$store;
-
-            $imgurl3 = config('app.imgurl').basename($store);
-
+        if (!empty($path3)) {
+            try {
+                $filename3 = time() . '_' . uniqid() . '.' . $path3->getClientOriginalExtension();
+                $destinationPath = storage_path('app/public/image');
+                
+                if (!file_exists($destinationPath)) {
+                    mkdir($destinationPath, 0777, true);
+                }
+                
+                $path3->move($destinationPath, $filename3);
+                $imgurl3 = '/storage/image/' . $filename3;
+                
+            } catch (\Exception $e) {
+                \Log::error('Image 3 Storage Error: ' . $e->getMessage());
+            }
+        } else {
+            $imgurl3 = $request->imgfile_val3;
         }
-
-
 
         $data = new Productvariant; 
 
@@ -381,87 +390,74 @@ class ProductvariantController extends Controller
             'imgfile3.mimes' => 'Image file 3 must be a file of type: jpeg, png, jpg, gif, svg, webp.',
             'imgfile3.max' => 'Image file 3 size must not exceed 2MB.',
         ]);
-
-
-
-        $imgurl    = '';
-
-        $path   = $request->file('imgfile');
-
-
+            // Image 1
+        $imgurl = '';
+        $path = $request->file('imgfile');
 
         if (!empty($path)) {
-
-            $store  = Storage::putFile('public/image', $path);
-
-            //$imgurl    = Storage::url($store);
-
-            //$imgurl = url('/').'/storage/app/'.$store;
-
-            $imgurl = config('app.imgurl').basename($store);
-
+            try {
+                $filename = time() . '_' . uniqid() . '.' . $path->getClientOriginalExtension();
+                $destinationPath = storage_path('app/public/image');
+                
+                if (!file_exists($destinationPath)) {
+                    mkdir($destinationPath, 0777, true);
+                }
+                
+                $path->move($destinationPath, $filename);
+                $imgurl = '/storage/image/' . $filename;
+                
+            } catch (\Exception $e) {
+                \Log::error('Image 1 Storage Error: ' . $e->getMessage());
+            }
+        } else {
+            $imgurl = $request->imgfile_val;
         }
 
-        else{
+        // Image 2
+        $imgurl2 = '';
+        $path2 = $request->file('imgfile2');
 
-            $imgurl=$request->imgfile_val;
-
+        if (!empty($path2)) {
+            try {
+                $filename2 = time() . '_' . uniqid() . '.' . $path2->getClientOriginalExtension();
+                $destinationPath = storage_path('app/public/image');
+                
+                if (!file_exists($destinationPath)) {
+                    mkdir($destinationPath, 0777, true);
+                }
+                
+                $path2->move($destinationPath, $filename2);
+                $imgurl2 = '/storage/image/' . $filename2;
+                
+            } catch (\Exception $e) {
+                \Log::error('Image 2 Storage Error: ' . $e->getMessage());
+            }
+        } else {
+            $imgurl2 = $request->imgfile_val2;
         }
 
+        // Image 3
+        $imgurl3 = '';
+        $path3 = $request->file('imgfile3');
 
-
-        $imgurl2    = '';
-
-        $path   = $request->file('imgfile2');
-
-
-
-        if (!empty($path)) {
-
-            $store  = Storage::putFile('public/image', $path);
-
-            //$imgurl    = Storage::url($store);
-
-            //$imgurl = url('/').'/storage/app/'.$store;
-
-            $imgurl2 = config('app.imgurl').basename($store);
-
+        if (!empty($path3)) {
+            try {
+                $filename3 = time() . '_' . uniqid() . '.' . $path3->getClientOriginalExtension();
+                $destinationPath = storage_path('app/public/image');
+                
+                if (!file_exists($destinationPath)) {
+                    mkdir($destinationPath, 0777, true);
+                }
+                
+                $path3->move($destinationPath, $filename3);
+                $imgurl3 = '/storage/image/' . $filename3;
+                
+            } catch (\Exception $e) {
+                \Log::error('Image 3 Storage Error: ' . $e->getMessage());
+            }
+        } else {
+            $imgurl3 = $request->imgfile_val3;
         }
-
-        else{
-
-            $imgurl2=$request->imgfile_val2;
-
-        }
-
-
-
-        $imgurl3    = '';
-
-        $path   = $request->file('imgfile3');
-
-
-
-        if (!empty($path)) {
-
-            $store  = Storage::putFile('public/image', $path);
-
-            //$imgurl    = Storage::url($store);
-
-            //$imgurl = url('/').'/storage/app/'.$store;
-
-            $imgurl3 = config('app.imgurl').basename($store);
-
-        }
-
-        else{
-
-            $imgurl3=$request->imgfile_val3;
-
-        }
-
-
-
         $data = Productvariant::find($request->editid);
 
         if (empty($data)) { 
@@ -479,6 +475,8 @@ class ProductvariantController extends Controller
         $data->product_id = $request->product_id;
 
         $data->imageurl    = $imgurl;
+        $data->imageurl2    = $imgurl2;
+        $data->imageurl3    = $imgurl3;
 
         $data->created_by=Auth::user()->id;
 
