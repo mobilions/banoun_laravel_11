@@ -1330,8 +1330,10 @@ if (!empty($colorIds) || !empty($sizeIds)) {
                 $Coupon = Coupon::where("coupon_code", $CartMaster->coupon_code)->where("delete_status", "0")->first();
                 if(!empty($Coupon)){
                     if($Coupon->price_type == "Price"){
+                        $discount = $Coupon->coupon_val;
                         $grandtotal = $grandtotal - $Coupon->coupon_val;
                     } else if($Coupon->price_type == "Percentage"){
+                        $discount = ($grandtotal / 100) * $Coupon->coupon_val;
                         $grandtotal = ($grandtotal / 100) * (100 - $Coupon->coupon_val);
                     }
                 }
