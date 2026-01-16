@@ -1,0 +1,10 @@
+
+textarea#description,
+textarea[name="description"],
+textarea#description_ar,
+textarea[name="description_ar"] {
+    height: 200px !important; 
+    min-height: 200px !important;
+    resize: vertical !important; 
+}
+
