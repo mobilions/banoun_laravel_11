@@ -1261,7 +1261,7 @@ class HomepageController extends BaseController
             ->where("carts.delete_status", "0")
             ->leftJoin("products", "products.id", "=", "carts.product_id")
             ->leftJoin("productvariants", "productvariants.id", "=", "carts.variant_id")
-            ->leftJoin("variants_sub", "variants_sub.id", "=", "productvariants.size_id")
+            ->leftJoin("variants_sub", "variants_sub.id", "=", "carts.size_id")
             ->get();
 
         $total = 0;
