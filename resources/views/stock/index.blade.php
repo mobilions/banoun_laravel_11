@@ -246,63 +246,57 @@ tr.selected {background-color:#adf7a9  ! important;}
     </div>
 
     <div class="col-md-12">
-
-        <div class="card">
-
-            <div class="card-body">
-
-                <h5>Stock Transaction</h5>
-
-                <table id="datatable-buttons1" class="table table-bordered dt-responsive nowrap w-100">
-
-                    <thead>
-
-                        <tr>
-                            <th>#</th>
-                            <th>Processed Quantity</th>
-                            <th>Total while action performed</th>
-                            <th>Previous Total</th>
-                            <th>Date</th>                            
-                            <th>Action By</th>
-                        </tr>
-
-                    </thead>           
-
-                    <tbody>
-
-                        @foreach ($indexes as $index)
-
-                        <tr>
-                            <td>{{$index->id}}</td>
-                            @if ($index->process == 'Remove') 
-                                <td>{{ $index->current_quantity - $index->quantity }} ( {{$index->process}} )</td>                            
-                            @elseif ($index->process == 'Add') 
-                                <td> {{ $index->quantity }} ( {{$index->process}} )</td>
+    <div class="card">
+        <div class="card-body">
+            <h5>Stock Transaction History</h5>
+            <table id="datatable-buttons1" class="table table-bordered dt-responsive nowrap w-100">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Processed Quantity</th>
+                        <th>Previous Quantity</th>
+                        <th>Total After Action</th>
+                        <th>Action</th>
+                        <th>Date</th>                            
+                        <th>Action By</th>
+                    </tr>
+                </thead>           
+                <tbody>
+                    @forelse ($indexes as $key => $log)
+                    <tr>
+                        <td>{{ $key + 1 }}</td>
+                        <td>
+                            @if ($log->process == 'Remove')
+                                <span class="text-danger">{{ $log->process_quantity }}</span>
+                                <span class="badge bg-danger">{{ $log->process }}</span>
+                            @elseif ($log->process == 'Add')
+                                <span class="text-success">+{{ $log->process_quantity }}</span>
+                                <span class="badge bg-success">{{ $log->process }}</span>
                             @else
-                                <td> {{ $index->quantity }} ( {{$index->process}} )</td>
+                                <span>{{ $log->process_quantity }}</span>
+                                <span class="badge bg-info">{{ $log->process }}</span>
                             @endif
-                            <td> 
-                                @if ($index->process == 'Remove') 
-                                  {{$index->current_quantity + $index->quantity}}
-                                @elseif ($index->process == 'Add' || $index->process == 'Delete') 
-                                    {{ $index->current_quantity }}
-                                @endif
-                            </td>
-                            <td>{{$index->previous_quantity}}</td>
-                            <td>{{date('d-m-Y',strtotime($index->created_at))}}</td>
-                            <td>{{ $index->user ? $index->user->name : 'N/A' }}</td>
-                        </tr>
-                        @endforeach
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
+                        </td>
+                        <td>{{ $log->previous_quantity }}</td>
+                        <td>{{ $log->total_quantity }}</td>
+                        <td>
+                            <span class="badge {{ $log->action == 'CREATED' ? 'bg-primary' : 'bg-warning' }}">
+                                {{ $log->action }}
+                            </span>
+                        </td>
+                        <td>{{ date('d-m-Y H:i', strtotime($log->created_at)) }}</td>
+                        <td>{{ $log->user ? $log->user->name : 'N/A' }}</td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="7" class="text-center">No stock transaction history found</td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
-
     </div>
+</div>
 
 </div>
 
