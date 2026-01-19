@@ -1154,17 +1154,41 @@ if (!empty($colorIds) || !empty($sizeIds)) {
             return $this->sendError(["error" => "Product not found."]);
         }
 
-        Cart::create([
-            "user_id" => $userId,
-            "product_id" => $Wishlist->product_id,
-            "variant_id" => $Wishlist->variant_id,
-            "size_id" => $request->sizeid,
-            "qty" => $request->qty,
-            "actual_price" => $Product->price,
-            "offer_price" => $Product->price_offer,
-            "total_price" => $Product->price * $request->qty,
-        ]);
+        $size = Productvariant::where('product_id', $Wishlist->product_id)
+            ->where('size_id', $request->sizeid)
+            ->where('delete_status', '0')
+            ->first();
 
+        if (empty($size)) {
+            return $this->sendError(["error" => "Size not available"]);
+        }
+
+        if ($size->available_quantity < $request->qty) {
+            return $this->sendError(["error" => "Only ".$size->available_quantity." quantity available"]);
+        }
+
+        $cart = Cart::where('user_id', $userId)
+            ->where('product_id', $Wishlist->product_id)
+            ->where('size_id', $request->sizeid)
+            ->where('delete_status', "0")
+            ->first();
+
+        if ($cart) {
+            $cart->qty += $request->qty;
+            $cart->save();
+        } else {
+            $cart = Cart::create([
+                'user_id'     => $userId,
+                'product_id'  => $Wishlist->product_id,
+                'size_id'     => $request->sizeid,
+                "variant_id" => $Wishlist->variant_id,
+                'qty'         => $request->qty,
+                'actual_price'       => $size->price,
+                'offer_price' => $size->price,
+                'total_price' => $size->price * $request->qty,
+            ]);
+        }
+        
         $Wishlist->update([
             "delete_status" => "1"
         ]);
@@ -1179,22 +1203,32 @@ if (!empty($colorIds) || !empty($sizeIds)) {
         $userId = auth("api")->id();
         $Wishlists = Wishlist::where("created_by", $userId)->where("delete_status", "0")->get();
         foreach($Wishlists as $Wishlist){
-            $Product = Product::where("id", $Wishlist->product_id)->first();
-    
-            Cart::create([
-                "user_id" => $userId,
-                "product_id" => $Wishlist->product_id,
-                "variant_id" => $Wishlist->variant_id,
-                "size_id" => $Wishlist->size_id,
-                "qty" => $Wishlist->qty,
-                "actual_price" => $Product ? $Product->price : 0,
-                "offer_price" => $Product ? $Product->price_offer : 0,
-                "total_price" => ($Product ? $Product->price : 0) * $Wishlist->qty,
-            ]);
-    
+            $cart = Cart::where('user_id', $userId)
+            ->where('product_id', $Wishlist->product_id)
+            ->where('size_id', $Wishlist->size_id)
+            ->where('delete_status', "0")
+            ->first();
+
+            if ($cart) {
+                $cart->qty += $Wishlist->qty;
+                $cart->save();
+            } else {
+                $cart = Cart::create([
+                    'user_id'     => $userId,
+                    'product_id'  => $Wishlist->product_id,
+                    'size_id'     => $request->sizeid,
+                    "variant_id" => $Wishlist->variant_id,
+                    'qty'         => $Wishlist->qty,
+                    'actual_price'       => $size->price,
+                    'offer_price' => $size->price,
+                    'total_price' => $size->price * $Wishlist->qty,
+                ]);
+            }
+            
             $Wishlist->update([
                 "delete_status" => "1"
             ]);
+            
         }
         $cart_count = Cart::where("user_id", $userId)->where("delete_status", "0")->count();
         $data['cart_count'] = $cart_count;
@@ -1281,7 +1315,7 @@ if (!empty($colorIds) || !empty($sizeIds)) {
             ->where("carts.delete_status", "0")
             ->leftJoin("products", "products.id", "=", "carts.product_id")
             ->leftJoin("productvariants", "productvariants.id", "=", "carts.variant_id")
-            ->leftJoin("variants_sub", "variants_sub.id", "=", "productvariants.size_id")
+            ->leftJoin("variants_sub", "variants_sub.id", "=", "carts.size_id")
             ->get();
 
         $total = 0;
