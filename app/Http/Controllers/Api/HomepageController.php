@@ -1154,17 +1154,41 @@ if (!empty($colorIds) || !empty($sizeIds)) {
             return $this->sendError(["error" => "Product not found."]);
         }
 
-        Cart::create([
-            "user_id" => $userId,
-            "product_id" => $Wishlist->product_id,
-            "variant_id" => $Wishlist->variant_id,
-            "size_id" => $request->sizeid,
-            "qty" => $request->qty,
-            "actual_price" => $Product->price,
-            "offer_price" => $Product->price_offer,
-            "total_price" => $Product->price * $request->qty,
-        ]);
+        $size = Productvariant::where('product_id', $Wishlist->product_id)
+            ->where('size_id', $request->sizeid)
+            ->where('delete_status', '0')
+            ->first();
 
+        if (empty($size)) {
+            return $this->sendError(["error" => "Size not available"]);
+        }
+
+        if ($size->available_quantity < $request->qty) {
+            return $this->sendError(["error" => "Only ".$size->available_quantity." quantity available"]);
+        }
+
+        $cart = Cart::where('user_id', $userId)
+            ->where('product_id', $Wishlist->product_id)
+            ->where('size_id', $request->sizeid)
+            ->where('delete_status', "0")
+            ->first();
+
+        if ($cart) {
+            $cart->qty += $request->qty;
+            $cart->save();
+        } else {
+            $cart = Cart::create([
+                'user_id'     => $userId,
+                'product_id'  => $Wishlist->product_id,
+                'size_id'     => $request->sizeid,
+                "variant_id" => $Wishlist->variant_id,
+                'qty'         => $request->qty,
+                'actual_price'       => $size->price,
+                'offer_price' => $size->price,
+                'total_price' => $size->price * $request->qty,
+            ]);
+        }
+        
         $Wishlist->update([
             "delete_status" => "1"
         ]);
