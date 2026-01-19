@@ -3,7 +3,7 @@ namespace App\Http\Controllers;
 use App\Models\Cart;
 use App\Models\CartMaster;
 use App\Models\OrderLog;
-use App\Models\Emailtemplate;
+use App\Models\EmailTemplate;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Hash;
