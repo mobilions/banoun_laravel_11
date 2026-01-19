@@ -1149,22 +1149,32 @@ class HomepageController extends BaseController
         $userId = auth("api")->id();
         $Wishlists = Wishlist::where("created_by", $userId)->where("delete_status", "0")->get();
         foreach($Wishlists as $Wishlist){
-            $Product = Product::where("id", $Wishlist->product_id)->first();
-    
-            Cart::create([
-                "user_id" => $userId,
-                "product_id" => $Wishlist->product_id,
-                "variant_id" => $Wishlist->variant_id,
-                "size_id" => $Wishlist->size_id,
-                "qty" => $Wishlist->qty,
-                "actual_price" => $Product ? $Product->price : 0,
-                "offer_price" => $Product ? $Product->price_offer : 0,
-                "total_price" => ($Product ? $Product->price : 0) * $Wishlist->qty,
-            ]);
-    
+            $cart = Cart::where('user_id', $userId)
+            ->where('product_id', $Wishlist->product_id)
+            ->where('size_id', $Wishlist->size_id)
+            ->where('delete_status', "0")
+            ->first();
+
+            if ($cart) {
+                $cart->qty += $Wishlist->qty;
+                $cart->save();
+            } else {
+                $cart = Cart::create([
+                    'user_id'     => $userId,
+                    'product_id'  => $Wishlist->product_id,
+                    'size_id'     => $request->sizeid,
+                    "variant_id" => $Wishlist->variant_id,
+                    'qty'         => $Wishlist->qty,
+                    'actual_price'       => $size->price,
+                    'offer_price' => $size->price,
+                    'total_price' => $size->price * $Wishlist->qty,
+                ]);
+            }
+            
             $Wishlist->update([
                 "delete_status" => "1"
             ]);
+            
         }
         $cart_count = Cart::where("user_id", $userId)->where("delete_status", "0")->count();
         $data['cart_count'] = $cart_count;
