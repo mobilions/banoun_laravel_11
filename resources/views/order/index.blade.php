@@ -110,7 +110,9 @@ tr.selected {background-color:#adf7a9  ! important;}
                         <td data-export="{{number_format($index->grandtotal, 2)}}">{{number_format($index->grandtotal, 2)}}</td>
                         <td data-export="{{$index->totalqty}}">{{$index->totalqty}}</td>
                         <td data-export="{{$index->paymenttype ?? 'N/A'}}">{{$index->paymenttype ?? 'N/A'}}</td>
-                        <td data-export="{{optional($index->orderStatus)->name ?? App\Models\Orderstatus::FindName($index->orderstatus)}}">{{optional($index->orderStatus)->name ?? App\Models\Orderstatus::FindName($index->orderstatus)}}</td>
+                        <td data-export="{{optional($index->orderStatus)->name ?? App\Models\Orderstatus::FindName($index->orderstatus)}}">
+                            {{optional($index->orderStatus)->name ?? App\Models\Orderstatus::FindName($index->orderstatus)}}
+                        </td>
                         <td class="export-ignore"><a href="{{url('/order')}}/{{$index->id}}/view" class="btn btn-outline-secondary me-2 waves-effect waves-light btn-sm font-size-18"><i class="mdi mdi-eye"></i></a></td>
                     </tr>
                     @empty

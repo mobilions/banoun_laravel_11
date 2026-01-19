@@ -1551,6 +1551,18 @@ if (!empty($colorIds) || !empty($sizeIds)) {
             "grand_total" => $CartMaster->grandtotal,
         ];
 
+        \DB::table('notifications')->insert([
+            'user_id' => $userId,
+            'type' => 'order',
+            'title' => 'Order Placed Successfully',
+            'message' => 'Your order #' . $CartMaster->id . ' has been placed',
+            'icon' => 'bx-cart',
+            'link' =>  '/order/' . $CartMaster->id. '/view',
+            'is_read' => false,
+            'created_at' => now(),
+            'updated_at' => now()
+        ]);
+
         $message['success'] = "Order completed successfully.";
         return $this->sendResponse($data, $message); 
     }
