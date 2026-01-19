@@ -13,7 +13,7 @@ use App\Models\Variant;
 use App\Models\Variantsub;
 
 use App\Models\Cart;
-
+use App\Models\Product;
 use Illuminate\Http\Request;
 
 use Illuminate\Support\Facades\Storage;
@@ -205,9 +205,11 @@ class ProductvariantController extends Controller
             $imgurl3 = $request->imgfile_val3;
         }
 
+        $productColors = Product::Select('colors')->where('id', $request->product_id)->first();
+   
         $data = new Productvariant; 
 
-        $data->color_id = $request->color_id;
+        $data->color_id = $productColors->colors ?? null;
 
         $data->size_id = $request->size_id;
 

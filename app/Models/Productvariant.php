@@ -31,7 +31,7 @@ class Productvariant extends Model
 
     protected $casts = [
         'size_id' => 'integer',
-        'color_id' => 'integer',
+        'color_id' => 'string',
         'price' => 'decimal:2',
         'created_by' => 'integer',
         'updated_by' => 'integer',
@@ -59,9 +59,14 @@ class Productvariant extends Model
         return $this->sizeVariant();
     }
     
-    public function color()
+    public function colors()
     {
-        return $this->colorVariant();
+        if (empty($this->color_id)) {
+            return collect();
+        }
+        
+        $colorIds = explode(',', $this->color_id);
+        return Variantsub::whereIn('id', $colorIds)->get();
     }
     
     public function stock()

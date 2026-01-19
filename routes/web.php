@@ -59,7 +59,7 @@ Route::post('password/confirm', [App\Http\Controllers\Auth\ConfirmPasswordContro
 Route::get('/', [HomeController::class, 'index']);
 Route::get('/home', [HomeController::class, 'index']);
 Route::get('/admin', [HomeController::class, 'index'])->name('admin');
-Route::get('/details/{variantId}', [StockController::class, 'getStockDetails'])->name('stock.details')->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
+//Route::get('/details/{variantId}', [StockController::class, 'getStockDetails'])->name('stock.details')->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
 
 Route::prefix('category')->group(function () {
     Route::get('/', [CategoryController::class, 'index'])->name('category');
@@ -228,7 +228,7 @@ Route::get('/addsearchTag/{name}/{name_ar}', [SearchtagController::class, 'addse
 Route::get('/selectBrandTag/{brandid}', [SearchtagController::class, 'selectBrandTag']);
 
 Route::get('/addVariantValue/{variant_id}/{name}/{name_ar}/{color_val}', [VariantsubController::class, 'addVariantValue']);
-
+Route::get('/details/{variant_id}', [StockController::class, 'details'])->name('stock.details');
 Route::prefix('delivery')->group(function () {
     Route::get('/', [DeliveryController::class, 'index'])->name('delivery');
     Route::get('/create', [DeliveryController::class, 'create'])->name('deliverycreate');
@@ -245,6 +245,7 @@ Route::prefix('stock')->group(function () {
     Route::post('/destroy', [StockController::class, 'destroy'])->name('stock.destroy');
     Route::get('/{id}/approve', [StockController::class, 'stcokapprove'])->name('stock.approve');
     Route::delete('/entry/{id}', [StockController::class, 'destroy'])->name('stock.destroy');
+    
 });
 
 Route::get('/stocklist', [StockController::class, 'stocklist'])->name('stock.list');

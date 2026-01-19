@@ -83,8 +83,8 @@ tr.selected {background-color:#adf7a9  ! important;}
                     <div>
 
                         <label>Enter Quantity <span class="text-danger">*</span></label>
-
-                        <input type="number" name="quantity" id="quantityedit" class="form-control" required="">
+                        <input type="number" name="quantity" id="quantityedit" class="form-control" required>
+                        <small id="quantityValidation" class="text-danger" style="display: none;"></small>
 
                         <input type="hidden" name="editid" id="editid">
 
@@ -102,7 +102,7 @@ tr.selected {background-color:#adf7a9  ! important;}
 
 <button type="button" class="btn btn-secondary waves-effect" data-bs-dismiss="modal">Close</button>
 
-<button type="submit" class="btn btn-primary waves-effect waves-light">Update</button>
+<button type="submit" id="editSubmitBtn" class="btn btn-primary waves-effect waves-light">Update</button>
 
 </div>
 
@@ -222,12 +222,12 @@ tr.selected {background-color:#adf7a9  ! important;}
                                         <i class="mdi mdi-pencil"></i>
                                     </button>
                                     
-                                    <button type="button" 
+                                    <!-- <button type="button" 
                                             class="btn btn-danger btn-sm waves-effect waves-light deletebtn" 
                                             data-id="{{$index->id}}" 
                                             data-quantity="{{$index->quantity}}">
                                         <i class="mdi mdi-delete"></i>
-                                    </button>
+                                    </button> -->
                                 @else
                                     <span class="text-muted">—</span>
                                 @endif
@@ -246,60 +246,57 @@ tr.selected {background-color:#adf7a9  ! important;}
     </div>
 
     <div class="col-md-12">
-
-        <div class="card">
-
-            <div class="card-body">
-
-                <h5>Stock Transaction</h5>
-
-                <table id="datatable-buttons1" class="table table-bordered dt-responsive nowrap w-100">
-
-                    <thead>
-
-                        <tr>
-
-                            <th>#</th>
-
-                            <th>Quantity</th>
-
-                            <th>Date Added</th>
-
-                            <th>Transaction</th>
-                            <th>Action By</th>
-
-                        </tr>
-
-                    </thead>           
-
-                    <tbody>
-
-                        @foreach ($indexes as $index)
-
-                        <tr>
-
-                            <td>{{$index->id}}</td>
-
-                            <td>{{$index->quantity}}</td>
-
-                            <td>{{date('d-m-Y',strtotime($index->created_at))}}</td>
-
-                                <td>{{$index->process}}</td>
-                                <td>{{ $index->user ? $index->user->name : 'N/A' }}</td>
-
-                        </tr>
-
-                        @endforeach
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
+    <div class="card">
+        <div class="card-body">
+            <h5>Stock Transaction History</h5>
+            <table id="datatable-buttons1" class="table table-bordered dt-responsive nowrap w-100">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Processed Quantity</th>
+                        <th>Previous Quantity</th>
+                        <th>Total After Action</th>
+                        <th>Action</th>
+                        <th>Date</th>                            
+                        <th>Action By</th>
+                    </tr>
+                </thead>           
+                <tbody>
+                    @forelse ($indexes as $key => $log)
+                    <tr>
+                        <td>{{ $key + 1 }}</td>
+                        <td>
+                            @if ($log->process == 'Remove')
+                                <span class="text-danger">{{ $log->process_quantity }}</span>
+                                <span class="badge bg-danger">{{ $log->process }}</span>
+                            @elseif ($log->process == 'Add')
+                                <span class="text-success">+{{ $log->process_quantity }}</span>
+                                <span class="badge bg-success">{{ $log->process }}</span>
+                            @else
+                                <span>{{ $log->process_quantity }}</span>
+                                <span class="badge bg-info">{{ $log->process }}</span>
+                            @endif
+                        </td>
+                        <td>{{ $log->previous_quantity }}</td>
+                        <td>{{ $log->total_quantity }}</td>
+                        <td>
+                            <span class="badge {{ $log->action == 'CREATED' ? 'bg-primary' : 'bg-warning' }}">
+                                {{ $log->action }}
+                            </span>
+                        </td>
+                        <td>{{ date('d-m-Y H:i', strtotime($log->created_at)) }}</td>
+                        <td>{{ $log->user ? $log->user->name : 'N/A' }}</td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="7" class="text-center">No stock transaction history found</td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
-
     </div>
+</div>
 
 </div>
 
@@ -360,9 +357,32 @@ tr.selected {background-color:#adf7a9  ! important;}
         initTable("#datatable-buttons", "#datatable-buttons_wrapper .col-md-6:eq(0)");
         initTable("#datatable-buttons1", "#datatable-buttons1_wrapper .col-md-6:eq(0)");
         $(".dataTables_length select").addClass("form-select form-select-sm");
+        
+        var originalQuantity = 0;
+        
         $('.editbtn').click(function() {
-            var id = $(this).data("id"); $("#editid").val(id);
-            var quantity = $(this).data("quantity"); $("#quantityedit").val(quantity);
+            var id = $(this).data("id"); 
+            $("#editid").val(id);
+            var quantity = $(this).data("quantity"); 
+            $("#quantityedit").val(quantity);
+            originalQuantity = quantity;
+            
+            // Reset validation on modal open
+            $('#quantityValidation').hide();
+            $('#editSubmitBtn').prop('disabled', false);
+        });
+
+        // Validate quantity input
+        $('#quantityedit').on('input', function() {
+            var newQuantity = parseInt($(this).val()) || 0;
+            
+            if (newQuantity >= originalQuantity) {
+                $('#quantityValidation').show().text('You can only remove the existing quantity.');
+                $('#editSubmitBtn').prop('disabled', true);
+            } else {
+                $('#quantityValidation').hide();
+                $('#editSubmitBtn').prop('disabled', false);
+            }
         });
 
         $('.deletebtn').on('click', function() {

@@ -1,8 +1,6 @@
 <?php
 
 namespace App\Models;
-
-
 use App\Models\Cart;
 use App\Models\Product;
 use App\Models\Productvariant;
@@ -10,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Enums\StockProcess;
+use App\Models\StockLog;
 
 class Stock extends Model
 {
@@ -18,7 +17,6 @@ class Stock extends Model
         'product_id',
         'variant_id',
         'quantity',
-        'process',
         'status',
         'cart_id',
         'created_by',
@@ -28,6 +26,7 @@ class Stock extends Model
     protected $casts = [
         'product_id' => 'integer',
         'variant_id' => 'integer',
+        'quantity' => 'integer',
         'status' => 'integer',
         'cart_id' => 'integer',
         'created_by' => 'integer',
@@ -58,103 +57,59 @@ class Stock extends Model
         return $this->belongsTo(\App\Models\User::class, 'updated_by');
     }
 
-    public  static function updateStock($product_id,$productvariants_id,$quantity,$process,$cart_id=0)
-
-   {
-
-   	
-
-        DB::transaction(function () use ($product_id,$productvariants_id,$quantity,$process,$cart_id) {
-    		  $data = new Stock; 
-            $data->product_id = $product_id;
-            $data->variant_id = $productvariants_id;
-            $data->quantity    = $quantity;
-            $data->cart_id    = $cart_id;
-            $data->process    = $process;
-            $data->updated_by=Auth::user()->id;
-            $data->save();
-
-            $variant = Productvariant::where('id',$productvariants_id)->lockForUpdate()->first();
+    public static function updateStock($product_id, $productvariants_id, $quantity, $process, $cart_id = 0)
+    {
+        DB::transaction(function () use ($product_id, $productvariants_id, $quantity, $process, $cart_id) {
+            $variant = Productvariant::where('id', $productvariants_id)->lockForUpdate()->first();
+            
             if (empty($variant)) { 
                 throw new \Exception('Product variant not found.');
             }
 
-            $qty=self::stockVariant($productvariants_id);
+            $previous_qty = $variant->available_quantity ?? 0;
+            
+            // Create stock entry
+            $data = new Stock; 
+            $data->product_id = $product_id;
+            $data->variant_id = $productvariants_id;
+            $data->quantity = $quantity;
+            $data->cart_id = $cart_id;
+            $data->created_by = Auth::user()->id;
+            $data->updated_by = Auth::user()->id;
+            $data->save();
 
-            $variant->available_quantity = $qty;
-            $variant->updated_by=Auth::user()->id;
+            // Calculate new total quantity
+            $total_qty = self::stockVariant($productvariants_id);
+
+            // Update variant quantity
+            $variant->available_quantity = $total_qty;
+            $variant->updated_by = Auth::user()->id;
             $variant->save();
+
+            // Create stock log
+            StockLog::create([
+                'stock_id' => $data->id,
+                'product_id' => $product_id,
+                'variant_id' => $productvariants_id,
+                'previous_quantity' => $previous_qty,
+                'process_quantity' => $quantity,
+                'total_quantity' => $total_qty,
+                'process' => $process,
+                'action' => 'CREATED',
+                'cart_id' => $cart_id,
+                'performed_by' => Auth::user()->id
+            ]);
         });
-
-   }
-
-
+    }
 
    public  static function stockApproval($product_id)
-
    {
-
   		$data = Stock::where('product_id',$product_id)->update(['status' => 1]); 
-
    }
 
-
-
-   public  static function stockProduct($product_id)
-
-   {
-
-   		$add=Stock::where('process',StockProcess::ADD)->where('product_id',$product_id)->sum('quantity');
-
-   		$sales=Stock::where('process',StockProcess::SALES)->where('product_id',$product_id)->sum('quantity');
-
-   		$return=Stock::where('process',StockProcess::RETURN)->where('product_id',$product_id)->sum('quantity');
-
-   		$cancel=Stock::where('process',StockProcess::CANCEL)->where('product_id',$product_id)->sum('quantity');
-
-   		$replace=Stock::where('process',StockProcess::REPLACE)->where('product_id',$product_id)->sum('quantity');
-
-
-
-   		$stock=$add+$return+$cancel+$replace-$sales;
-
-
-
-   		return $stock;
-
-
-
-   }
-
-
-
-   public  static function stockVariant($variant_id)
-
-   {
-
-   		$add=Stock::where('process',StockProcess::ADD)->where('variant_id',$variant_id)->sum('quantity');
-
-   		$sales=Stock::where('process',StockProcess::SALES)->where('variant_id',$variant_id)->sum('quantity');
-
-   		$return=Stock::where('process',StockProcess::RETURN)->where('variant_id',$variant_id)->sum('quantity');
-
-   		$cancel=Stock::where('process',StockProcess::CANCEL)->where('variant_id',$variant_id)->sum('quantity');
-
-   		$replace=Stock::where('process',StockProcess::REPLACE)->where('variant_id',$variant_id)->sum('quantity');
-
-
-
-   		$stock=$add+$return+$cancel+$replace-$sales;
-
-
-
-   		return $stock;
-
-
-
-   }
-
-
+   public static function stockVariant($variant_id) {
+    return Stock::where('variant_id', $variant_id)->sum('quantity');
+}
 
   public static function FindStatus($id){
 

@@ -224,94 +224,117 @@ tr.selected {background-color:#adf7a9 !important;}
         $(".dataTables_length select").addClass("form-select form-select-sm");
 
         // Handle click on "View Log" button
-        $(document).on('click', '.view-details', function(e) {
-            e.stopPropagation();
-            var variantId = $(this).data('variant-id');
-            var clickedRow = $(this).closest('tr');
-            var existingDetailsRow = clickedRow.next('tr.stock-details-row');
+$(document).on('click', '.view-details', function(e) {
+    e.stopPropagation();
+    var variantId = $(this).data('variant-id');
+    var clickedRow = $(this).closest('tr');
+    var existingDetailsRow = clickedRow.next('tr.stock-details-row');
+    
+    // Check if details row already exists
+    if (existingDetailsRow.length > 0) {
+        existingDetailsRow.remove();
+        return;
+    }
+    
+    // Create new details row
+    var detailsRow = $('<tr class="stock-details-row">' +
+        '<td colspan="8">' +
+        '<div class="p-3">' +
+        '<h6>Stock Transaction History</h6>' +
+        '<div class="table-responsive">' +
+        '<table class="table table-sm stock-details-table">' +
+        '<thead>' +
+        '<tr>' +
+        '<th>#</th>' +
+        '<th>Date</th>' +
+        '<th>Action</th>' +
+        '<th>Processed Qty</th>' +
+        '<th>Previous Qty</th>' +
+        '<th>Total After Action</th>' +
+        '<th>Action By</th>' +
+        '</tr>' +
+        '</thead>' +
+        '<tbody class="stock-details-body">' +
+        '<tr><td colspan="7" class="text-center">' +
+        '<div class="spinner-border spinner-border-sm" role="status">' +
+        '<span class="visually-hidden">Loading...</span>' +
+        '</div>' +
+        '</td></tr>' +
+        '</tbody>' +
+        '</table>' +
+        '</div>' +
+        '</div>' +
+        '</td>' +
+        '</tr>');
+    
+    clickedRow.after(detailsRow);
+    
+    // Load stock details via AJAX
+    $.ajax({
+        url: '/details/' + variantId,
+        method: 'GET',
+        success: function(response) {
+            console.log("Response:", response);
             
-            // Check if details row already exists
-            if (existingDetailsRow.length > 0) {
-                existingDetailsRow.remove();
-                return;
-            }
+            var tbody = detailsRow.find('.stock-details-body');
+            tbody.empty(); // Clear the loading spinner
             
-            // Create new details row
-            var detailsRow = $('<tr class="stock-details-row">' +
-                '<td colspan="8">' +
-                '<div class="p-3">' +
-                '<h6>Stock Addition History</h6>' +
-                '<div class="table-responsive">' +
-                '<table class="table table-sm stock-details-table">' +
-                '<thead>' +
-                '<tr>' +
-                '<th>#</th>' +
-                '<th>Date Added</th>' +
-                '<th>Quantity Added</th>' +
-                '<th>Process</th>' +
-                '<th>Status</th>' +
-                '</tr>' +
-                '</thead>' +
-                '<tbody class="stock-details-body">' +
-                '<tr><td colspan="5" class="text-center">' +
-                '<div class="spinner-border spinner-border-sm" role="status">' +
-                '<span class="visually-hidden">Loading...</span>' +
-                '</div>' +
-                '</td></tr>' +
-                '</tbody>' +
-                '</table>' +
-                '</div>' +
-                '</div>' +
-                '</td>' +
-                '</tr>');
-            
-            clickedRow.after(detailsRow);
-            
-            // Load stock details via AJAX
-            $.ajax({
-                url: '/details/' + variantId,
-                method: 'GET',
-                success: function(response) {
-                    console.log("Response:", response);
+            if (response && response.length > 0) {
+                $.each(response, function(index, log) {
+                    // Parse the date
+                    var date = new Date(log.created_at);
+                    var formattedDate = date.toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
                     
-                    var tbody = detailsRow.find('.stock-details-body');
-                    tbody.empty(); // Clear the loading spinner
+                    // Determine badge class
+                    var processBadge = '';
+                    var processQtyDisplay = '';
                     
-                    if (response && response.length > 0) {
-                        $.each(response, function(index, stock) {
-                            // Parse the date
-                            var date = new Date(stock.created_at);
-                            var formattedDate = date.toLocaleDateString('en-US', {
-                                year: 'numeric',
-                                month: '2-digit',
-                                day: '2-digit',
-                                hour: '2-digit',
-                                minute: '2-digit'
-                            });
-                            
-                            var row = '<tr>' +
-                                '<td>' + (index + 1) + '</td>' +
-                                '<td>' + formattedDate + '</td>' +
-                                '<td><strong>' + stock.quantity + '</strong></td>' +
-                                '<td><span class="badge bg-success">' + stock.process + '</span></td>' +
-                                '<td>' + (stock.status == 1 ? '<span class="badge bg-success">Active</span>' : '<span class="badge bg-secondary">Inactive</span>') + '</td>' +
-                                '</tr>';
-                            
-                            tbody.append(row);
-                        });
-                        
-                        console.log("Rows appended successfully");
+                    if (log.process === 'Remove') {
+                        processBadge = '<span class="badge bg-danger">' + log.process + '</span>';
+                        processQtyDisplay = '<span class="text-danger">' + log.process_quantity + '</span>';
+                    } else if (log.process === 'Add') {
+                        processBadge = '<span class="badge bg-success">' + log.process + '</span>';
+                        processQtyDisplay = '<span class="text-success">+' + log.process_quantity + '</span>';
                     } else {
-                        tbody.html('<tr><td colspan="5" class="text-center">No stock records found</td></tr>');
+                        processBadge = '<span class="badge bg-info">' + log.process + '</span>';
+                        processQtyDisplay = '<span>' + log.process_quantity + '</span>';
                     }
-                },
-                error: function(xhr, status, error) {
-                    console.error('AJAX Error:', xhr, status, error);
-                    var tbody = detailsRow.find('.stock-details-body');
-                    tbody.html('<tr><td colspan="5" class="text-center text-danger">Error: ' + error + '</td></tr>');
-                }
-            });
-        });
+                    
+                    var actionBadge = log.action === 'CREATED' 
+                        ? '<span class="badge bg-primary">' + log.action + '</span>'
+                        : '<span class="badge bg-warning">' + log.action + '</span>';
+                    
+                    var row = '<tr>' +
+                        '<td>' + (index + 1) + '</td>' +
+                        '<td>' + formattedDate + '</td>' +
+                        '<td>' + actionBadge + '</td>' +
+                        '<td>' + processQtyDisplay + ' ' + processBadge + '</td>' +
+                        '<td>' + log.previous_quantity + '</td>' +
+                        '<td>' + log.total_quantity + '</td>' +
+                        '<td>' + (log.user ? log.user.name : 'N/A') + '</td>' +
+                        '</tr>';
+                    
+                    tbody.append(row);
+                });
+                
+                console.log("Rows appended successfully");
+            } else {
+                tbody.html('<tr><td colspan="7" class="text-center">No stock records found</td></tr>');
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('AJAX Error:', xhr, status, error);
+            var tbody = detailsRow.find('.stock-details-body');
+            tbody.html('<tr><td colspan="7" class="text-center text-danger">Error: ' + error + '</td></tr>');
+        }
+    });
+});
     });
 })(jQuery);
 </script>
