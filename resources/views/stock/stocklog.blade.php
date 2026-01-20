@@ -72,6 +72,13 @@ tr.selected {background-color:#adf7a9 !important;}
                             <label>Max Quantity</label>
                             <input type="number" name="max_quantity" class="form-control" placeholder="Max" value="{{ request('max_quantity') }}" min="0">
                         </div>
+                        <div class="col-md-2">
+                            <label>Product Status</label>
+                            <select name="status" class="form-select">
+                                <option value="">Active</option>
+                                <option value="deleted" {{ request('status') == 'deleted' ? 'selected' : '' }}>Deleted</option>
+                            </select>
+                        </div>
                         <div class="col-md-1">
                             <label>&nbsp;</label>
                             <button type="submit" class="btn btn-primary waves-effect waves-light w-100" title="Filter"><i class="mdi mdi-filter me-1"></i>Filter</button>

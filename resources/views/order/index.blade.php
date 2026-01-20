@@ -29,55 +29,55 @@ tr.selected {background-color:#adf7a9  ! important;}
         <div class="card">
             <div class="card-body">
                 <form method="GET" action="{{url('/orders')}}" class="mb-3">
-                    <div class="row g-3">
-                        <div class="col-md-2">
-                            <label>From Date</label>
-                            <input class="form-control" type="date" value="{{$fromdate}}" name="fromdate" id="fromdate">
-                        </div>
-                        <div class="col-md-2">
-                            <label>To Date</label>
-                            <input class="form-control" type="date" value="{{$todate}}" name="todate" id="todate">
-                        </div>
-                        <div class="col-md-2">
-                            <label>Search</label>
-                            <input type="text" name="search" class="form-control" placeholder="Order #, Name, Phone..." value="{{ request('search') }}">
-                        </div>
-                        <div class="col-md-2">
-                            <label>Order Status</label>
-                            <select name="order_status" class="form-select">
-                                <option value="">All Statuses</option>
-                                @foreach($orderStatuses ?? [] as $status)
-                                    <option value="{{ $status->id }}" {{ request('order_status') == $status->id ? 'selected' : '' }}>{{ $status->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <label>Payment Type</label>
-                            <select name="payment_type" class="form-select">
-                                <option value="">All Types</option>
-                                @foreach($paymentTypes ?? [] as $type)
-                                    <option value="{{ $type }}" {{ request('payment_type') == $type ? 'selected' : '' }}>{{ $type }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <label>Min Amount</label>
-                            <input type="number" name="min_amount" class="form-control" placeholder="Min" value="{{ request('min_amount') }}" step="0.01">
-                        </div>
-                        <div class="col-md-2">
-                            <label>Max Amount</label>
-                            <input type="number" name="max_amount" class="form-control" placeholder="Max" value="{{ request('max_amount') }}" step="0.01">
-                        </div>
-                        <div class="col-md-1">
-                            <label>&nbsp;</label>
-                            <button type="submit" class="btn btn-primary waves-effect waves-light w-100" title="Filter"><i class="mdi mdi-filter me-1"></i>Filter</button>
-                        </div>
-                        <div class="col-md-1">
-                            <label>&nbsp;</label>
-                            <a href="{{url('/orders')}}" class="btn btn-secondary waves-effect waves-light w-100" title="Reset"><i class="mdi mdi-refresh me-1"></i>Clear</a>
-                        </div>
-                    </div>
-                </form>
+    <div class="row g-3">
+        <div class="col-md-2">
+            <label>From Date</label>
+            <input class="form-control" type="date" value="{{ old('fromdate', $fromdate) }}" name="fromdate" id="fromdate">
+        </div>
+        <div class="col-md-2">
+            <label>To Date</label>
+            <input class="form-control" type="date" value="{{ old('todate', $todate) }}" name="todate" id="todate">
+        </div>
+        <div class="col-md-2">
+            <label>Search</label>
+            <input type="text" name="search" class="form-control" placeholder="Order #, Name, Phone..." value="{{ old('search', request('search')) }}">
+        </div>
+        <div class="col-md-2">
+            <label>Order Status</label>
+            <select name="order_status" class="form-select">
+                <option value="">All Statuses</option>
+                @foreach($orderStatuses ?? [] as $status)
+                    <option value="{{ $status->id }}" {{ old('order_status', request('order_status')) == $status->id ? 'selected' : '' }}>{{ $status->name }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label>Payment Type</label>
+            <select name="payment_type" class="form-select">
+                <option value="">All Types</option>
+                @foreach($paymentTypes ?? [] as $type)
+                    <option value="{{ $type }}" {{ old('payment_type', request('payment_type')) == $type ? 'selected' : '' }}>{{ $type }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label>Min Amount</label>
+            <input type="number" name="min_amount" class="form-control" placeholder="Min" value="{{ old('min_amount', request('min_amount')) }}" step="0.01">
+        </div>
+        <div class="col-md-2">
+            <label>Max Amount</label>
+            <input type="number" name="max_amount" class="form-control" placeholder="Max" value="{{ old('max_amount', request('max_amount')) }}" step="0.01">
+        </div>
+        <div class="col-md-1">
+            <label>&nbsp;</label>
+            <button type="submit" class="btn btn-primary waves-effect waves-light w-100" title="Filter"><i class="mdi mdi-filter me-1"></i>Filter</button>
+        </div>
+        <div class="col-md-1">
+            <label>&nbsp;</label>
+            <a href="{{url('/orders')}}" class="btn btn-secondary waves-effect waves-light w-100" title="Reset"><i class="mdi mdi-refresh me-1"></i>Clear</a>
+        </div>
+    </div>
+</form>
             </div>
         </div>
     </div>

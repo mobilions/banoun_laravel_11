@@ -91,12 +91,20 @@ tr.selected {background-color:#adf7a9  ! important;}
                         <input type="number" name="max_price" class="form-control" placeholder="Max Price" value="{{ request('max_price') }}" step="0.01">
                     </div>
                     <div class="col-md-2">
+                        <label>Status</label>
+                        <select name="status" class="form-select">
+                            <option value="">Active</option>
+                            <option value="deleted" {{ request('status') == 'deleted' ? 'selected' : '' }}>Deleted</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
                         <label>&nbsp;</label>
                         <div class="d-flex gap-2">
                             <a href="{{ route('products') }}" class="btn btn-secondary waves-effect waves-light flex-fill" title="Reset"><i class="mdi mdi-refresh me-1"></i>Clear</a>
                             <button type="submit" class="btn btn-primary waves-effect waves-light flex-fill" title="Filter"><i class="mdi mdi-filter me-1"></i>Filter</button>
                         </div>
                     </div>
+                    
                 </div>
             </form>
 

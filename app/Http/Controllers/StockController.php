@@ -262,6 +262,7 @@ class StockController extends Controller
             'subcategory_id' => 'nullable|integer|exists:subcategories,id',
             'min_quantity' => 'nullable|numeric|min:0',
             'max_quantity' => 'nullable|numeric|min:0',
+            'status' => 'nullable|string|in:deleted',
         ]);
 
         $query = Productvariant::query()
@@ -306,6 +307,16 @@ class StockController extends Controller
         if ($request->has('subcategory_id') && $request->subcategory_id) {
             $query->whereHas('product', function($q) use ($request) {
                 $q->where('subcategory_id', $request->subcategory_id);
+            });
+        }
+
+        if ($request->has('status') && $request->status == 'deleted') {
+            $query->whereHas('product', function($q) {
+                $q->where('delete_status', 1);
+            });
+        } else {
+            $query->whereHas('product', function($q) {
+                $q->where('delete_status', 0);
             });
         }
 
