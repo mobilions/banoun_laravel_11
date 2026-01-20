@@ -132,6 +132,7 @@ tr.selected {background-color:#adf7a9  ! important;}
                                 {{ (int)$index->delete_status === 0 ? 'Active' : 'Deleted' }}
                             </span>
                         </td>
+                        @if ($index->delete_status === 0)
                         <td class="export-ignore">
                             <a href="{{url('/product')}}/{{$index->id}}/edit" class="btn btn-outline-secondary me-2 waves-effect waves-light btn-sm font-size-18"><i class="mdi mdi-pencil"></i></a>
                             <form action="{{url('/product')}}/{{$index->id}}/delete" method="POST" class="d-inline" onsubmit="return confirm('Delete this product?');">
@@ -141,6 +142,7 @@ tr.selected {background-color:#adf7a9  ! important;}
                                 </button>
                             </form>
                         </td>
+                        @endif
                     </tr>
                     @empty
                     <tr>
