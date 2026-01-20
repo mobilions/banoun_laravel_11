@@ -493,6 +493,7 @@ class HomepageController extends BaseController
         ->leftJoin("subcategories", "subcategories.id", "=", "products.subcategory_id")
         ->where('products.delete_status','0')
         ->where("products.is_newarrival", "1")
+        ->orderBy("products.id", "DESC")
         ->take(8)
         ->get();
 
@@ -535,6 +536,7 @@ class HomepageController extends BaseController
         ->leftJoin("subcategories", "subcategories.id", "=", "products.subcategory_id")
         ->where('products.delete_status','0')
         ->where("products.is_trending", "1")
+        ->orderBy("products.id", "DESC")
         ->take(8)
         ->get();
 
