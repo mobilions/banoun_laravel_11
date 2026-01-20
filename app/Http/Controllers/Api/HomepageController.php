@@ -1067,6 +1067,10 @@ if (!empty($colorIds) || !empty($sizeIds)) {
             return $this->sendError($validator->errors());
         }
         
+        $Coupon = Coupon::where("coupon_code", $request->couponId)->where("delete_status", "0")->first();
+        if(empty($Coupon)){
+            return $this->sendError(["error" => "Please enter a valid coupon."]);
+        }
         $userId = auth("api")->id();
         $CartMaster = CartMaster::where("user_id", $userId)->where("is_checkouted", "0")->where("is_deleted", "0")->first();
         if(empty($CartMaster)){
