@@ -206,7 +206,8 @@ class HomepageController extends BaseController
                 $product = $product->orderBy("products.is_newarrival", "desc");
             }
             if($request->orderby == "trending"){
-                $product = $product->orderBy("products.is_trending", "desc");
+                $product->orderByRaw("COALESCE(products.is_trending, 0) DESC")
+                ->orderBy("products.id", "DESC");
             }
             if($request->orderby == "h2l"){
                 $product = $product->orderBy("products.price_offer", "desc");
