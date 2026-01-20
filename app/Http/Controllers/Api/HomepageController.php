@@ -203,7 +203,8 @@ class HomepageController extends BaseController
                 });
             }
             if($request->orderby == "new"){
-                $product = $product->orderBy("products.is_newarrival", "desc");
+                $product->orderByRaw("COALESCE(products.is_newarrival, 0) DESC")
+                ->orderBy("products.id", "DESC");
             }
             if($request->orderby == "trending"){
                 $product->orderByRaw("COALESCE(products.is_trending, 0) DESC")
