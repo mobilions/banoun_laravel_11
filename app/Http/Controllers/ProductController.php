@@ -45,6 +45,10 @@ class ProductController extends Controller
     public function index(Request $request)
 
     {
+        $this->validate($request, [
+            'min_price' => 'nullable|numeric|min:0',
+            'max_price' => 'nullable|numeric|min:0|gte:min_price',
+        ]);
         $title = "Product";
 
         $query = Product::with(['category', 'brand', 'subcategory'])

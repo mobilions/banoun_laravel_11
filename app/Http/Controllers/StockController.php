@@ -261,7 +261,7 @@ class StockController extends Controller
             'brand_id' => 'nullable|integer|exists:brands,id',
             'subcategory_id' => 'nullable|integer|exists:subcategories,id',
             'min_quantity' => 'nullable|numeric|min:0',
-            'max_quantity' => 'nullable|numeric|min:0',
+            'max_quantity' => 'nullable|numeric|min:0|gte:min_quantity',
             'status' => 'nullable|string|in:deleted',
         ]);
 

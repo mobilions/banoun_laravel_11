@@ -58,38 +58,38 @@ tr.selected {background-color:#adf7a9  ! important;}
 
         <div class="card-body">
             <!-- Filters -->
-            <form method="GET" action="{{url('/customer')}}" class="mb-3">
-                <div class="row g-3">
-                    <div class="col-md-3">
-                        <label>Search</label>
-                        <input type="text" name="search" class="form-control" placeholder="Name, Email, Phone..." value="{{ request('search') }}">
-                    </div>
-                    <div class="col-md-2">
-                        <label>Verification Status</label>
-                        <select name="is_verified" class="form-select">
-                            <option value="1" {{ request('is_verified', '1') == '1' ? 'selected' : '' }}>Verified</option>
-                            <option value="0" {{ request('is_verified') == '0' ? 'selected' : '' }}>Not Verified</option>
-                            <option value="" {{ request('is_verified') === '' ? 'selected' : '' }}>All</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <label>Min Credit</label>
-                        <input type="number" name="min_credit" class="form-control" placeholder="Min" value="{{ request('min_credit') }}" step="0.01" min="0">
-                    </div>
-                    <div class="col-md-2">
-                        <label>Max Credit</label>
-                        <input type="number" name="max_credit" class="form-control" placeholder="Max" value="{{ request('max_credit') }}" step="0.01" min="0">
-                    </div>
-                    <div class="col-md-1">
-                        <label>&nbsp;</label>
-                        <button type="submit" class="btn btn-primary waves-effect waves-light w-100" title="Filter"><i class="mdi mdi-filter me-1"></i>Filter</button>
-                    </div>
-                    <div class="col-md-1">
-                        <label>&nbsp;</label>
-                        <a href="{{url('/customer')}}" class="btn btn-secondary waves-effect waves-light w-100" title="Reset"><i class="mdi mdi-refresh me-1"></i>Clear</a>
-                    </div>
-                </div>
-            </form>
+             <form method="GET" action="{{url('/customer')}}" class="mb-3">
+    <div class="row g-3">
+        <div class="col-md-3">
+            <label>Search</label>
+            <input type="text" name="search" class="form-control" placeholder="Name, Email, Phone..." value="{{ old('search', request('search')) }}">
+        </div>
+        <div class="col-md-2">
+            <label>Verification Status</label>
+            <select name="is_verified" class="form-select">
+                <option value="1" {{ old('is_verified', request('is_verified', '1')) == '1' ? 'selected' : '' }}>Verified</option>
+                <option value="0" {{ old('is_verified', request('is_verified')) == '0' ? 'selected' : '' }}>Not Verified</option>
+                <option value="" {{ old('is_verified', request('is_verified')) === '' ? 'selected' : '' }}>All</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label>Min Credit</label>
+            <input type="number" name="min_credit" class="form-control" placeholder="Min" value="{{ old('min_credit', request('min_credit')) }}" step="0.01" min="0">
+        </div>
+        <div class="col-md-2">
+            <label>Max Credit</label>
+            <input type="number" name="max_credit" class="form-control" placeholder="Max" value="{{ old('max_credit', request('max_credit')) }}" step="0.01" min="0">
+        </div>
+        <div class="col-md-1">
+            <label>&nbsp;</label>
+            <button type="submit" class="btn btn-primary waves-effect waves-light w-100" title="Filter"><i class="mdi mdi-filter me-1"></i>Filter</button>
+        </div>
+        <div class="col-md-1">
+            <label>&nbsp;</label>
+            <a href="{{url('/customer')}}" class="btn btn-secondary waves-effect waves-light w-100" title="Reset"><i class="mdi mdi-refresh me-1"></i>Clear</a>
+        </div>
+    </div>
+</form>
 
             <table id="datatable-buttons" class="table table-bordered nowrap w-100 align-middle">
                 <thead>

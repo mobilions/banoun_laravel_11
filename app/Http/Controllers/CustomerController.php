@@ -58,7 +58,7 @@ class CustomerController extends Controller
             'search' => 'nullable|string|max:255',
             'is_verified' => 'nullable',
             'min_credit' => 'nullable|numeric|min:0',
-            'max_credit' => 'nullable|numeric|min:0',
+            'max_credit' => 'nullable|numeric|min:0|gte:min_credit',
         ]);
 
         $query = User::active()->where('role','user');

@@ -32,63 +32,63 @@ tr.selected {background-color:#adf7a9 !important;}
             <div class="card-body">
                 <!-- Filters -->
                 <form method="GET" action="{{url('/stocklog')}}" class="mb-3">
-                    <div class="row g-3">
-                        <div class="col-md-3">
-                            <label>Search Product</label>
-                            <input type="text" name="search" class="form-control" placeholder="Search by product name..." value="{{ request('search') }}">
-                        </div>
-                        <div class="col-md-2">
-                            <label>Category</label>
-                            <select name="category_id" class="form-select">
-                                <option value="">All Categories</option>
-                                @foreach($categories ?? [] as $cat)
-                                    <option value="{{ $cat->id }}" {{ request('category_id') == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <label>Brand</label>
-                            <select name="brand_id" class="form-select">
-                                <option value="">All Brands</option>
-                                @foreach($brands ?? [] as $brand)
-                                    <option value="{{ $brand->id }}" {{ request('brand_id') == $brand->id ? 'selected' : '' }}>{{ $brand->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <label>SubCategory</label>
-                            <select name="subcategory_id" class="form-select">
-                                <option value="">All SubCategories</option>
-                                @foreach($subcategories ?? [] as $subcat)
-                                    <option value="{{ $subcat->id }}" {{ request('subcategory_id') == $subcat->id ? 'selected' : '' }}>{{ $subcat->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <label>Min Quantity</label>
-                            <input type="number" name="min_quantity" class="form-control" placeholder="Min" value="{{ request('min_quantity') }}" min="0">
-                        </div>
-                        <div class="col-md-2">
-                            <label>Max Quantity</label>
-                            <input type="number" name="max_quantity" class="form-control" placeholder="Max" value="{{ request('max_quantity') }}" min="0">
-                        </div>
-                        <div class="col-md-2">
-                            <label>Product Status</label>
-                            <select name="status" class="form-select">
-                                <option value="">Active</option>
-                                <option value="deleted" {{ request('status') == 'deleted' ? 'selected' : '' }}>Deleted</option>
-                            </select>
-                        </div>
-                        <div class="col-md-1">
-                            <label>&nbsp;</label>
-                            <button type="submit" class="btn btn-primary waves-effect waves-light w-100" title="Filter"><i class="mdi mdi-filter me-1"></i>Filter</button>
-                        </div>
-                        <div class="col-md-1">
-                            <label>&nbsp;</label>
-                            <a href="{{url('/stocklog')}}" class="btn btn-secondary waves-effect waves-light w-100" title="Reset"><i class="mdi mdi-refresh me-1"></i>Clear</a>
-                        </div>
-                    </div>
-                </form>
+    <div class="row g-3">
+        <div class="col-md-3">
+            <label>Search Product</label>
+            <input type="text" name="search" class="form-control" placeholder="Search by product name..." value="{{ old('search', request('search')) }}">
+        </div>
+        <div class="col-md-2">
+            <label>Category</label>
+            <select name="category_id" class="form-select">
+                <option value="">All Categories</option>
+                @foreach($categories ?? [] as $cat)
+                    <option value="{{ $cat->id }}" {{ old('category_id', request('category_id')) == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label>Brand</label>
+            <select name="brand_id" class="form-select">
+                <option value="">All Brands</option>
+                @foreach($brands ?? [] as $brand)
+                    <option value="{{ $brand->id }}" {{ old('brand_id', request('brand_id')) == $brand->id ? 'selected' : '' }}>{{ $brand->name }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label>SubCategory</label>
+            <select name="subcategory_id" class="form-select">
+                <option value="">All SubCategories</option>
+                @foreach($subcategories ?? [] as $subcat)
+                    <option value="{{ $subcat->id }}" {{ old('subcategory_id', request('subcategory_id')) == $subcat->id ? 'selected' : '' }}>{{ $subcat->name }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label>Min Quantity</label>
+            <input type="number" name="min_quantity" class="form-control" placeholder="Min" value="{{ old('min_quantity', request('min_quantity')) }}" min="0">
+        </div>
+        <div class="col-md-2">
+            <label>Max Quantity</label>
+            <input type="number" name="max_quantity" class="form-control" placeholder="Max" value="{{ old('max_quantity', request('max_quantity')) }}" min="0">
+        </div>
+        <div class="col-md-2">
+            <label>Product Status</label>
+            <select name="status" class="form-select">
+                <option value="">Active</option>
+                <option value="deleted" {{ old('status', request('status')) == 'deleted' ? 'selected' : '' }}>Deleted</option>
+            </select>
+        </div>
+        <div class="col-md-1">
+            <label>&nbsp;</label>
+            <button type="submit" class="btn btn-primary waves-effect waves-light w-100" title="Filter"><i class="mdi mdi-filter me-1"></i>Filter</button>
+        </div>
+        <div class="col-md-1">
+            <label>&nbsp;</label>
+            <a href="{{url('/stocklog')}}" class="btn btn-secondary waves-effect waves-light w-100" title="Reset"><i class="mdi mdi-refresh me-1"></i>Clear</a>
+        </div>
+    </div>
+</form>
 
                 <table id="datatable-buttons" class="table table-bordered dt-responsive">
                     <thead>
