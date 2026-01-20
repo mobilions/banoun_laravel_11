@@ -149,82 +149,58 @@ class HomepageController extends BaseController
             if($request->subcategoryId != "" && $request->subcategoryId != "0" && $request->subcategoryId != null){
                 $product = $product->where("products.subcategory_id", $request->subcategoryId);
             }
-        //     if (($request->sizeId != "" && $request->sizeId != "0" && $request->sizeId != null) || ($request->colorId != "" && $request->colorId != "0" && $request->colorId != null)) {
-        //         $product = $product->whereExists(function ($q) use ($request) {
-        //             $q->select(DB::raw(1))
-        //               ->from('productvariants')
-        //               ->whereColumn('productvariants.product_id', 'products.id');
-            
-        // if ($request->filled('sizeId')) {
-        //     $q->where('productvariants.size_id', (int) $request->sizeId);
-        // }
-
-        // if ($request->filled('colorId')) {
-        //     $colors = array_map('intval', explode(',', $request->colorId));
-
-        //     $q->where(function ($cq) use ($colors) {
-        //         foreach ($colors as $color) {
-        //             $cq->orWhereRaw(
-        //                 'FIND_IN_SET(?, productvariants.color_id)',
-        //                 [$color]
-        //             );
-        //         }
-        //     });
-        // }
-
-        //         });
-        //     }
-
             $colorIds = !empty($request->colorId)? (is_array($request->colorId) ? $request->colorId : explode(',', $request->colorId)): [];
-$sizeIds = !empty($request->sizeId)? (is_array($request->sizeId) ? $request->sizeId : explode(',', $request->sizeId)) : [];
- 
- 
-// Color & Size filter (match ANY)
+            $sizeIds = !empty($request->sizeId)? (is_array($request->sizeId) ? $request->sizeId : explode(',', $request->sizeId)) : [];
+            
+            // Color & Size filter (match ANY)
 
-if (!empty($colorIds) || !empty($sizeIds)) {
+            if (!empty($colorIds) || !empty($sizeIds)) {
 
-    $product->where(function ($q) use ($colorIds, $sizeIds) {
- 
-        if (!empty($colorIds)) {
+                $product->where(function ($q) use ($colorIds, $sizeIds) {
+            
+                    if (!empty($colorIds)) {
 
-            $q->where(function ($qc) use ($colorIds) {
+                        $q->where(function ($qc) use ($colorIds) {
 
-                foreach ($colorIds as $colorId) {
+                            foreach ($colorIds as $colorId) {
 
-                    $qc->orWhereRaw("FIND_IN_SET(?, products.colors)", [$colorId]);
+                                $qc->orWhereRaw("FIND_IN_SET(?, products.colors)", [$colorId]);
 
-                }
+                            }
 
-            });
+                        });
 
-        }
- 
-        if (!empty($sizeIds)) {
+                    }
+            
+                    if (!empty($sizeIds)) {
 
-            $q->where(function ($qs) use ($sizeIds) {
+                        $q->where(function ($qs) use ($sizeIds) {
 
-                foreach ($sizeIds as $sizeId) {
+                            foreach ($sizeIds as $sizeId) {
 
-                    $qs->orWhereRaw("FIND_IN_SET(?, products.size)", [$sizeId]);
+                                $qs->orWhereRaw("FIND_IN_SET(?, products.size)", [$sizeId]);
 
-                }
+                            }
 
-            });
+                        });
 
-        }
+                    }
 
-    });
+                });
 
-}
- 
+            }
+            
             if($request->minPrice != "" && $request->minPrice != "0" && $request->minPrice != null){
                 $product = $product->where("products.price_offer", ">=", $request->minPrice);
             }
             if($request->maxPrice != "" && $request->maxPrice != "0" && $request->maxPrice != null){
                 $product = $product->where("products.price_offer", "<=", $request->maxPrice);
             }
-            if ($request->keyword != "" && $request->keyword != null) {
-                $product = $product->where("products.name", "like", "%" . $request->keyword . "%")->orWhere("brands.name", "like", "%" . $request->keyword . "%");
+            if (!empty($request->keyword)) {
+                $product->where(function ($q) use ($request) {
+                    $q->where("products.name", "like", "%" . $request->keyword . "%")
+                      ->orWhere("brands.name", "like", "%" . $request->keyword . "%");
+                });
             }
             if($request->orderby == "new"){
                 $product = $product->orderBy("products.is_newarrival", "desc");
