@@ -58,47 +58,54 @@ tr.selected {background-color:#adf7a9  ! important;}
 
         <div class="card-body">
             <!-- Filters -->
-            <form method="GET" action="{{ route('products') }}" class="mb-3">
-                <div class="row g-3">
-                    <div class="col-md-3">
-                        <label>Search</label>
-                        <input type="text" name="search" class="form-control" placeholder="Search by name..." value="{{ request('search') }}">
-                    </div>
-                    <div class="col-md-2">
-                        <label>Category</label>
-                        <select name="category_id" class="form-select">
-                            <option value="">All Categories</option>
-                            @foreach($categories ?? [] as $cat)
-                                <option value="{{ $cat->id }}" {{ request('category_id') == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <label>Brand</label>
-                        <select name="brand_id" class="form-select">
-                            <option value="">All Brands</option>
-                            @foreach($brands ?? [] as $brand)
-                                <option value="{{ $brand->id }}" {{ request('brand_id') == $brand->id ? 'selected' : '' }}>{{ $brand->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <label>Min Price</label>
-                        <input type="number" name="min_price" class="form-control" placeholder="Min Price" value="{{ request('min_price') }}" step="0.01">
-                    </div>
-                    <div class="col-md-2">
-                        <label>Max Price</label>
-                        <input type="number" name="max_price" class="form-control" placeholder="Max Price" value="{{ request('max_price') }}" step="0.01">
-                    </div>
-                    <div class="col-md-2">
-                        <label>&nbsp;</label>
-                        <div class="d-flex gap-2">
-                            <a href="{{ route('products') }}" class="btn btn-secondary waves-effect waves-light flex-fill" title="Reset"><i class="mdi mdi-refresh me-1"></i>Clear</a>
-                            <button type="submit" class="btn btn-primary waves-effect waves-light flex-fill" title="Filter"><i class="mdi mdi-filter me-1"></i>Filter</button>
-                        </div>
-                    </div>
-                </div>
-            </form>
+             <form method="GET" action="{{ route('products') }}" class="mb-3">
+    <div class="row g-3">
+        <div class="col-md-3">
+            <label>Search</label>
+            <input type="text" name="search" class="form-control" placeholder="Search by name..." value="{{ old('search', request('search')) }}">
+        </div>
+        <div class="col-md-2">
+            <label>Category</label>
+            <select name="category_id" class="form-select">
+                <option value="">All Categories</option>
+                @foreach($categories ?? [] as $cat)
+                    <option value="{{ $cat->id }}" {{ old('category_id', request('category_id')) == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label>Brand</label>
+            <select name="brand_id" class="form-select">
+                <option value="">All Brands</option>
+                @foreach($brands ?? [] as $brand)
+                    <option value="{{ $brand->id }}" {{ old('brand_id', request('brand_id')) == $brand->id ? 'selected' : '' }}>{{ $brand->name }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label>Min Price</label>
+            <input type="number" name="min_price" class="form-control" placeholder="Min Price" value="{{ old('min_price', request('min_price')) }}" step="0.01">
+        </div>
+        <div class="col-md-2">
+            <label>Max Price</label>
+            <input type="number" name="max_price" class="form-control" placeholder="Max Price" value="{{ old('max_price', request('max_price')) }}" step="0.01">
+        </div>
+        <div class="col-md-2">
+            <label>Status</label>
+            <select name="status" class="form-select">
+                <option value="">Active</option>
+                <option value="deleted" {{ old('status', request('status')) == 'deleted' ? 'selected' : '' }}>Deleted</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label>&nbsp;</label>
+            <div class="d-flex gap-2">
+                <a href="{{ route('products') }}" class="btn btn-secondary waves-effect waves-light flex-fill" title="Reset"><i class="mdi mdi-refresh me-1"></i>Clear</a>
+                <button type="submit" class="btn btn-primary waves-effect waves-light flex-fill" title="Filter"><i class="mdi mdi-filter me-1"></i>Filter</button>
+            </div>
+        </div>
+    </div>
+</form>
 
             <table id="datatable-buttons" class="table table-bordered nowrap w-100 align-middle">
                 <thead>
@@ -125,6 +132,7 @@ tr.selected {background-color:#adf7a9  ! important;}
                                 {{ (int)$index->delete_status === 0 ? 'Active' : 'Deleted' }}
                             </span>
                         </td>
+                        @if ($index->delete_status === 0)
                         <td class="export-ignore">
                             <a href="{{url('/product')}}/{{$index->id}}/edit" class="btn btn-outline-secondary me-2 waves-effect waves-light btn-sm font-size-18"><i class="mdi mdi-pencil"></i></a>
                             <form action="{{url('/product')}}/{{$index->id}}/delete" method="POST" class="d-inline" onsubmit="return confirm('Delete this product?');">
@@ -134,6 +142,7 @@ tr.selected {background-color:#adf7a9  ! important;}
                                 </button>
                             </form>
                         </td>
+                        @endif
                     </tr>
                     @empty
                     <tr>

@@ -26,8 +26,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use App\Models\Productvariant;
-
-
+use App\Models\Stock;
 
 class ProductController extends Controller
 
@@ -46,10 +45,13 @@ class ProductController extends Controller
     public function index(Request $request)
 
     {
+        $this->validate($request, [
+            'min_price' => 'nullable|numeric|min:0',
+            'max_price' => 'nullable|numeric|min:0|gte:min_price',
+        ]);
         $title = "Product";
 
-        $query = Product::active()
-            ->with(['category', 'brand', 'subcategory'])
+        $query = Product::with(['category', 'brand', 'subcategory'])
             ->orderByDesc('created_at');
 
         // Search functionality
@@ -78,6 +80,12 @@ class ProductController extends Controller
         }
         if ($request->has('max_price') && $request->max_price) {
             $query->where('price', '<=', $request->max_price);
+        }
+
+        if ($request->has('status') && $request->status == 'deleted') {
+            $query->where('delete_status', 1);
+        } else {
+            $query->where('delete_status', 0);
         }
 
         // Pagination
@@ -660,7 +668,7 @@ class ProductController extends Controller
     if (!file_exists($storagePath)) {
         \Log::warning('Storage directory does not exist, attempting to create...');
         try {
-            mkdir($storagePath, 0775, true);
+        mkdir($storagePath, 0775, true);
             \Log::info('Directory created successfully');
         } catch (\Exception $e) {
             \Log::error('Failed to create directory: ' . $e->getMessage());
@@ -821,7 +829,8 @@ private function storeImageFile($file): ?string
         $data->delete_status = 1;
 
         $data->save();
-
+         
+        Stock::where('product_id',$id)->update(['is_product_deleted'=>1]);
         return redirect('/product')->with('success', 'Product deleted successfully.');
 
     }

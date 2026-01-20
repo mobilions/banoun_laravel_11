@@ -31,7 +31,7 @@ class OrderController extends Controller
             'order_status' => 'nullable|integer',
             'payment_type' => 'nullable|string',
             'min_amount' => 'nullable|numeric|min:0',
-            'max_amount' => 'nullable|numeric|min:0',
+            'max_amount' => 'nullable|numeric|min:0|gte:min_amount',
         ]);
 
         $fromdate = $request->input('fromdate', date('Y-m-01'));
