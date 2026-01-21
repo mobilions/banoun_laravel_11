@@ -29,34 +29,30 @@
                             <div class="col-lg-6 mb-3">
                                 <div>
                                     <label>Coupon Code <span class="text-danger">*</span></label>
-                                    <input value="{{ old('coupon_code', $log->coupon_code) }}" class="form-control @error('coupon_code') is-invalid @enderror" type="text" name="coupon_code" id="coupon_code" required="">
-                                    @error('coupon_code') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
+                                    <input value="{{ old('coupon_code', $log->coupon_code) }}" class="form-control" type="text" name="coupon_code" id="coupon_code" required="">
                                     <input class="form-control" value="{{$log->id}}"  name="editid" id="editid" type="hidden">
                                 </div>
                             </div>
                             <div class="col-lg-6 mb-3" style="display: none;">
                                 <div>
                                     <label>Coupon Code in arabic</label>
-                                    <input value="{{ old('coupon_code_ar', $log->coupon_code_ar) }}" class="form-control @error('coupon_code_ar') is-invalid @enderror" type="text" name="coupon_code_ar" id="coupon_code_ar">
-                                    @error('coupon_code_ar') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
+                                    <input value="{{ old('coupon_code_ar', $log->coupon_code_ar) }}" class="form-control" type="text" name="coupon_code_ar" id="coupon_code_ar">
                                 </div>
                             </div>
                             <div class="col-lg-6 mb-3">
                                 <div>
                                     <label>Coupon Type <span class="text-danger">*</span></label>
-                                    <select id="price_type" name="price_type" class="form-control @error('price_type') is-invalid @enderror">
+                                    <select id="price_type" name="price_type" class="form-control">
                                         <option value="Percentage" {{ old('price_type', $log->price_type) == 'Percentage' ? 'selected' : '' }}>Percentage</option>
                                         <option value="Price" {{ old('price_type', $log->price_type) == 'Price' ? 'selected' : '' }}>Price</option>
                                         <option value="FreeDelivery" {{ old('price_type', $log->price_type) == 'FreeDelivery' ? 'selected' : '' }}>FreeDelivery</option>
                                     </select>
-                                    @error('price_type') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
                                 </div>
                             </div>
                             <div class="col-lg-6 mb-3">
                                 <div>
                                     <label>Coupon Value <span class="text-danger">*</span></label>
-                                    <input value="{{ old('coupon_val', $log->coupon_val) }}" class="form-control @error('coupon_val') is-invalid @enderror" type="number" name="coupon_val" id="coupon_val" step="0.01" min="0" required="">
-                                    @error('coupon_val') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
+                                    <input value="{{ old('coupon_val', $log->coupon_val) }}" class="form-control" type="number" name="coupon_val" id="coupon_val" step="0.01" min="0" required="">
                                 </div>
                             </div>
                             <div class="col-lg-4 mt-3">
