@@ -1198,25 +1198,27 @@ class HomepageController extends BaseController
             ->where('delete_status', '0')
             ->first();
 
-            if ($cart) {
-                $cart->qty += $Wishlist->qty;
-                $cart->save();
-            } else {
-                $cart = Cart::create([
-                    'user_id'     => $userId,
-                    'product_id'  => $Wishlist->product_id,
-                    'size_id'     => $Wishlist->size_id,
-                    "variant_id" => $Wishlist->variant_id,
-                    'qty'         => $Wishlist->qty,
-                    'actual_price'       => $size->price,
-                    'offer_price' => $size->price,
-                    'total_price' => $size->price * $Wishlist->qty,
+            if(!empty($size)){
+                if ($cart) {
+                    $cart->qty += $Wishlist->qty;
+                    $cart->save();
+                } else {
+                    $cart = Cart::create([
+                        'user_id'     => $userId,
+                        'product_id'  => $Wishlist->product_id,
+                        'size_id'     => $Wishlist->size_id,
+                        "variant_id" => $Wishlist->variant_id,
+                        'qty'         => $Wishlist->qty,
+                        'actual_price'       => $size->price,
+                        'offer_price' => $size->price,
+                        'total_price' => $size->price * $Wishlist->qty,
+                    ]);
+                }
+            
+                $Wishlist->update([
+                    "delete_status" => "1"
                 ]);
             }
-            
-            $Wishlist->update([
-                "delete_status" => "1"
-            ]);
             
         }
         $cart_count = Cart::where("user_id", $userId)->where("delete_status", "0")->count();
@@ -1250,7 +1252,14 @@ class HomepageController extends BaseController
     
     public function updatewishlist(Request $request){
         $userId = auth("api")->id();
-        Wishlist::where("product_id", $request->productId)->where("created_by", $userId)->where("delete_status", "0")->update(["size_id" => $request->sizeid, "qty" => $request->qty]);
+        
+        $Productvariant = Productvariant::where("product_id", $request->productId)->where("size_id", $request->sizeid)->where("delete_status", "0")->first();
+
+        Wishlist::where("product_id", $request->productId)->where("created_by", $userId)->where("delete_status", "0")->update([
+            "size_id" => $request->sizeid,
+            "qty" => $request->qty,
+            'variant_id' => !empty($Productvariant) ? $Productvariant->id : null,
+        ]);
         $message_res = "Wishlist updated successfully.";
         
         $data = $this->getWishlistSummary($userId);
