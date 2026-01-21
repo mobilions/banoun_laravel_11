@@ -1754,7 +1754,7 @@ class HomepageController extends BaseController
     }
 
     public function terms_conditions(){
-        $PageContent = Faq::where('delete_status','0')->where('type',"term")->first();
+        $PageContent = PageContent::where('delete_status','0')->where('type',"term")->first();
 
         $data["description"] = !empty($PageContent) ? $PageContent->description : "";
         $message['success'] = "Terms and condition get successfully.";
