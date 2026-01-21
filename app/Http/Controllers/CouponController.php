@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 
 class CouponController extends Controller
@@ -54,7 +55,7 @@ class CouponController extends Controller
                 'required',
                 'string',
                 'max:255',
-                \Rule::unique('coupons', 'coupon_code')
+                Rule::unique('coupons', 'coupon_code')
                     ->where('delete_status', '0')
             ],
             'coupon_code_ar' => 'nullable|string|max:255',
@@ -129,7 +130,7 @@ class CouponController extends Controller
                 'required',
                 'string',
                 'max:255',
-                \Rule::unique('coupons', 'coupon_code')
+                Rule::unique('coupons', 'coupon_code')
                     ->ignore($request->editid)
                     ->where('delete_status', '0')
             ],
