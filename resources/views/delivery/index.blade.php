@@ -90,7 +90,7 @@ tr.selected {background-color:#adf7a9  ! important;}
 
                         <td>{{$index->name_ar}}</td>
 
-                        <td>  <img src="{{ asset('storage/' . $index->imageurl) }}" width="100" alt="{{ $index->name }}" title=""></a> </td>
+                        <td> @if($index->imageurl) <img src="{{ asset('storage/' . $index->imageurl) }}" width="100" alt="{{ $index->name }}" title=""></a> @endif</td>
 
                         <td>
                             <a href="{{url('/delivery')}}/{{$index->id}}/edit" class="btn btn-outline-secondary me-2 waves-effect waves-light btn-sm font-size-18"><i class="mdi mdi-pencil"></i></a>
