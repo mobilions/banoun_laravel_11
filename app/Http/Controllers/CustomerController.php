@@ -66,14 +66,9 @@ class CustomerController extends Controller
         if ($request->filled('is_verified')) {
             if($request->is_verified == 2){
                 $query->whereIn('is_verified', [0, 1]);
-            }
-            if ($request->is_verified !== '') {
+            } else  {
                 $query->where('is_verified', (int)$request->is_verified);
             }
-        } elseif ($request->is_verified == NULL) {
-             $query->whereIn('is_verified', [0, 1]);
-        } else {
-             $query->where('is_verified', 1);
         }
 
         if ($request->has('search') && $request->search) {
