@@ -1186,7 +1186,7 @@ class HomepageController extends BaseController
     public function movealltobag(Request $request){
         $userId = auth("api")->id();
         $Wishlists = Wishlist::where("created_by", $userId)->where("delete_status", "0")->get();
-        $movealltobag = 1;
+        $movealltobag = 0;
         foreach($Wishlists as $Wishlist){
             $cart = Cart::where('user_id', $userId)
             ->where('product_id', $Wishlist->product_id)
@@ -1216,16 +1216,15 @@ class HomepageController extends BaseController
                     ]);
                 }
             
+                $movealltobag = 1;
                 $Wishlist->update([
                     "delete_status" => "1"
                 ]);
-            } else {
-                $movealltobag = 0;
             }
         }
 
         if($movealltobag == "0"){
-            return $this->sendError(["sizeid" => "Some items could not be moved to the bag because the size is not selected."]);
+            return $this->sendError(["sizeid" => "Please select a size to add all items to the bag."]);
         }
         $data = $this->getWishlistSummary($userId);
 
