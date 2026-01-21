@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Hash;
 use Auth;
+use Illuminate\Validation\Rule;
 
 class ProfileController extends Controller
 {
@@ -43,7 +44,13 @@ class ProfileController extends Controller
     {
         $this->validate($request, [
             'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:users,email',
+            'email' => [
+            'required',
+            'email',
+            'max:255',
+                Rule::unique('users', 'email')
+                    ->where('role', 'admin') 
+            ],
             'password' => 'required|string|min:6',
         ], [
             'name.required' => 'Name is required.',
@@ -87,7 +94,14 @@ class ProfileController extends Controller
         $this->validate($request, [
             'editid' => 'required|exists:users,id',
             'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:users,email,'.$request->editid,
+            'email' => [
+            'required',
+            'email',
+            'max:255',
+            Rule::unique('users', 'email')
+                    ->where('role', 'admin')  
+                    ->ignore($request->editid) 
+            ],
             'password' => 'nullable|string|min:6',
         ], [
             'editid.required' => 'User ID is required.',
