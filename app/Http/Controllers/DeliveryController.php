@@ -91,29 +91,28 @@ class DeliveryController extends Controller
      */
 
     public function store(Request $request)
-
     {
         $this->validate($request, [
             'name' => 'required|string|max:255',
             'name_ar' => 'nullable|string|max:255',
-            'imgfile' => 'nullable|image',
+            'imgfile' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ], [
             'name.required' => 'Info is required.',
             'name.max' => 'Info must not exceed 255 characters.',
             'name_ar.max' => 'Arabic info must not exceed 255 characters.',
             'imgfile.image' => 'The file must be an image.',
-            // 'imgfile.mimes' => 'The image must be a file of type: svg.',
-            // 'imgfile.max' => 'The image size must not exceed 2MB.',
+            'imgfile.mimes' => 'The image must be jpeg, png, jpg, gif, or svg.',
+            'imgfile.max' => 'The image size must not exceed 2MB.',
         ]);
 
         try {
             $imgurl = '';
 
-            $path = $request->file('imgfile');
-
-            if (!empty($path) && $path->isValid()) {
-                $store = Storage::putFile('public/image', $path);
-                $imgurl = config('app.imgurl').basename($store);
+            if ($request->hasFile('imgfile') && $request->file('imgfile')->isValid()) {
+                $file = $request->file('imgfile');
+                $path = $file->store('public/image');
+                $filename = basename($path);
+                $imgurl = config('app.imgurl') . $filename;
             }
 
             $data = new Delivery; 
@@ -129,7 +128,6 @@ class DeliveryController extends Controller
             \Log::error('Delivery creation failed: ' . $e->getMessage());
             return redirect()->back()->withInput()->with('error', 'Failed to create delivery info. Please try again.');
         }
-
     }
 
 
@@ -196,14 +194,13 @@ class DeliveryController extends Controller
 
      */
 
-    public function update(Request $request, Delivery $delivery)
-
+     public function update(Request $request, Delivery $delivery)
     {
         $this->validate($request, [
             'editid' => 'required|exists:delivery_options,id',
             'name' => 'required|string|max:255',
             'name_ar' => 'nullable|string|max:255',
-            'imgfile' => 'nullable|image',
+            'imgfile' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'imgfile_val' => 'nullable|string',
         ], [
             'editid.required' => 'Record ID is required.',
@@ -212,8 +209,8 @@ class DeliveryController extends Controller
             'name.max' => 'Info must not exceed 255 characters.',
             'name_ar.max' => 'Arabic info must not exceed 255 characters.',
             'imgfile.image' => 'The file must be an image.',
-            // 'imgfile.mimes' => 'The image must be a file of type: svg.',
-            // 'imgfile.max' => 'The image size must not exceed 2MB.',
+            'imgfile.mimes' => 'The image must be jpeg, png, jpg, gif, or svg.',
+            'imgfile.max' => 'The image size must not exceed 2MB.',
         ]);
 
         $data = Delivery::find($request->editid);
@@ -223,15 +220,23 @@ class DeliveryController extends Controller
         }
 
         try {
-            $imgurl = '';
+            $imgurl = $data->imageurl;
 
-            $path = $request->file('imgfile');
-
-            if (!empty($path) && $path->isValid()) {
-                $store = Storage::putFile('public/image', $path);
-                $imgurl = config('app.imgurl').basename($store);
-            } else {
-                $imgurl = $request->imgfile_val ?? '';
+            if ($request->hasFile('imgfile') && $request->file('imgfile')->isValid()) {
+                $file = $request->file('imgfile');
+                if (!empty($data->imageurl)) {
+                    $oldFilename = basename($data->imageurl);
+                    $oldPath = 'public/image/' . $oldFilename;
+                    if (Storage::exists($oldPath)) {
+                        Storage::delete($oldPath);
+                    }
+                }
+                $path = $file->store('public/image');
+                $filename = basename($path);
+                $imgurl = config('app.imgurl') . $filename;
+                
+            } elseif ($request->filled('imgfile_val')) {
+                $imgurl = $request->imgfile_val;
             }
 
             $data->name = $request->name;
@@ -245,7 +250,6 @@ class DeliveryController extends Controller
             \Log::error('Delivery update failed: ' . $e->getMessage());
             return redirect()->back()->withInput()->with('error', 'Failed to update delivery info. Please try again.');
         }
-
     }
 
 
