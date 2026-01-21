@@ -69,7 +69,7 @@ tr.selected {background-color:#adf7a9  ! important;}
             <select name="is_verified" class="form-select">
                 <option value="1" {{ old('is_verified', request('is_verified', '1')) == '1' ? 'selected' : '' }}>Verified</option>
                 <option value="0" {{ old('is_verified', request('is_verified')) == '0' ? 'selected' : '' }}>Not Verified</option>
-                <option value="" {{ old('is_verified', request('is_verified')) === '' ? 'selected' : '' }}>All</option>
+                <option value="2" {{ old('is_verified', request('is_verified')) == '2' ? 'selected' : '' }}>All</option>
             </select>
         </div>
         <div class="col-md-2">

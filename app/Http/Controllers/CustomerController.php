@@ -64,6 +64,9 @@ class CustomerController extends Controller
         $query = User::active()->where('role','user');
 
         if ($request->filled('is_verified')) {
+            if($request->is_verified == 2){
+                $query->whereIn('is_verified', [0, 1]);
+            }
             if ($request->is_verified !== '') {
                 $query->where('is_verified', (int)$request->is_verified);
             }
