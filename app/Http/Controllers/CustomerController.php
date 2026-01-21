@@ -67,8 +67,10 @@ class CustomerController extends Controller
             if ($request->is_verified !== '') {
                 $query->where('is_verified', (int)$request->is_verified);
             }
+        } elseif ($request->is_verified == NULL) {
+             $query->whereIn('is_verified', [0, 1]);
         } else {
-            $query->where('is_verified', 1);
+             $query->where('is_verified', 1);
         }
 
         if ($request->has('search') && $request->search) {
@@ -103,7 +105,7 @@ class CustomerController extends Controller
 
         $log = User::where('id',$id)->first();
 
-        $kids = Userkids::where('user_id',$id)->get();
+        $kids = Userkids::where(['user_id'=>$id, 'delete_status' => 0])->get();
 
         $userAddress=UserAddress::with('userarea')->where('user_id',$id)->get();
         $cartMasters=CartMaster::where('user_id',$id)->get();
@@ -147,7 +149,6 @@ class CustomerController extends Controller
 
         try {
             $data->name = $request->name;
-            $data->email = $request->email;
             $data->phone = $request->phone;
             $data->save();
 
