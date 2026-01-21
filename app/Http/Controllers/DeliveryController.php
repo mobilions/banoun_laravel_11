@@ -11,10 +11,8 @@ use App\Models\Delivery;
 use App\Models\Searchtag;
 
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-
-use Auth;
 
 
 
@@ -106,19 +104,12 @@ class DeliveryController extends Controller
         ]);
 
         try {
-            $imgurl = '';
-
-            if ($request->hasFile('imgfile') && $request->file('imgfile')->isValid()) {
-                $file = $request->file('imgfile');
-                $path = $file->store('public/image');
-                $filename = basename($path);
-                $imgurl = config('app.imgurl') . $filename;
-            }
+            $imgurl = $this->handleImageUpload($request, 'imgfile');
 
             $data = new Delivery; 
             $data->name = $request->name;
             $data->name_ar = $request->name_ar;
-            $data->imageurl = $imgurl;
+            $data->imageurl = $imgurl; 
             $data->delete_status = '0';
             $data->created_by = Auth::user()->id;
             $data->save();
@@ -129,7 +120,6 @@ class DeliveryController extends Controller
             return redirect()->back()->withInput()->with('error', 'Failed to create delivery info. Please try again.');
         }
     }
-
 
 
     /**
@@ -194,7 +184,7 @@ class DeliveryController extends Controller
 
      */
 
-     public function update(Request $request, Delivery $delivery)
+    public function update(Request $request, Delivery $delivery)
     {
         $this->validate($request, [
             'editid' => 'required|exists:delivery_options,id',
@@ -220,28 +210,34 @@ class DeliveryController extends Controller
         }
 
         try {
-            $imgurl = $data->imageurl;
-
-            if ($request->hasFile('imgfile') && $request->file('imgfile')->isValid()) {
-                $file = $request->file('imgfile');
-                if (!empty($data->imageurl)) {
-                    $oldFilename = basename($data->imageurl);
-                    $oldPath = 'public/image/' . $oldFilename;
-                    if (Storage::exists($oldPath)) {
-                        Storage::delete($oldPath);
+            $oldImage = $data->imageurl;
+            $imgurl = '';
+            $file = $request->file('imgfile');
+            
+            if (!empty($file) && $file->isValid()) {
+                try {
+                   $this->deleteOldImage($oldImage);
+                   $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                    $destinationPath = storage_path('app/public/image');
+                    
+                    if (!file_exists($destinationPath)) {
+                        mkdir($destinationPath, 0777, true);
                     }
+                    
+                    $file->move($destinationPath, $filename);
+                    $imgurl = 'image/' . $filename;
+                    
+                } catch (\Exception $e) {
+                    \Log::error('Image Upload Error: ' . $e->getMessage());
+                    $imgurl = $oldImage;
                 }
-                $path = $file->store('public/image');
-                $filename = basename($path);
-                $imgurl = config('app.imgurl') . $filename;
-                
-            } elseif ($request->filled('imgfile_val')) {
-                $imgurl = $request->imgfile_val;
+            } else {
+               $imgurl = $request->input('imgfile_val', $oldImage);
             }
 
             $data->name = $request->name;
             $data->name_ar = $request->name_ar;
-            $data->imageurl = $imgurl;
+            $data->imageurl = $imgurl; 
             $data->updated_by = Auth::user()->id;
             $data->save();
 
@@ -251,7 +247,44 @@ class DeliveryController extends Controller
             return redirect()->back()->withInput()->with('error', 'Failed to update delivery info. Please try again.');
         }
     }
+    
+    private function handleImageUpload($request, $fieldName, $existingValue = null)
+    {
+        $file = $request->file($fieldName);
+        
+        if (!empty($file) && $file->isValid()) {
+            try {
+                $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $destinationPath = storage_path('app/public/image');
+                
+                if (!file_exists($destinationPath)) {
+                    mkdir($destinationPath, 0777, true);
+                }
+                
+                $file->move($destinationPath, $filename);
+                return 'image/' . $filename;
+                
+            } catch (\Exception $e) {
+                \Log::error("Image Upload Error ({$fieldName}): " . $e->getMessage());
+                return $existingValue;
+            }
+        }
+        return $request->input($fieldName . '_val', $existingValue);
+    }
 
+    private function deleteOldImage($imagePath)
+    {
+        if (!empty($imagePath)) {
+            try {
+                $fullPath = storage_path('app/public/' . $imagePath);
+                if (file_exists($fullPath)) {
+                    unlink($fullPath);
+                }
+            } catch (\Exception $e) {
+                \Log::error('Image Delete Error: ' . $e->getMessage());
+            }
+        }
+    }
 
 
     /**
