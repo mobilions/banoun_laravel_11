@@ -1219,10 +1219,9 @@ class HomepageController extends BaseController
                     "delete_status" => "1"
                 ]);
             }
-            
         }
-        $cart_count = Cart::where("user_id", $userId)->where("delete_status", "0")->count();
-        $data['cart_count'] = $cart_count;
+
+        $data = $this->getWishlistSummary($userId);
 
         $message['success'] = "All item move to cart list successfully.";
         return $this->sendResponse($data, $message); 
