@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 
 class CouponController extends Controller
@@ -50,7 +51,13 @@ class CouponController extends Controller
         $this->validate($request, [
             'price_type' => 'required|string|in:Percentage,Price,FreeDelivery',
             'coupon_val' => 'required|numeric|min:0',
-            'coupon_code' => 'required|string|max:255|unique:coupons,coupon_code',
+            'coupon_code' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('coupons', 'coupon_code')
+                    ->where('delete_status', '0')
+            ],
             'coupon_code_ar' => 'nullable|string|max:255',
         ], [
             'price_type.required' => 'Coupon type is required.',
@@ -119,7 +126,14 @@ class CouponController extends Controller
             'editid' => 'required|exists:coupons,id',
             'price_type' => 'required|string|in:Percentage,Price,FreeDelivery',
             'coupon_val' => 'required|numeric|min:0',
-            'coupon_code' => 'required|string|max:255|unique:coupons,coupon_code,'.$request->editid,
+            'coupon_code' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('coupons', 'coupon_code')
+                    ->ignore($request->editid)
+                    ->where('delete_status', '0')
+            ],
             'coupon_code_ar' => 'nullable|string|max:255',
         ], [
             'editid.required' => 'Coupon ID is required.',

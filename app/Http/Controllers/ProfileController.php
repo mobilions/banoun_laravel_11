@@ -49,7 +49,8 @@ class ProfileController extends Controller
             'email',
             'max:255',
                 Rule::unique('users', 'email')
-                    ->where('role', 'admin') 
+                    ->where('role', 'admin')
+                ->where('delete_status', '0'),
             ],
             'password' => 'required|string|min:6',
         ], [
@@ -99,7 +100,8 @@ class ProfileController extends Controller
             'email',
             'max:255',
             Rule::unique('users', 'email')
-                    ->where('role', 'admin')  
+                    ->where('role', 'admin')
+                    ->where('delete_status', '0')
                     ->ignore($request->editid) 
             ],
             'password' => 'nullable|string|min:6',
