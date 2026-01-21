@@ -1193,6 +1193,11 @@ class HomepageController extends BaseController
             ->where('delete_status', "0")
             ->first();
 
+            $size = Productvariant::where('product_id', $Wishlist->product_id)
+            ->where('size_id', $Wishlist->sizeid)
+            ->where('delete_status', '0')
+            ->first();
+
             if ($cart) {
                 $cart->qty += $Wishlist->qty;
                 $cart->save();
@@ -1200,7 +1205,7 @@ class HomepageController extends BaseController
                 $cart = Cart::create([
                     'user_id'     => $userId,
                     'product_id'  => $Wishlist->product_id,
-                    'size_id'     => $request->sizeid,
+                    'size_id'     => $Wishlist->sizeid,
                     "variant_id" => $Wishlist->variant_id,
                     'qty'         => $Wishlist->qty,
                     'actual_price'       => $size->price,
