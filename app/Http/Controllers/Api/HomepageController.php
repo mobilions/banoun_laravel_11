@@ -1224,7 +1224,7 @@ class HomepageController extends BaseController
         }
 
         if($movealltobag == "0"){
-            return $this->sendError(["sizeid" => "Please select a size to add all items to the bag."]);
+            return $this->sendError(["sizeid" => "Please select a size to add the item to the bag."]);
         }
         $data = $this->getWishlistSummary($userId);
 
