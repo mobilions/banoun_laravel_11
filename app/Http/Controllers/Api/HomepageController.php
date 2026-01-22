@@ -1736,6 +1736,7 @@ class HomepageController extends BaseController
             $carts = $carts->map(function($item) {
                 $Productimage = ProductImage::where("product_id", $item->productId)->where("delete_status", "0")->first();
                 $item->imageurl = !empty($Productimage) ? $Productimage->imageurl : "";
+                $item->sizeName = $item->sizeName != null ? $item->sizeName : "";
                 return $item;
             });
             
