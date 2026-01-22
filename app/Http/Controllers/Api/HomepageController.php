@@ -373,8 +373,8 @@ class HomepageController extends BaseController
 
             $delivery = DeliveryOption::select("name", "imageurl")->where("delete_status", "0")->get();
             $delivery = $delivery->map(function($item){
-                $delivery->icon = asset('storage/' . $delivery->imageurl);
-                unset($delivery->imageurl);
+                $item->icon = asset('storage/' . $item->imageurl);
+                unset($item->imageurl);
                 return $item;
             });
 
