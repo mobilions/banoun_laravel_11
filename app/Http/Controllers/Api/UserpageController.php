@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Auth;
 
 use Illuminate\Support\Facades\Storage;
 
+use App\Models\UserKid;
 use Validator;
 
 
@@ -149,7 +150,7 @@ class UserpageController extends BaseController
 
             $kidId = DB::table('user_kids')->where('id',$request->kidId)->update(['delete_status'=>'1']);
 
-            $kids = DB::table('user_kids')->select('user_id as userId','id as kidId','name','gender','dob','imgfile')->where('user_id',auth("api")->user()->id)->where('delete_status','0')->get();
+            $kids = UserKid::select('user_id as userId','id as kidId','name','gender','dob','imgfile')->where('user_id',auth("api")->user()->id)->where('delete_status','0')->get();
 
             $msg = 'Kid Details Deleted';
             $massage['success'] = $msg;
@@ -158,7 +159,7 @@ class UserpageController extends BaseController
 
 
 
-        $kids = DB::table('user_kids')->select('user_id as userId','id as kidId','name','gender','dob','imgfile')->where('user_id',auth("api")->user()->id)->where('delete_status','0')->get();
+        $kids = UserKid::select('user_id as userId','id as kidId','name','gender','dob','imgfile')->where('user_id',auth("api")->user()->id)->where('delete_status','0')->get();
 
 
         $massage['success'] = $msg;
