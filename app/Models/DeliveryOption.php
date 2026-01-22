@@ -24,6 +24,6 @@ class DeliveryOption extends Model
     ];
 
     public function getImageurlAttribute($value){
-        return $value != "" ? asset($value) : "";
+        return ($value != "" && $value != null) ? asset($value) : "";
     }
 }
