@@ -371,7 +371,12 @@ class HomepageController extends BaseController
                 return $item;
             });
 
-            $delivery = DeliveryOption::select("name", "imageurl as icon")->where("delete_status", "0")->get();
+            $delivery = DeliveryOption::select("name", "imageurl")->where("delete_status", "0")->get();
+            $delivery = $delivery->map(function($item){
+                $delivery->icon = asset('storage/' . $delivery->imageurl);
+                unset($delivery->imageurl);
+                return $item;
+            });
 
             $productTemp = Product::where("id", $product->productId)->first();
             $product_info["description"] = $productTemp->description;

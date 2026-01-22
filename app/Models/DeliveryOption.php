@@ -22,8 +22,4 @@ class DeliveryOption extends Model
         'updated_by' => 'integer',
         'delete_status' => 'integer'
     ];
-
-    public function getImageurlAttribute($value){
-        return ($value != "" && $value != null) ? asset($value) : "";
-    }
 }
