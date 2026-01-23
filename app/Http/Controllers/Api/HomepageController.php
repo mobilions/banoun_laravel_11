@@ -1322,6 +1322,7 @@ class HomepageController extends BaseController
             ->where("carts.user_id", $userId)
             ->where("carts.delete_status", "0")
             ->leftJoin("products", "products.id", "=", "carts.product_id")
+            ->leftJoin("productvariants", "productvariants.id", "=", "carts.variant_id")
             ->leftJoin("variants_sub", "variants_sub.id", "=", "carts.size_id")
             ->get();
 
@@ -1346,7 +1347,6 @@ class HomepageController extends BaseController
             }
 
             $item->available_quantity = ($item->available_quantity == null || $item->available_quantity == "") ? "0" : $item->available_quantity;
-
 
             $item->imageurl = !empty($Productimage) ? $Productimage->imageurl : "";
             $item->sizeName = $item->sizeName != null ? $item->sizeName : "";
