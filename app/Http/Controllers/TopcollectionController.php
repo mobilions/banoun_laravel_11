@@ -55,8 +55,20 @@ class TopcollectionController extends Controller
     {
 
         $title = "Top Banner";
-
-        $indexes = Topcollection::join('categories', 'topcollections.category_id', '=', 'categories.id')->addSelect('categories.name as category','categories.name_ar as category_ar','topcollections.*')->where('topcollections.delete_status','0')->get();
+        $indexes = Topcollection::leftJoin(
+                'categories',
+                'topcollections.category_id',
+                '=',
+                'categories.id'
+            )
+            ->addSelect(
+                'categories.name as category',
+                'categories.name_ar as category_ar',
+                'topcollections.*'
+            )
+            ->where('topcollections.delete_status', '0')
+            ->orderBy('topcollections.id', 'desc')
+            ->get();
 
         return view('topcollection.index',compact('title','indexes'));  
 
