@@ -51,27 +51,38 @@ class TopcollectionController extends Controller
 
 
     public function index()
-
     {
-
         $title = "Top Banner";
-        $indexes = Topcollection::leftJoin(
-                'categories',
-                'topcollections.category_id',
-                '=',
-                'categories.id'
-            )
-            ->addSelect(
-                'categories.name as category',
-                'categories.name_ar as category_ar',
-                'topcollections.*'
-            )
+
+        $indexes = Topcollection::query()
+            ->leftJoin('categories', function ($join) {
+                $join->on('topcollections.shopby', '=', 'categories.id')
+                    ->where('topcollections.type', 'category');
+            })
+            ->leftJoin('products', function ($join) {
+                $join->on('topcollections.shopby', '=', 'products.id')
+                    ->where('topcollections.type', 'product');
+            })
+            ->select([
+                'topcollections.*',
+                \DB::raw("
+                    CASE 
+                        WHEN topcollections.type = 'category' THEN categories.name
+                        WHEN topcollections.type = 'product' THEN products.name
+                    END as name
+                "),
+                \DB::raw("
+                    CASE 
+                        WHEN topcollections.type = 'category' THEN categories.name_ar
+                        WHEN topcollections.type = 'product' THEN products.name_ar
+                    END as name_ar
+                ")
+            ])
             ->where('topcollections.delete_status', '0')
-            ->orderBy('topcollections.id', 'desc')
+            ->orderByDesc('topcollections.id')
             ->get();
 
-        return view('topcollection.index',compact('title','indexes'));  
-
+        return view('topcollection.index', compact('title', 'indexes'));
     }
 
 
