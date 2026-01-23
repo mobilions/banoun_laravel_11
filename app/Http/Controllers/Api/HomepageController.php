@@ -1427,6 +1427,15 @@ class HomepageController extends BaseController
             
             $item->imageurl = !empty($Productimage) ? $Productimage->imageurl : "";
             $item->is_wishlisted = 1;
+
+            $size = Productvariant::where('product_id', $item->productId)
+            ->where('size_id', $item->sizeid)
+            ->where('delete_status', '0')
+            ->first();
+            if(!empty($size)){
+                $item->price_offer = $size->price;
+            }
+
             return $item;
         });
 
