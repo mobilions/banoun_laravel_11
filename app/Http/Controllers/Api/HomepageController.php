@@ -1106,6 +1106,10 @@ class HomepageController extends BaseController
         $userId = auth("api")->id();
         $Cart = Cart::where("id", $request->cartId)->first();
         if($request->action == "movetowishlist" && !empty($Cart)){
+            Wishlist::where("product_id", $Cart->product_id)->where("created_by", $Cart->user_id)->update([
+                "delete_status" => "1"
+            ]);
+            
             Wishlist::create([
                 "product_id" => $Cart->product_id,
                 "variant_id" => $Cart->variant_id,
