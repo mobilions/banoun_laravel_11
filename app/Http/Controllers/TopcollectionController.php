@@ -53,36 +53,41 @@ class TopcollectionController extends Controller
     public function index()
     {
         $title = "Top Banner";
-
         $indexes = Topcollection::query()
-            ->leftJoin('categories', function ($join) {
-                $join->on('topcollections.shopby', '=', 'categories.id')
-                    ->where('topcollections.type', 'category');
-            })
-            ->leftJoin('products', function ($join) {
-                $join->on('topcollections.shopby', '=', 'products.id')
-                    ->where('topcollections.type', 'product');
-            })
-            ->select([
-                'topcollections.*',
-                \DB::raw("
-                    CASE 
-                        WHEN topcollections.type = 'category' THEN categories.name
-                        WHEN topcollections.type = 'product' THEN products.name
-                    END as name
-                "),
-                \DB::raw("
-                    CASE 
-                        WHEN topcollections.type = 'category' THEN categories.name_ar
-                        WHEN topcollections.type = 'product' THEN products.name_ar
-                    END as name_ar
-                ")
-            ])
-            ->where('topcollections.delete_status', '0')
-            ->orderByDesc('topcollections.id')
-            ->get();
+                    ->leftJoin('categories', function ($join) {
+                        $join->on('topcollections.category_id', '=', 'categories.id')
+                            ->where('topcollections.shopby', 'category');
+                    })
+                    ->leftJoin('products', function ($join) {
+                        $join->on('topcollections.category_id', '=', 'products.id')
+                            ->where('topcollections.shopby', 'product');
+                    })
+                    ->select([
+                        'topcollections.id',
+                        'topcollections.shopby',
+                        'topcollections.category_id',
+                        'topcollections.name as banner_name',
+                        'topcollections.name_ar as banner_name_ar',
 
-        return view('topcollection.index', compact('title', 'indexes'));
+                        \DB::raw("
+                            CASE 
+                                WHEN topcollections.shopby = 'category' THEN categories.name
+                                WHEN topcollections.shopby = 'product' THEN products.name
+                            END AS source_name
+                        "),
+                        \DB::raw("
+                            CASE 
+                                WHEN topcollections.shopby = 'category' THEN categories.name_ar
+                                WHEN topcollections.shopby = 'product' THEN products.name_ar
+                            END AS source_name_ar
+                        "),
+                    ])
+                    ->where('topcollections.delete_status', 0)
+                    ->orderByDesc('topcollections.id')
+                    ->get();
+
+
+       return view('topcollection.index', compact('title', 'indexes'));
     }
 
 
