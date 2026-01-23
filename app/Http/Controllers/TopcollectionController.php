@@ -185,6 +185,7 @@ class TopcollectionController extends Controller
             $data->imageurl = $imgurl;
             $data->shopby = $request->shopby;
             $data->category_id = $request->category_id;
+            $data->type = $request->category_id;
             $data->redirect_type = $redirect_type;
             $data->redirect_by = $redirect_by;
             $data->delete_status = '0';
@@ -362,6 +363,7 @@ class TopcollectionController extends Controller
             $data->redirect_type = $redirect_type;
             $data->redirect_by = $redirect_by;
             $data->category_id = $request->category_id;
+            $data->type = $request->category_id;
             $data->updated_by = Auth::user()->id;
             $data->save();
 
