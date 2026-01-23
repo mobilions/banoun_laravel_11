@@ -1739,7 +1739,7 @@ class HomepageController extends BaseController
             ->where("carts.master_id", $CartMaster->id)
             ->leftJoin("products", "products.id", "=", "carts.product_id")
             ->leftJoin("productvariants", "productvariants.id", "=", "carts.variant_id")
-            ->leftJoin("variants_sub", "variants_sub.id", "=", "productvariants.size_id")
+            ->leftJoin("variants_sub", "variants_sub.id", "=", "carts.size_id")
             ->get();
 
             $carts = $carts->map(function($item) {
