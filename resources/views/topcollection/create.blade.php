@@ -90,9 +90,8 @@
 
                                 <option value="category">Category</option>
 
-                                <option value="brand">Brand</option>
-
-                                <option value="subcategory">SubCategory</option>
+                                {{-- <option value="brand">Brand</option> --}}
+                                {{-- <option value="subcategory">SubCategory</option> --}}
 
                                 <option value="product">Product</option>
 

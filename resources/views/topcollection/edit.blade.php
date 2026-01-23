@@ -88,9 +88,9 @@
 
                                 <option @if($log->shopby=='category') selected="" @endif value="category">Category</option>
 
-                                <option @if($log->shopby=='brand') selected="" @endif value="brand">Brand</option>
+                                {{-- <option @if($log->shopby=='brand') selected="" @endif value="brand">Brand</option> --}}
 
-                                <option @if($log->shopby=='subcategory') selected="" @endif value="subcategory">SubCategory</option>
+                                {{-- <option @if($log->shopby=='subcategory') selected="" @endif value="subcategory">SubCategory</option> --}}
 
                                 <option @if($log->shopby=='product') selected="" @endif value="product">Product</option>
 
