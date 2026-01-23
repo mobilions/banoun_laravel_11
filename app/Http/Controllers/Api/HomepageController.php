@@ -1416,7 +1416,7 @@ class HomepageController extends BaseController
             "cart_count" => $cart_count,
             "offer_price" => $CartMaster->discount,
             "delivery_price" => $CartMaster->delivery,
-            "promo_price" => $CartMaster->promo_price,
+            "promo_price" => $CartMaster->discount,
             "grand_total" => $CartMaster->grandtotal,
         ];
 
