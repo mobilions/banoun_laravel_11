@@ -1316,12 +1316,12 @@ class HomepageController extends BaseController
                 "products.price as productPrice",
                 "carts.offer_price as price_offer",
                 "variants_sub.name as sizeName",
+                "carts.size_id",
                 "productvariants.available_quantity"
             )
             ->where("carts.user_id", $userId)
             ->where("carts.delete_status", "0")
             ->leftJoin("products", "products.id", "=", "carts.product_id")
-            ->leftJoin("productvariants", "productvariants.id", "=", "carts.variant_id")
             ->leftJoin("variants_sub", "variants_sub.id", "=", "carts.size_id")
             ->get();
 
@@ -1336,7 +1336,18 @@ class HomepageController extends BaseController
         $carts = $carts->map(function($item) use (&$total, &$subtotal, &$tax, &$delivery, &$discount, &$grandtotal, &$totalqty, &$cart_count) {
             $Productimage = ProductImage::where("product_id", $item->productId)->where("delete_status", "0")->first();
             
+            $size = Productvariant::where('product_id', $item->productId)
+            ->where('size_id', $item->size_id)
+            ->where('delete_status', '0')
+            ->first();
+            unset($item->size_id);
+            if(!empty($size)){
+                $item->available_quantity = $size->available_quantity;
+            }
+
             $item->available_quantity = ($item->available_quantity == null || $item->available_quantity == "") ? "0" : $item->available_quantity;
+
+
             $item->imageurl = !empty($Productimage) ? $Productimage->imageurl : "";
             $item->sizeName = $item->sizeName != null ? $item->sizeName : "";
 
