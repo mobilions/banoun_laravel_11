@@ -53,42 +53,47 @@ class TopcollectionController extends Controller
     public function index()
     {
         $title = "Top Banner";
+
         $indexes = Topcollection::query()
-                    ->leftJoin('categories', function ($join) {
-                        $join->on('topcollections.category_id', '=', 'categories.id')
-                            ->where('topcollections.shopby', 'category');
-                    })
-                    ->leftJoin('products', function ($join) {
-                        $join->on('topcollections.category_id', '=', 'products.id')
-                            ->where('topcollections.shopby', 'product');
-                    })
-                    ->select([
-                        'topcollections.id',
-                        'topcollections.shopby',
-                        'topcollections.category_id',
-                        'topcollections.name as banner_name',
-                        'topcollections.name_ar as banner_name_ar',
+            ->leftJoin('categories', function ($join) {
+                $join->on('categories.id', '=', 'topcollections.type')
+                    ->where('topcollections.shopby', 'category');
+            })
+            ->leftJoin('products', function ($join) {
+                $join->on('products.id', '=', 'topcollections.type')
+                    ->where('topcollections.shopby', 'product');
+            })
+            ->where('topcollections.delete_status', 0)
+            ->orderByDesc('topcollections.id')
+            ->select([
+                'topcollections.id',
+                'topcollections.shopby',
+                'topcollections.type',
+                'topcollections.imageurl',
+                'topcollections.name as banner_name',
+                'topcollections.name_ar as banner_name_ar',
 
-                        \DB::raw("
-                            CASE 
-                                WHEN topcollections.shopby = 'category' THEN categories.name
-                                WHEN topcollections.shopby = 'product' THEN products.name
-                            END AS source_name
-                        "),
-                        \DB::raw("
-                            CASE 
-                                WHEN topcollections.shopby = 'category' THEN categories.name_ar
-                                WHEN topcollections.shopby = 'product' THEN products.name_ar
-                            END AS source_name_ar
-                        "),
-                    ])
-                    ->where('topcollections.delete_status', 0)
-                    ->orderByDesc('topcollections.id')
-                    ->get();
+                // Pick name based on shopby
+                \DB::raw("
+                    CASE
+                        WHEN topcollections.shopby = 'product' THEN products.name
+                        WHEN topcollections.shopby = 'category' THEN categories.name
+                    END AS source_name
+                "),
 
+                \DB::raw("
+                    CASE
+                        WHEN topcollections.shopby = 'product' THEN products.name_ar
+                        WHEN topcollections.shopby = 'category' THEN categories.name_ar
+                    END AS source_name_ar
+                "),
+            ])
+            ->get();
 
-       return view('topcollection.index', compact('title', 'indexes'));
+        return view('topcollection.index', compact('title', 'indexes'));
     }
+
+
 
 
 

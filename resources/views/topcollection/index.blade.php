@@ -72,8 +72,6 @@ tr.selected {background-color:#adf7a9  ! important;}
 
                         <th>Name</th>
 
-                        <th>Description</th>
-
                         <th>Image</th>
 
                         <th>Action</th>
@@ -81,52 +79,46 @@ tr.selected {background-color:#adf7a9  ! important;}
                     </tr>
 
                 </thead>           
+<tbody>
+@foreach ($indexes as $index)
+    <tr>
+        <td>{{ $index->id }}</td>
 
-                <tbody>
+        <td>{{ ucfirst($index->shopby) }}</td>
 
-                    @foreach ($indexes as $index)
+       
+        <td>
+            {{ $index->source_name ?? '-' }}
+            <br>
+            <small class="text-muted">{{ $index->source_name_ar ?? '' }}</small>
+        </td>
 
-                    <tr>
+        <td>
+            {{ $index->banner_name }}
+            <br>
+            <small class="text-muted">{{ $index->banner_name_ar }}</small>
+        </td>
+        <td>
+           
+                <img src="{{ $index->imageurl }}" width="100" alt="Banner Image">
+           
+        </td>
+        <td>
+            <a href="{{ url('/topcollection/'.$index->id.'/edit') }}"
+               class="btn btn-outline-secondary btn-sm">
+                <i class="mdi mdi-pencil"></i>
+            </a>
 
-                        <td>{{$index->id}}</td>
+            <a href="{{ url('/topcollection/'.$index->id.'/delete') }}"
+               class="btn btn-outline-danger btn-sm"
+               onclick="return confirm('Are you sure?')">
+                <i class="mdi mdi-trash-can-outline"></i>
+            </a>
+        </td>
+    </tr>
+@endforeach
+</tbody>
 
-                        <td>{{$index->shopby}}</td>
-
-                        @if($index->shopby=='category')
-
-                        <td>{{App\Models\Usbanner::getColumnWhere('categories','id',$index->category_id,'name')}}</td>
-
-                        @elseif($index->shopby=='subcategory')
-
-                        <td>{{App\Models\Usbanner::getColumnWhere('subcategories','id',$index->category_id,'name')}}</td>
-
-                        @elseif($index->shopby=='brand')
-
-                        <td>{{App\Models\Usbanner::getColumnWhere('brands','id',$index->category_id,'name')}}</td>
-
-                        @else
-
-                        <td></td>
-
-                        @endif
-
-                        <td>{{$index->name}}<br>
-
-                            {{$index->name_ar}}</td>
-
-                        <td>{{$index->description}}<br>
-
-                            {{$index->description_ar}}</td>
-
-                        <td>  <img src="{{$index->imageurl}}" width="100" alt="" title=""></a> </td>
-
-                        <td><a href="{{url('/topcollection')}}/{{$index->id}}/edit" class="btn btn-outline-secondary me-2 waves-effect waves-light btn-sm font-size-18"><i class="mdi mdi-pencil"></i></a><a href="{{url('/topcollection')}}/{{$index->id}}/delete" class="btn btn-outline-danger waves-effect waves-light btn-sm font-size-18"><i class="mdi mdi-trash-can-outline"></i></a></td>
-
-                    </tr>
-
-                    @endforeach
-
-                </tbody>
 
             </table>
 
