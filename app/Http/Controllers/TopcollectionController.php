@@ -51,16 +51,49 @@ class TopcollectionController extends Controller
 
 
     public function index()
-
     {
-
         $title = "Top Banner";
 
-        $indexes = Topcollection::join('categories', 'topcollections.category_id', '=', 'categories.id')->addSelect('categories.name as category','categories.name_ar as category_ar','topcollections.*')->where('topcollections.delete_status','0')->get();
+        $indexes = Topcollection::query()
+            ->leftJoin('categories', function ($join) {
+                $join->on('categories.id', '=', 'topcollections.type')
+                    ->where('topcollections.shopby', 'category');
+            })
+            ->leftJoin('products', function ($join) {
+                $join->on('products.id', '=', 'topcollections.type')
+                    ->where('topcollections.shopby', 'product');
+            })
+            ->where('topcollections.delete_status', 0)
+            ->orderByDesc('topcollections.id')
+            ->select([
+                'topcollections.id',
+                'topcollections.shopby',
+                'topcollections.type',
+                'topcollections.imageurl',
+                'topcollections.name as banner_name',
+                'topcollections.name_ar as banner_name_ar',
 
-        return view('topcollection.index',compact('title','indexes'));  
+                // Pick name based on shopby
+                \DB::raw("
+                    CASE
+                        WHEN topcollections.shopby = 'product' THEN products.name
+                        WHEN topcollections.shopby = 'category' THEN categories.name
+                    END AS source_name
+                "),
 
+                \DB::raw("
+                    CASE
+                        WHEN topcollections.shopby = 'product' THEN products.name_ar
+                        WHEN topcollections.shopby = 'category' THEN categories.name_ar
+                    END AS source_name_ar
+                "),
+            ])
+            ->get();
+
+        return view('topcollection.index', compact('title', 'indexes'));
     }
+
+
 
 
 
@@ -185,6 +218,7 @@ class TopcollectionController extends Controller
             $data->imageurl = $imgurl;
             $data->shopby = $request->shopby;
             $data->category_id = $request->category_id;
+            $data->type = $request->category_id;
             $data->redirect_type = $redirect_type;
             $data->redirect_by = $redirect_by;
             $data->delete_status = '0';
@@ -362,6 +396,7 @@ class TopcollectionController extends Controller
             $data->redirect_type = $redirect_type;
             $data->redirect_by = $redirect_by;
             $data->category_id = $request->category_id;
+            $data->type = $request->category_id;
             $data->updated_by = Auth::user()->id;
             $data->save();
 

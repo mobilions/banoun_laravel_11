@@ -251,7 +251,10 @@
 
 <script>
 
-    loadurl();
+     @if(!isset($log) || !$log->id)
+        loadurl();
+    @endif
+
 
     loadType();
 

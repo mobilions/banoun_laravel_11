@@ -99,7 +99,7 @@
 
                     <div class="col-lg-2 mt-3 mb-3">
 
-                       <img src="{{$log->imageurl}}" width="80" alt="" title=""> 
+                       <img src="{{ asset('storage/' . $log->imageurl) }}" width="80" alt="" title=""> 
 
                     </div>                    
 
