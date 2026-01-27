@@ -335,6 +335,7 @@ class HomepageController extends BaseController
             ->leftJoin('subcategories', 'subcategories.id', '=', 'products.subcategory_id')
             ->leftJoin('brands', 'brands.id', '=', 'products.brand_id')
             ->where('products.subcategory_id', $product->subcategoryId)
+            ->where('products.delete_status', "0")
             ->where('products.id', '!=', $request->productId)
             ->get();
             
