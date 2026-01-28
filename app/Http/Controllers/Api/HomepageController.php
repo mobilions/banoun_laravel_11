@@ -490,7 +490,7 @@ class HomepageController extends BaseController
 
     public function homepage(){
 
-        $topbanners = Topcollection::select('imageurl', 'redirect_type as type', 'category_id as categoryId')->where('delete_status','0')->get();
+        $topbanners = Topcollection::select('imageurl', 'redirect_type as type', 'type as categoryId', 'shopby')->where('delete_status','0')->get();
         $categories = Category::select('id as categoryId', 'name', 'description', 'imageurl')->where('delete_status','0')->take(4)->get();
         $designers = Brand::select('id as brandId', 'imageurl', 'name')->where('delete_status','0')->take(8)->get();
         $new_arrivals = Product::select('products.id as productId', 'products.name', 'products.price', 'products.price_offer', 'products.category_id as categoryId', 'products.subcategory_id as subcategoryId', 'products.brand_id as brandId', 'brands.name as brandName', 'categories.name as categoryName', 'subcategories.name as subcategoryName')
