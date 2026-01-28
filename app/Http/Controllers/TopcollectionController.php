@@ -235,7 +235,7 @@ class TopcollectionController extends Controller
             $data->created_by = Auth::user()->id;
             $data->save();
 
-            $searchtag = new Searchtag;
+            $searchtag = new SearchTag;
             $searchtag->title = $request->name;
             $searchtag->title_ar = $request->name_ar;
             $searchtag->created_by = Auth::user()->id;
