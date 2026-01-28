@@ -490,7 +490,7 @@ class HomepageController extends BaseController
 
     public function homepage(){
 
-        $topbanners = Topcollection::select('imageurl', 'redirect_type as type', 'type as categoryId', 'shopby')->where('delete_status','0')->get();
+        $topbanners = Topcollection::select('imageurl', 'redirect_type as type', 'type as categoryId', 'shopby', 'url')->where('delete_status','0')->get();
         $topbanners = $topbanners->map(function($item){
             $item->categoryId = $item->categoryId != null ? $item->categoryId : "";
             return $item;

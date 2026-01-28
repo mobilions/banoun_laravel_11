@@ -53,4 +53,8 @@ class Topcollection extends Model
     public function getShopbyAttribute($value){
         return $value != null ? $value : "";
     }
+    
+    public function getUrlAttribute($value){
+        return $value != null ? $value : "";
+    }
 }
