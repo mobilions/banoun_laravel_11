@@ -13,7 +13,7 @@ use App\Models\Product;
 use App\Models\Subcategory;
 
 use App\Models\Brand;
-use App\Models\SearchTag;
+use App\Models\Searchtag;
 use App\Models\Topcollection;
 
 use Illuminate\Http\Request;
@@ -235,7 +235,7 @@ class TopcollectionController extends Controller
             $data->created_by = Auth::user()->id;
             $data->save();
 
-            $searchtag = new SearchTag;
+            $searchtag = new Searchtag;
             $searchtag->title = $request->name;
             $searchtag->title_ar = $request->name_ar;
             $searchtag->created_by = Auth::user()->id;
