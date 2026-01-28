@@ -152,7 +152,7 @@ class TopcollectionController extends Controller
             'name_ar' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'description_ar' => 'nullable|string',
-            'redirect_type' => 'required|string|in:category,product_listing,product_detail,URL',
+            'redirect_type' => 'required|string|in:categorylist,productlist,productdetails,URL',
             'imgfile' => 'required|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
         ];
 
@@ -161,7 +161,7 @@ class TopcollectionController extends Controller
         } else {
             $rules['shopby'] = 'required|string|in:category,subcategory,brand,product';
             $rules['type'] = 'required|integer';
-            if ($request->shopby == 'subcategory' && $request->redirect_type == 'product_listing') {
+            if ($request->shopby == 'subcategory' && $request->redirect_type == 'productlist') {
                 $rules['parent_category_id'] = 'required|integer|exists:categories,id';
             }
         }
@@ -201,7 +201,7 @@ class TopcollectionController extends Controller
             $data->imageurl = $imgurl;
             $data->redirect_type = $request->redirect_type;
 
-            if($request->shopby == 'category'){
+            if($request->shopby == 'categorylist'){
                 $redirect_by = 'categoryId';
             } elseif($request->shopby == 'subcategory'){
                 $redirect_by = 'subcategoryId';
@@ -224,7 +224,7 @@ class TopcollectionController extends Controller
                 $data->type = $request->type;
                 $data->url = null;
                 
-                if ($request->shopby == 'subcategory' && $request->redirect_type == 'product_listing') {
+                if ($request->shopby == 'subcategory' && $request->redirect_type == 'productlist') {
                     $data->parent_category_id = $request->parent_category_id;
                 } else {
                     $data->parent_category_id = null;
@@ -325,7 +325,7 @@ class TopcollectionController extends Controller
             'name_ar' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'description_ar' => 'nullable|string',
-            'redirect_type' => 'required|string|in:category,product_listing,product_detail,URL',
+            'redirect_type' => 'required|string|in:categorylist,productlist,productdetails,URL',
             'imgfile' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
             'imgfile_val' => 'nullable|string',
         ];
@@ -336,7 +336,7 @@ class TopcollectionController extends Controller
             $rules['shopby'] = 'required|string|in:category,subcategory,brand,product';
             $rules['type'] = 'required|integer';
             
-            if ($request->shopby == 'subcategory' && $request->redirect_type == 'product_listing') {
+            if ($request->shopby == 'subcategory' && $request->redirect_type == 'productlist') {
                 $rules['parent_category_id'] = 'required|integer|exists:categories,id';
             }
         }
@@ -383,7 +383,7 @@ class TopcollectionController extends Controller
             if ($request->redirect_type == 'URL') {
                 $redirect_by = null;
             } else {
-                if ($request->shopby == 'category') {
+                if ($request->shopby == 'categorylist') {
                     $redirect_by = 'categoryId';
                 } elseif ($request->shopby == 'subcategory') {
                     $redirect_by = 'subcategoryId';
@@ -414,7 +414,7 @@ class TopcollectionController extends Controller
                 $data->type = $request->type;
                 $data->url = null;
                 
-                if ($request->shopby == 'subcategory' && $request->redirect_type == 'product_listing') {
+                if ($request->shopby == 'subcategory' && $request->redirect_type == 'productlist') {
                     $data->parent_category_id = $request->parent_category_id;
                 } else {
                     $data->parent_category_id = null;
