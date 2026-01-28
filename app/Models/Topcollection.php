@@ -45,4 +45,12 @@ class Topcollection extends Model
     public function getImageurlAttribute($value){
         return $value != "" ? asset($value) : "";
     }
+    
+    public function getTypeAttribute($value){
+        return $value != null ? $value : "";
+    }
+    
+    public function getShopbyAttribute($value){
+        return $value != null ? $value : "";
+    }
 }
