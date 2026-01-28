@@ -99,6 +99,12 @@ class ProductController extends Controller
 
     }
 
+    public function getAll()
+{
+    $products = Product::where('delete_status', '0')->get(['id', 'name', 'name_ar']);
+    return response()->json($products);
+}
+
 
 
     public function productsearch()

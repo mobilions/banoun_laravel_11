@@ -51,10 +51,15 @@ class CategoryController extends Controller
         $indexes = Category::active()
             ->orderByDesc('created_at')
             ->get();
-
         return view('category.index',compact('title','indexes'));  
 
     }
+
+    public function getAll()
+{
+    $categories = Category::where('delete_status', '0')->get(['id', 'name', 'name_ar']);
+    return response()->json($categories);
+}
 
 
 

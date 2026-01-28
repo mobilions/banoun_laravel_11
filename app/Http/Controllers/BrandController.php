@@ -55,7 +55,12 @@ class BrandController extends Controller
         return view('brand.index',compact('title','indexes'));  
 
     }
-
+    
+    public function getAll()
+{
+    $brands = Brand::where('delete_status', '0')->get(['id', 'name', 'name_ar']);
+    return response()->json($brands);
+}
 
 
     /**

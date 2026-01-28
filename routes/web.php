@@ -63,6 +63,7 @@ Route::get('/admin', [HomeController::class, 'index'])->name('admin');
 
 Route::prefix('category')->group(function () {
     Route::get('/', [CategoryController::class, 'index'])->name('category');
+    Route::get('/all', [CategoryController::class, 'getAll']);
     Route::get('/create', [CategoryController::class, 'create'])->name('categorycreate');
     Route::post('/store', [CategoryController::class, 'store']);
     Route::get('/{id}/edit', [CategoryController::class, 'edit']);
@@ -72,6 +73,7 @@ Route::prefix('category')->group(function () {
 
 Route::prefix('brand')->group(function () {
     Route::get('/', [BrandController::class, 'index'])->name('brand');
+    Route::get('/all', [BrandController::class, 'getAll']);
     Route::get('/create', [BrandController::class, 'create'])->name('brandcreate');
     Route::post('/store', [BrandController::class, 'store']);
     Route::get('/{id}/edit', [BrandController::class, 'edit']);
@@ -86,6 +88,8 @@ Route::prefix('subcategory')->group(function () {
     Route::get('/{id}/edit', [SubcategoryController::class, 'edit']);
     Route::post('/update', [SubcategoryController::class, 'update']);
     Route::post('/{id}/delete', [SubcategoryController::class, 'destroy']);
+    Route::get('/by-category/{category_id}', [SubcategoryController::class, 'getByCategory'])->name('subcategory.by-category');
+
 });
 
 Route::prefix('banner')->group(function () {
@@ -126,6 +130,8 @@ Route::prefix('carousal')->group(function () {
 
 Route::prefix('product')->group(function () {
     Route::get('/', [ProductController::class, 'index'])->name('products');
+        Route::get('/all', [ProductController::class, 'getAll']);
+
     Route::get('/create', [ProductController::class, 'create'])->name('productcreate');
     Route::post('/store', [ProductController::class, 'store']);
     Route::get('/{id}/edit', [ProductController::class, 'edit']);

@@ -65,7 +65,7 @@ tr.selected {background-color:#adf7a9  ! important;}
                     <tr>
 
                         <th>#</th>
-
+                        <th>Redirect Type</th>
                         <th>Shop By</th>
 
                         <th>Type</th>
@@ -79,18 +79,28 @@ tr.selected {background-color:#adf7a9  ! important;}
                     </tr>
 
                 </thead>           
-<tbody>
+                 <tbody>
 @foreach ($indexes as $index)
     <tr>
         <td>{{ $index->id }}</td>
-
-        <td>{{ ucfirst($index->shopby) }}</td>
-
+        <td>
+            {{ $index->redirect_type }}
+        <td>
+            @if($index->redirect_type == 'URL')
+                External URL
+            @else
+                {{ ucfirst($index->shopby) }}
+            @endif
+        </td>
        
         <td>
-            {{ $index->source_name ?? '-' }}
-            <br>
-            <small class="text-muted">{{ $index->source_name_ar ?? '' }}</small>
+            @if($index->redirect_type == 'URL')
+                URL: {{ $index->url }}
+            @else
+                {{ $index->source_name ?? '-' }}
+                <br>
+                <small class="text-muted">{{ $index->source_name_ar ?? '' }}</small>
+            @endif
         </td>
 
         <td>
@@ -98,11 +108,15 @@ tr.selected {background-color:#adf7a9  ! important;}
             <br>
             <small class="text-muted">{{ $index->banner_name_ar }}</small>
         </td>
+        
         <td>
-           
+            @if($index->imageurl)
                 <img src="{{ $index->imageurl }}" width="100" alt="Banner Image">
-           
+            @else
+                <span class="text-muted">No image</span>
+            @endif
         </td>
+        
         <td>
             <a href="{{ url('/topcollection/'.$index->id.'/edit') }}"
                class="btn btn-outline-secondary btn-sm">

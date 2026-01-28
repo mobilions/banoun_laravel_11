@@ -60,7 +60,17 @@ class SubcategoryController extends Controller
         return view('subcategory.index',compact('title','indexes'));  
 
     }
-
+    
+    public function getByCategory($category_id)
+    {
+        $subcategories = Subcategory::where('category_id', $category_id)
+            ->where('delete_status', 0)
+            ->select('id', 'name', 'name_ar')
+            ->orderBy('name')
+            ->get();
+        
+        return response()->json($subcategories);
+    }
 
 
     /**
