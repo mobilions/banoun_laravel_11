@@ -152,7 +152,7 @@ class TopcollectionController extends Controller
             'name_ar' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'description_ar' => 'nullable|string',
-            'redirect_type' => 'required|string|in:Category,Product listing,Product detail,URL',
+            'redirect_type' => 'required|string|in:category,product_listing,product_detail,URL',
             'imgfile' => 'required|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
         ];
 
@@ -161,7 +161,7 @@ class TopcollectionController extends Controller
         } else {
             $rules['shopby'] = 'required|string|in:category,subcategory,brand,product';
             $rules['type'] = 'required|integer';
-            if ($request->shopby == 'subcategory' && $request->redirect_type == 'Product listing') {
+            if ($request->shopby == 'subcategory' && $request->redirect_type == 'product_listing') {
                 $rules['parent_category_id'] = 'required|integer|exists:categories,id';
             }
         }
@@ -224,7 +224,7 @@ class TopcollectionController extends Controller
                 $data->type = $request->type;
                 $data->url = null;
                 
-                if ($request->shopby == 'subcategory' && $request->redirect_type == 'Product listing') {
+                if ($request->shopby == 'subcategory' && $request->redirect_type == 'product_listing') {
                     $data->parent_category_id = $request->parent_category_id;
                 } else {
                     $data->parent_category_id = null;
@@ -325,7 +325,7 @@ class TopcollectionController extends Controller
             'name_ar' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'description_ar' => 'nullable|string',
-            'redirect_type' => 'required|string|in:Category,Product listing,Product detail,URL',
+            'redirect_type' => 'required|string|in:category,product_listing,product_detail,URL',
             'imgfile' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
             'imgfile_val' => 'nullable|string',
         ];
@@ -336,7 +336,7 @@ class TopcollectionController extends Controller
             $rules['shopby'] = 'required|string|in:category,subcategory,brand,product';
             $rules['type'] = 'required|integer';
             
-            if ($request->shopby == 'subcategory' && $request->redirect_type == 'Product listing') {
+            if ($request->shopby == 'subcategory' && $request->redirect_type == 'product_listing') {
                 $rules['parent_category_id'] = 'required|integer|exists:categories,id';
             }
         }
@@ -414,7 +414,7 @@ class TopcollectionController extends Controller
                 $data->type = $request->type;
                 $data->url = null;
                 
-                if ($request->shopby == 'subcategory' && $request->redirect_type == 'Product listing') {
+                if ($request->shopby == 'subcategory' && $request->redirect_type == 'product_listing') {
                     $data->parent_category_id = $request->parent_category_id;
                 } else {
                     $data->parent_category_id = null;
