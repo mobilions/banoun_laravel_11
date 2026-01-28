@@ -45,9 +45,9 @@
                                         <label>Select Redirection Type <span class="text-danger">*</span></label>
                                         <select class="form-control" name="redirect_type" id="redirect_type" onchange="loadurl()" required="">
                                             <option value="" disabled selected>Select</option>
-                                            <option value="category" {{ old('redirect_type') == 'category' ? 'selected' : '' }}>Category</option>
-                                            <option value="product_listing" {{ old('redirect_type') == 'product_listing' ? 'selected' : '' }}>Product Listing</option>
-                                            <option value="product_detail" {{ old('redirect_type') == 'product_detail' ? 'selected' : '' }}>Product Detail</option>
+                                            <option value="categorylist" {{ old('redirect_type') == 'categorylist' ? 'selected' : '' }}>Category</option>
+                                            <option value="productlist" {{ old('redirect_type') == 'productlist' ? 'selected' : '' }}>Product Listing</option>
+                                            <option value="productdetails" {{ old('redirect_type') == 'productdetails' ? 'selected' : '' }}>Product Detail</option>
                                             <option value="URL" {{ old('redirect_type') == 'URL' ? 'selected' : '' }}>URL</option>
                                         </select>
                                         @error('redirect_type')
@@ -237,7 +237,7 @@
         if (shopby == 'category') {
             url = '/category/all';
         } else if (shopby == 'subcategory') {
-            if (redirect_type == 'product_listing') {
+            if (redirect_type == 'productlist') {
                 $('#parent_category_div').show();
                 $('#parent_category_id').attr('required', true);
                 $('#type').html('<option value="" disabled selected>Select parent category first</option>').prop('disabled', false);
@@ -350,7 +350,7 @@
         $('#url').removeAttr('required');
         $('#parent_category_id').removeAttr('required');
         $('.shopby-option').hide();
-        if (redirect_type == 'category') {
+        if (redirect_type == 'categorylist') {
             $('#shopby_div').show();
             $('#type_div').show();
             $('.category-option').show();
@@ -358,14 +358,14 @@
             $('#type').attr('required', true);
             loadType();
             
-        } else if (redirect_type == 'product_listing') {
+        } else if (redirect_type == 'productlist') {
             $('#shopby_div').show();
             $('#type_div').show();
             $('.category-option, .subcategory-option, .brand-option').show();
             $('#shopby').attr('required', true);
             $('#type').attr('required', true);
             
-        } else if (redirect_type == 'product_detail') {
+        } else if (redirect_type == 'productdetails') {
             $('#shopby_div').show();
             $('#type_div').show();
             $('.product-option').show();
