@@ -216,6 +216,11 @@ class HomepageController extends BaseController
             if($request->orderby == "l2h"){
                 $product = $product->orderBy("products.price_offer", "asc");
             }
+            $maxPrice = $product->max('price_offer');
+            $maxPrice = (!empty($maxPrice) && $maxPrice > 0)
+            ? $maxPrice
+            : 100;
+            
             $product = $product->offset($offset)
             ->limit($limit)
             ->get();
@@ -246,11 +251,6 @@ class HomepageController extends BaseController
             $item->imageurl = !empty($Productimage) ? $Productimage->imageurl : "";
             return $item;
         });
-
-        $maxPrice = Product::where('delete_status', '0')->max('price_offer');
-        $maxPrice = (!empty($maxPrice) && $maxPrice > 0)
-        ? $maxPrice
-        : 100;
 
         $data['colors'] = $colors;
         $data['sizes'] = $sizes;
