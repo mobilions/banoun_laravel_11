@@ -493,6 +493,12 @@ class HomepageController extends BaseController
         $topbanners = Topcollection::select('imageurl', 'redirect_type as type', 'type as categoryId', 'shopby', 'url')->where('delete_status','0')->get();
         $topbanners = $topbanners->map(function($item){
             $item->categoryId = $item->categoryId != null ? $item->categoryId : "";
+            $subcategory_name = "";
+            if($item->shopby == "subcategory"){
+                $Subcategory = Subcategory::where("id", $item->categoryId)->first();
+                $subcategory_name = !empty($Subcategory) ? $Subcategory->name : "";
+            }
+            $item->subcategory_name = $subcategory_name;
             return $item;
         });
         $categories = Category::select('id as categoryId', 'name', 'description', 'imageurl')->where('delete_status','0')->take(4)->get();
