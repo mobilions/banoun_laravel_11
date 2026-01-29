@@ -219,7 +219,7 @@ class HomepageController extends BaseController
             $maxPrice = $product->max('price_offer');
             $maxPrice = (!empty($maxPrice) && $maxPrice > 0)
             ? $maxPrice
-            : 100;
+            : "100";
             
             $product = $product->offset($offset)
             ->limit($limit)
