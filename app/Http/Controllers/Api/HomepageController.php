@@ -149,9 +149,27 @@ class HomepageController extends BaseController
             if($request->subcategoryId != "" && $request->subcategoryId != "0" && $request->subcategoryId != null){
                 $product = $product->where("products.subcategory_id", $request->subcategoryId);
             }
+            
+            $maxPrice = $product->max('price_offer');
+            $maxPrice = (!empty($maxPrice) && $maxPrice > 0)
+            ? $maxPrice
+            : "100";
+
             $colorIds = !empty($request->colorId)? (is_array($request->colorId) ? $request->colorId : explode(',', $request->colorId)): [];
             $sizeIds = !empty($request->sizeId)? (is_array($request->sizeId) ? $request->sizeId : explode(',', $request->sizeId)) : [];
             
+            if($request->minPrice != "" && $request->minPrice != "0" && $request->minPrice != null){
+                $product = $product->where("products.price_offer", ">=", $request->minPrice);
+            }
+            if($request->maxPrice != "" && $request->maxPrice != "0" && $request->maxPrice != null){
+                $product = $product->where("products.price_offer", "<=", $request->maxPrice);
+            }
+            if (!empty($request->keyword)) {
+                $product->where(function ($q) use ($request) {
+                    $q->where("products.name", "like", "%" . $request->keyword . "%")
+                      ->orWhere("brands.name", "like", "%" . $request->keyword . "%");
+                });
+            }
             // Color & Size filter (match ANY)
 
             if (!empty($colorIds) || !empty($sizeIds)) {
@@ -190,18 +208,6 @@ class HomepageController extends BaseController
 
             }
             
-            if($request->minPrice != "" && $request->minPrice != "0" && $request->minPrice != null){
-                $product = $product->where("products.price_offer", ">=", $request->minPrice);
-            }
-            if($request->maxPrice != "" && $request->maxPrice != "0" && $request->maxPrice != null){
-                $product = $product->where("products.price_offer", "<=", $request->maxPrice);
-            }
-            if (!empty($request->keyword)) {
-                $product->where(function ($q) use ($request) {
-                    $q->where("products.name", "like", "%" . $request->keyword . "%")
-                      ->orWhere("brands.name", "like", "%" . $request->keyword . "%");
-                });
-            }
             if($request->orderby == "new"){
                 $product->orderByRaw("COALESCE(products.is_newarrival, 0) DESC")
                 ->orderBy("products.id", "DESC");
@@ -216,10 +222,6 @@ class HomepageController extends BaseController
             if($request->orderby == "l2h"){
                 $product = $product->orderBy("products.price_offer", "asc");
             }
-            $maxPrice = $product->max('price_offer');
-            $maxPrice = (!empty($maxPrice) && $maxPrice > 0)
-            ? $maxPrice
-            : "100";
             
             $product = $product->offset($offset)
             ->limit($limit)
