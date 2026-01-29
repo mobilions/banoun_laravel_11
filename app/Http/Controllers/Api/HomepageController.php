@@ -248,6 +248,9 @@ class HomepageController extends BaseController
         });
 
         $maxPrice = Product::where('delete_status', '0')->max('price_offer');
+        $maxPrice = (!empty($maxPrice) && $maxPrice > 0)
+        ? $maxPrice
+        : 100;
 
         $data['colors'] = $colors;
         $data['sizes'] = $sizes;
