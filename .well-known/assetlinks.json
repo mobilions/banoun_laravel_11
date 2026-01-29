@@ -1,0 +1,24 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2822
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fnil\fcharset0 .AppleSystemUIFontMonospaced-Regular;\f1\fmodern\fcharset0 Courier;}
+{\colortbl;\red255\green255\blue255;\red25\green25\blue25;\red244\green245\blue246;\red78\green0\blue233;
+\red17\green94\blue81;\red19\green21\blue26;\red17\green109\blue18;}
+{\*\expandedcolortbl;;\cssrgb\c12941\c12941\c12941;\cssrgb\c96471\c96863\c97255;\cssrgb\c38431\c0\c93333;
+\cssrgb\c4706\c43922\c39216;\cssrgb\c9804\c10980\c13333;\csgenericrgb\c6667\c42745\c7059;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww14140\viewh8400\viewkind0
+\deftab720
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs29\fsmilli14600 \cf2 \cb3 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 [\{\
+  \cf4 \strokec4 "\cf5 \strokec5 relation\cf4 \strokec4 "\cf6 \strokec6 :\cf2 \strokec2  [\cf5 \strokec5 "delegate_permission/common.handle_all_urls"\cf2 \strokec2 ]\cf6 \strokec6 ,\cf2 \strokec2 \
+  \cf4 \strokec4 "\cf5 \strokec5 target\cf4 \strokec4 "\cf6 \strokec6 :\cf2 \strokec2  \{\
+    \cf4 \strokec4 "\cf5 \strokec5 namespace\cf4 \strokec4 "\cf6 \strokec6 :\cf2 \strokec2  \cf4 \strokec4 "\cf5 \strokec5 android_app\cf4 \strokec4 "\cf6 \strokec6 ,\cf2 \strokec2 \
+    \cf4 \strokec4 "\cf5 \strokec5 package_name\cf4 \strokec4 "\cf6 \strokec6 :\cf2 \strokec2  \cf4 \strokec4 "
+\f1\fs30 \cf7 \cb1 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 com.app.banoun
+\f0\fs29\fsmilli14600 \cf4 \cb3 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec4 "\cf6 \strokec6 ,\cf2 \strokec2 \
+    \cf4 \strokec4 "\cf5 \strokec5 sha256_cert_fingerprints\cf4 \strokec4 "\cf6 \strokec6 :\cf2 \strokec2 \
+    [\cf5 \strokec5 "66:9E:B5:50:35:E5:AA:F9:A0:3E:A4:DB:09:CD:69:3C:18:33:0E:59:A3:9A:E9:5D:7D:6E:86:64:4A:40:8B:DF"\cf2 \strokec2 ]\
+  \}\
+\}]\
+}
