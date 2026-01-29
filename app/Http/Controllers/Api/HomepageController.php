@@ -247,8 +247,11 @@ class HomepageController extends BaseController
             return $item;
         });
 
+        $maxPrice = Product::where('delete_status', '0')->max('price_offer');
+
         $data['colors'] = $colors;
         $data['sizes'] = $sizes;
+        $data['max_rice'] = $maxPrice;
         $data['products'] = $product;
 
         $message["success"] = 'Product Lists';
