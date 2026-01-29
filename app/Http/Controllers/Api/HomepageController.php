@@ -251,7 +251,7 @@ class HomepageController extends BaseController
 
         $data['colors'] = $colors;
         $data['sizes'] = $sizes;
-        $data['max_rice'] = $maxPrice;
+        $data['max_price'] = $maxPrice;
         $data['products'] = $product;
 
         $message["success"] = 'Product Lists';
