@@ -1510,7 +1510,7 @@ class HomepageController extends BaseController
             "orderId" => $CartMaster->id,
             "totalprice" => $CartMaster->total,
             "offer_price" => $CartMaster->total,
-            "promo_price" => $CartMaster->promo_price,
+            "promo_price" => $CartMaster->discount,
             "delivery_price" => $CartMaster->delivery,
             "grand_total" => $CartMaster->grandtotal,
         ];
@@ -1560,7 +1560,7 @@ class HomepageController extends BaseController
             "orderId" => $CartMaster->id,
             "totalprice" => $CartMaster->total,
             "offer_price" => $CartMaster->total,
-            "promo_price" => $CartMaster->promo_price,
+            "promo_price" => $CartMaster->discount,
             "delivery_price" => $CartMaster->delivery,
             "grand_total" => $CartMaster->grandtotal,
         ];
@@ -1678,7 +1678,7 @@ class HomepageController extends BaseController
                 "cart_count" => $cart_count,
                 "totalprice" => $CartMaster->total,
                 "offer_price" => $CartMaster->total,
-                "promo_price" => $CartMaster->promo_price,
+                "promo_price" => $CartMaster->discount,
                 "delivery_price" => $CartMaster->delivery,
                 "grand_total" => $CartMaster->grandtotal,
             ];
@@ -1753,7 +1753,7 @@ class HomepageController extends BaseController
                 "cart_count" => $cart_count,
                 "totalprice" => $CartMaster->total,
                 "offer_price" => $CartMaster->total,
-                "promo_price" => $CartMaster->promo_price,
+                "promo_price" => $CartMaster->discount,
                 "delivery_price" => $CartMaster->delivery,
                 "grand_total" => $CartMaster->grandtotal,
             ];
