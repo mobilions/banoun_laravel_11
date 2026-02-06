@@ -1541,6 +1541,7 @@ class HomepageController extends BaseController
             "paymenttype" => $request->paymentType,
             "use_credit" => $request->useCredit,
             "paymentstatus" => "pending",
+            "created_at" => date("Y-m-d H:i:s"),
             "giftwrap_msg" => $request->giftwrap_msg,
         ]);
 
